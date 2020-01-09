@@ -1,5 +1,25 @@
-import re
+#log function
 import math
+import re
+
+E = 2.718281828459045
+PI = 3.141592653589793
+
+def logn(n, x = math.e):
+    print(n/x)
+    return 1 + logn(n/x, x) if n > (x-1) else 0
+
+def lognNew(n, x = E):
+    return math.log(n) / math.log(x)
+
+def triangleFunction(func, expr):
+    if func == 'sin':
+        return math.sin(expr)
+    elif func == 'cos':
+        return math.cos(expr)
+    elif func == 'tan':
+        return math.tan(expr)
+
 
 class Node(object):
     def __init__(self, op):
@@ -67,8 +87,9 @@ class Term(Node):
         self.tt = tt
     
     def eval(self):
-        left = self.f.eval()
-        left = -self.expo.eval(left) if left < 0 else self.expo.eval(left)
+        left = self.expo.eval(self.f.eval())
+        #print(left)
+        #left = -self.expo.eval(left) if left < 0 else self.expo.eval(left)
         return self.tt.eval(left)
     
     def __str__(self):
@@ -85,15 +106,15 @@ class TermTail(Node):
         self.tt = tt
     
     def eval(self, left):
-        eval_factor = self.f.eval()
+        eval_factor = self.expo.eval(self.f.eval())
+        #eval_factor = -self.expo.eval(eval_factor) if eval_factor < 0 else self.expo.eval(eval_factor)
         left = self.calc(left, eval_factor)
-        left = -self.expo.eval(left) if left < 0 else self.expo.eval(left)
         return self.tt.eval(left)
     
     def __str__(self):
-        return  f'{str(self.op)}{str(self.f)}{str(self.exp)}{str(self.tt)}'
+        return  f'{str(self.op)}{str(self.f)}{str(self.expo)}{str(self.tt)}'
     def __repr__(self):
-        return f'TermTail({repr(self.op)},{repr(self.f)},{repr(self.exp)},{repr(self.tt)})'
+        return f'TermTail({repr(self.op)},{repr(self.f)},{repr(self.expo)},{repr(self.tt)})'
 
 
 class Factor(Node):
@@ -104,9 +125,9 @@ class Factor(Node):
 
     def eval(self):
         if self.sign is '-':
-            return -self.e.eval() if isinstance(self.e, Expr) else -float(self.e)
+            return -self.e.eval() if isinstance(self.e, (Expr, Variable, Factor)) else -float(self.e)
         else:
-            return self.e.eval() if isinstance(self.e, Expr) else float(self.e)
+            return self.e.eval() if isinstance(self.e, (Expr, Variable, Factor)) else float(self.e)
     
     def __str__(self):
         return f'({self.sign}{self.e})' if isinstance(self.e, Expr) else f'{self.sign}{self.e}'
@@ -118,8 +139,8 @@ class Variable(Node):
         super(__class__,self)
         self.e = e
     
-    def eval():
-        pass
+    def eval(self):
+        return self.e.eval()
     
     def __str__(self):
         return str(self.e)
@@ -131,6 +152,8 @@ class AngleF(Node):
         super(__class__,self)
         self.angleF = angleF
         self.e = e
+    def eval(self):
+        return triangleFunction(self.angleF, self.e.eval())
     
     def __str__(self):
         return f'{str(self.angleF)}({str(self.e)})'
@@ -162,13 +185,13 @@ class Log(Node):
         self.logarithm = logarithm
         self.e = e
     
-    def eval(self, left):
+    def eval(self):
+        return lognNew(self.e.eval(),self.logarithm)
         
     def __str__(self):
         return f'log{str(self.logarithm):.4}({str(self.e)})'
     def __repr__(self):
         return f'Log({repr(self.logarithm)},{repr(self.e)})'
-
 
 from collections.abc import Iterable
 
@@ -242,9 +265,9 @@ class Parser(object):
     def parseTerm(self):
         print('Term')
         f = self.parseFactor()
-        exp = self.parseExpo()
+        expo = self.parseExpo()
         tt = self.parseTermTail()
-        return Term(f, exp, tt)
+        return Term(f, expo, tt)
     
     def parseTermTail(self):
         print('TermTail')
