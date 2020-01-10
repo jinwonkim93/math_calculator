@@ -147,7 +147,7 @@ class Variable(Node):
         self.e = e
     
     def eval(self):
-        return self.e.eval() if isinstance(self.e, (Expr, Variable, AngleF)) else float(self.e)
+        return self.e.eval() if isinstance(self.e, (Expr, Log, AngleF, Symbol)) else float(self.e)
     
     def __str__(self):
         return str(self.e)
@@ -200,8 +200,23 @@ class Log(Node):
     def __repr__(self):
         return f'Log({repr(self.logarithm)},{repr(self.e)})'
 
-
-from collections.abc import Iterable
+class Symbol(object):
+    def __init__(self, symbol,subExpr = None):
+        self.symbol = symbol
+        self.value = None
+        self.subExpr = subExpr
+        
+    def insert(self, value, subExpr = None):
+        self.value = value
+        self.subExpr = subExpr
+    
+    def eval(self):
+        return self.value.eval() if isinstance(self.value, Expr) else float(self.value)
+    
+    def __repr__(self):
+        return f'({repr(self.subExpr)}' if self.subExpr is not None else f'({repr(self.value)})'
+    def __str__(self):
+        return f'({self.subExpr})' if self.subExpr is not None else f'({self.value})'
 
 class Scanner(object):
     def __init__(self, line):
@@ -236,22 +251,22 @@ class Scanner(object):
             return False
     
     def isDigit(self, value):
-        if value in ['e','pi']: return True
+        if value in greeks: return True
         try:
             float(value)
             return True
         except ValueError:
             return False
         
-
     def isAlpha(self, value):
-        if value in ['e','pi']: return False
+        if value in greeks: return False
         return value.isalpha()
 
     def isSpecialNum(self, value):
         if value == 'e': return E
         if value == 'pi': return PI
         else: return value
+
 class Parser(object):
     def __init__(self, scanner):
         self.tokens = scanner
@@ -259,9 +274,18 @@ class Parser(object):
     
 
     
-    def getVariables(self, line):
-        for variable in line:
-            self.variables[variable.key] = variable.get()
+    def insertValue(self):
+        for name, symbol in self.variables.items():
+            value = input(f'what is value of {name}: ')
+            if self.tokens.isDigit(value):
+                symbol.insert(value)
+            else:
+                tok = Scanner(value)
+                sub_parser = Parser(tok)
+                sub_expr = sub_parser.parse()
+                sub_parser.insertValue()
+                symbol.insert(sub_expr.eval(), subExpr = sub_expr)
+                
             
     def parse(self):
         try:
@@ -337,7 +361,14 @@ class Parser(object):
             return Variable(log)
         else:
             alpha = self.tokens.takeIt(self.tokens.isAlpha)
-            return Variable(alpha)
+            if alpha == 'EOL': raise Exception("Invalid Variable")
+            elif alpha in self.variables.keys():
+                alpha = self.variables.get(alpha)
+                return Variable(alpha)
+            else:
+                sym = Symbol(alpha)
+                self.variables[alpha] = sym
+                return Variable(sym)
     
     def parseAngleF(self):
         angleF = self.tokens.takeIt()
