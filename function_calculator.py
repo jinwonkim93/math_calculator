@@ -5,6 +5,11 @@ import re
 E = 2.718281828459045
 PI = 3.141592653589793
 
+greeks = ('alpha', 'beta', 'gamma', 'delta', 'epsilon', 'zeta',
+                    'eta', 'theta', 'iota', 'kappa', 'lambda', 'mu', 'nu',
+                    'xi', 'omicron', 'pi', 'rho', 'sigma', 'tau', 'upsilon',
+                    'phi', 'chi', 'psi', 'omega')
+
 def logn(n, x = math.e):
     print(n/x)
     return 1 + logn(n/x, x) if n > (x-1) else 0
@@ -218,6 +223,7 @@ class Symbol(object):
     def __str__(self):
         return f'({self.subExpr})' if self.subExpr is not None else f'({self.value})'
 
+from collections.abc import Iterable
 class Scanner(object):
     def __init__(self, line):
         self.tokens = re.findall(r'[-+]|[a-z|A-Z]+|[0-9]*\.?[0-9]+|[*+-/()^]', line) + ['EOL']
