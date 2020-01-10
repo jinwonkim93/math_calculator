@@ -180,7 +180,10 @@ class Expo(Node):
     
     def eval(self, left):
         eval_factor = self.expo.eval(self.f.eval())
-        return left**eval_factor
+        try:
+            return left**eval_factor
+        except:
+            raise Exception("OverflowError: Numerical result out of range")
 
             
     def __str__(self):
@@ -219,7 +222,7 @@ class Symbol(object):
         return self.value.eval() if isinstance(self.value, Expr) else float(self.value)
     
     def __repr__(self):
-        return f'({repr(self.subExpr)}' if self.subExpr is not None else f'({repr(self.value)})'
+        return f'({repr(self.symbol)}' if self.subExpr is not None else f'({repr(self.symbol)})'
     def __str__(self):
         return f'({self.subExpr})' if self.subExpr is not None else f'({self.value})'
 
