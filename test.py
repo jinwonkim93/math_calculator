@@ -1,4 +1,5 @@
-from function_calculator import *
+from scanner import Scanner
+from parser import Parser
 
 def test(case):
     try:

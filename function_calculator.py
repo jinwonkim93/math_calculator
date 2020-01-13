@@ -8,7 +8,7 @@ PI = 3.141592653589793
 greeks = ('alpha', 'beta', 'gamma', 'delta', 'epsilon', 'zeta',
                     'eta', 'theta', 'iota', 'kappa', 'lambda', 'mu', 'nu',
                     'xi', 'omicron', 'pi', 'rho', 'sigma', 'tau', 'upsilon',
-                    'phi', 'chi', 'psi', 'omega')
+                    'phi', 'chi', 'psi', 'omega','e')
 
 def logn(n, x = math.e):
     print(n/x)
@@ -152,14 +152,14 @@ class Variable(Node):
         self.e = e
     
     def eval(self):
-        return self.e.eval() if isinstance(self.e, (Expr, Log, AngleF, Symbol)) else float(self.e)
+        return self.e.eval() if isinstance(self.e, (Expr, Log, AngleFunction, Symbol)) else float(self.e)
     
     def __str__(self):
         return str(self.e)
     def __repr__(self):
         return f'Variable({repr(self.e)})'
 
-class AngleF(Node):
+class AngleFunction(Node):
     def __init__(self, angleF, e):
         super(__class__,self)
         self.angleF = angleF
@@ -170,9 +170,9 @@ class AngleF(Node):
     def __str__(self):
         return f'{str(self.angleF)}({str(self.e)})'
     def __repr__(self):
-        return f'AngleF({repr(self.angleF)},{repr(self.e)})'
+        return f'AngleFunction({repr(self.angleF)},{repr(self.e)})'
 
-class Expo(Node):
+class Exponential(Node):
     def __init__(self, f, expo):
         super(__class__,self)
         self. f = f
@@ -192,7 +192,7 @@ class Expo(Node):
         else:
             return f'^({str(self.f)})^{str(self.expo)}' if isinstance(self.f, Expr) else f'^{str(self.f)}{str(self.expo)}'
     def __repr__(self):
-        return f'Expo({repr(self.f)},{repr(self.expo)})'
+        return f'Exponential({repr(self.f)},{repr(self.expo)})'
 
 class Log(Node):
     def __init__(self, logarithm, e):
@@ -281,7 +281,6 @@ class Parser(object):
         self.tokens = scanner
         self.variables = {}
     
-
     
     def insertValue(self):
         for name, symbol in self.variables.items():
@@ -335,35 +334,35 @@ class Parser(object):
             self.tokens.takeIt()
             e = self.parseExpr()
             self.tokens.takeIt()
-            expo = self.parseExpo()
+            expo = self.parseExponential()
             return Factor(e, expo = expo)
         elif self.tokens.isType(['+','-']):
             sign = self.tokens.takeIt()
             f = self.parseFactor()
-            expo = self.parseExpo()
+            expo = self.parseExponential()
             return Factor(f, sign = sign, expo = expo)
         elif self.tokens.isType(self.tokens.isAlpha):
             var = self.parseVariable()
-            expo = self.parseExpo()
+            expo = self.parseExponential()
             return Factor(var, expo = expo)
         elif self.tokens.isType(self.tokens.isDigit):
             num = self.tokens.isSpecialNum(self.tokens.takeIt())
-            expo = self.parseExpo()
+            expo = self.parseExponential()
             return Factor(num, expo = expo)
         else:
             raise Exception("Invalid Factor")
             
-    def parseExpo(self):
+    def parseExponential(self):
         if self.tokens.isType(['^']):
             self.tokens.takeIt()
             f = self.parseFactor()
-            expo = self.parseExpo()
-            return Expo(f, expo)
+            expo = self.parseExponential()
+            return Exponential(f, expo)
         return Empty()
     
     def parseVariable(self):
         if self.tokens.isType(['sin','cos','tan']):
-            angleF = self.parseAngleF()
+            angleF = self.parseAngleFunction()
             return Variable(angleF)
         elif self.tokens.isType(['log','ln']):
             log = self.parseLog()
@@ -379,12 +378,12 @@ class Parser(object):
                 self.variables[alpha] = sym
                 return Variable(sym)
     
-    def parseAngleF(self):
+    def parseAngleFunction(self):
         angleF = self.tokens.takeIt()
         self.tokens.takeIt()
         e = self.parseExpr()
         self.tokens.takeIt()
-        return AngleF(angleF, e)
+        return AngleFunction(angleF, e)
     
     def parseLog(self):
         log = self.tokens.takeIt()
