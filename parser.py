@@ -1,6 +1,6 @@
 from expression import Expr, ExprTail
 from term import Term, TermTail
-from factor import Factor, Variable
+from factor import Factor, Variable, Constant
 from math_function import Log, Exponential, Symbol, AngleFunction
 from error import Error
 from empty import Empty
@@ -78,7 +78,7 @@ class Parser(object):
             expo = self.parseExponential()
             return Factor(var, expo = expo)
         elif self.tokens.isType(self.tokens.isDigit):
-            num = self.tokens.isSpecialNum(self.tokens.takeIt())
+            num = Constant(self.tokens.isSpecialNum(self.tokens.takeIt()))
             expo = self.parseExponential()
             return Factor(num, expo = expo)
         else:

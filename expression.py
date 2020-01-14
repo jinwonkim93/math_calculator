@@ -10,6 +10,9 @@ class Expr(Node):
     def eval(self):
         return self.et.eval(self.t.eval())
 
+    def canonicalize(self):
+        coeff, terms, seq = self.et.canonicalize(self.t.canonicalize())
+    
     def __str__(self):
         return f'{str(self.t)}{str(self.et)}'
     
@@ -29,6 +32,9 @@ class ExprTail(Node):
         left = self.calc(left, eval_term)
         return self.et.eval(left)
 
+    def canonicalize(self, left):
+        pass
+    
     def __str__(self):
         return f'{str(self.op)}{str(self.t)}{str(self.et)}'
     def __repr__(self):

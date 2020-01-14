@@ -9,12 +9,23 @@ class Factor(Node):
         self.sign = sign
         self.expo = expo
 
+    """    
     def eval(self):
         if self.sign is '-':
             return -self.expo.eval(self.e.eval()) if isinstance(self.e, (Expr, Variable, Factor)) else -self.expo.eval(float(self.e))
         else:
             return self.expo.eval(self.e.eval()) if isinstance(self.e, (Expr, Variable, Factor)) else self.expo.eval(float(self.e))
+    """
+    def eval(self):
+        return -self.expo.eval(self.e.eval()) if self.sign is '-' else self.expo.eval(self.e.eval())
     
+    def canonicalize(self):
+        if self.sign is '-':
+            return -self.expo.canonicalize(self.e.canonicalize()) if isinstance(self.e, (Expr, Variable, Factor)) else -self.expo.eval(float(self.e))
+        else:
+            return self.expo.canonicalize(self.e.canonicalize()) if isinstance(self.e, (Expr, Variable, Factor)) else self.expo.eval(float(self.e))
+
+
     def __str__(self):
         return f'({self.sign}{self.e}{self.expo})' if isinstance(self.e, Expr) else f'{self.sign}{self.e}{self.expo}'
     def __repr__(self):
@@ -28,8 +39,26 @@ class Variable(Node):
     def eval(self):
         #return self.e.eval() if isinstance(self.e, (Expr, Log, AngleFunction, Symbol)) else float(self.e)
         return float(self.e) if isinstance(self.e, str) else self.e.eval()
+
+    def canonicalize(self):
+        
+        return coeff, terms, seq
     
     def __str__(self):
         return str(self.e)
     def __repr__(self):
         return f'Variable({repr(self.e)})'
+
+class Constant(Node):
+    def __init__(self,e):
+        super(__class__,self)
+        self.e = float(e)
+
+    def eval(self):
+        return self.e
+    
+    def __str__(self):
+        return str(self.e)
+    
+    def __repr__(self):
+        return f'Constant({repr(self.e)})'

@@ -11,6 +11,9 @@ class Term(Node):
     def eval(self):
         return self.tt.eval(self.f.eval())
     
+    def canonicalize(self):
+        return self.tt.canonicalize(self.f.canonicalize())
+
     def __str__(self):
         return f'{str(self.f)}{str(self.tt)}'
     def __repr__(self):
@@ -28,6 +31,9 @@ class TermTail(Node):
         left = self.calc(left, eval_factor)
         return self.tt.eval(left)
     
+    def canonicalize(self, left):
+        pass
+
     def __str__(self):
         return  f'{str(self.op)}{str(self.f)}{str(self.tt)}'
     def __repr__(self):
