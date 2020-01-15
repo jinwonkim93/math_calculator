@@ -1,7 +1,7 @@
 from node import Node
 from empty import Empty
 from factor import Symbol, Constant
-from math_function import pow
+from utils import pow
 
 class Exponential(Node):
     def __init__(self, f, expo):
@@ -12,7 +12,8 @@ class Exponential(Node):
     def eval(self, left):
         eval_factor = self.expo.eval(self.f.eval())
         try:
-            return left**eval_factor
+            print(type(left), type(eval_factor))
+            return pow(left,eval_factor)
         except:
             raise Exception("OverflowError: Numerical result out of range")
 
