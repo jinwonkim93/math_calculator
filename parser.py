@@ -1,7 +1,7 @@
 from expression import Expr, ExprTail
 from term import Term, TermTail
-from factor import Factor, Variable, Constant
-from math_function import Log, Exponential, Symbol, AngleFunction
+from factor_new import Factor, Variable, Constant, Symbol
+from math_function import Log, Exponential, AngleFunction
 from error import Error
 from empty import Empty
 from mathematical_constant import *

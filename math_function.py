@@ -3,6 +3,7 @@ from node import Node
 from expression import Expr
 from empty import Empty
 from mathematical_constant import *
+from factor import Variable, Constant
 
 class AngleFunction(Node):
     def __init__(self, angleF, e):
@@ -53,24 +54,6 @@ class Log(Node):
     def __repr__(self):
         return f'Log({repr(self.logarithm)},{repr(self.e)})'
 
-class Symbol(object):
-    def __init__(self, symbol,subExpr = None):
-        self.symbol = symbol
-        self.value = None
-        self.subExpr = subExpr
-        
-    def insert(self, value, subExpr = None):
-        self.value = value
-        self.subExpr = subExpr
-    
-    def eval(self):
-        return self.value.eval() if isinstance(self.value, Expr) else float(self.value)
-    
-    def __repr__(self):
-        return f'({repr(self.symbol)}' if self.subExpr is not None else f'({repr(self.symbol)})'
-    def __str__(self):
-        return f'({self.subExpr})' if self.subExpr is not None else f'({self.value})'
-
 def logn(n, x = math.e):
     print(n/x)
     return 1 + logn(n/x, x) if n > (x-1) else 0
@@ -85,3 +68,10 @@ def triangleFunction(func, expr):
         return math.cos(expr)
     elif func == 'tan':
         return math.tan(expr)
+
+def pow(base,expo):
+    if isinstance(base, Variable):
+        base.expo = base.expo ** expo
+        return base
+    elif isinstance(base, Constant):
+        return base.e ** expo

@@ -13,3 +13,17 @@ class Node(object):
         elif self.op is '/':
             return left / right
     
+        
+    def calcByTerm(self, left,right, checkTerm):
+        print(left, right)
+        if isinstance(left, list):
+            for idx, element in enumerate(left):
+                if checkTerm(element,right):
+                    new_ = self.calc(element, right)
+                    temp.append(left)
+                    temp.extend(left[idx+1:])
+                    break
+                else:
+                    temp.append(element)
+        else:
+            return self.calc(left, right)

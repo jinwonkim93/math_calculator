@@ -29,56 +29,43 @@ class Factor(Node):
     def __repr__(self):
         return f'Factor({repr(self.sign)},{repr(self.e)},{repr(self.expo)})'
 
-class Variable(Node):
-    def __init__(self, e):
-        super(__class__,self)
-        self.coeff = 1
-        self.e = e
-        self.expo = 1
-    
-    def eval(self):
-        return float(self.e) if isinstance(self.e, str) else self.e.eval()
-
-    def canonicalize(self):
-        return self
-
-    def __str__(self):
-        return str(self.e)
-    def __repr__(self):
-        return f'Variable({repr(self.e)})'
-
-class Symbol(object):
-    def __init__(self, symbol, coeff = 1, expo = 1):
+class Variable(object):
+    def __init__(self, e, coeff = 1, expo = 1):
         self.coeff = coeff
-        self.symbol = symbol
-        self.value = None
+        self.e = e
         self.expo = expo
     
+    
     def __add__(self, other):
-        if isinstance(other, Symbol):
-            if self.symbol == other.symbol and self.expo == other.expo:
+        if type(self) == type(other):
+            if self.e.symbol == other.e.symbol and self.expo == other.expo:
                 coeff = self.coeff + other.coeff
-                return Symbol(self.symbol, coeff = coeff)
+                return Variable(self.e, coeff = coeff)
         else:
-            return [self,"+",other]
+            if isinstance(other, (float,int, Constant)):
+                return [self,"+", other]
     
     def __sub__(self,other):
-        if isinstance(other, Symbol):
-            if self.symbol == other.symbol and self.expo == other.expo:
+        if type(self) == type(other):
+            if self.e.symbol == other.e.symbol and self.expo == other.expo:
                 coeff = self.coeff - other.coeff
                 return Symbol(self.symbol, coeff = coeff)
-        
+            else:
+                return [self, "-", other]
         else:
-            return [self,"-",other]
+            if isinstance(other, (float,int, Constant)):
+                return [self,"-",other]
     
     def __mul__(self, other):
-        if isinstance(other, Symbol):
-            if self.symbol == other.symbol:
+        if type(self) == type(other):
+            if self.e.symbol == other.e.symbol:
                 coeff = self.coeff * other.coeff
                 expo = self.expo + other.expo
                 return Symbol(self.symbol, coeff = coeff, expo = expo)
+            else:
+                return [self, "*", other]
         else:
-            if isinstance(other, (float,int)):
+            if isinstance(other, (float,int, Constant)):
                 coeff = self.coeff * other
                 return Symbol(self.symbol, coeff = coeff, expo = self.expo)
             else:
@@ -91,13 +78,15 @@ class Symbol(object):
                         
     
     def __truediv__(self, other):
-        if isinstance(other, Symbol):
-            if self.symbol == other.symbol:
+        if type(self) == type(other):
+            if self.e.symbol == other.e.symbol:
                 coeff = self.coeff / other.coeff
                 expo = self.expo - other.expo
                 return Symbol(self.symbol, coeff = coeff, expo = expo)
+            else:
+                return [self, "/", other]
         else:
-            if isinstance(other, (float,int)):
+            if isinstance(other, (float,int, Constant)):
                 coeff = self.coeff / other
                 return Symbol(self.symbol, coeff = coeff, expo = self.expo)
             else:
@@ -111,9 +100,9 @@ class Symbol(object):
             return f'{self.coeff}'
         
         elif self.coeff != 1:
-            return f'{self.coeff}{self.symbol}' if self.expo == 1 else f'{self.coeff}{self.symbol}^{self.expo}'
+            return f'{self.coeff}*{self.e.symbol}' if self.expo == 1 else f'{self.coeff}{self.e.symbol}^{self.expo}'
         else:
-            return f'{self.symbol}' if self.expo == 1 else f'{self.symbol}^{self.expo}'
+            return f'{self.e.symbol}' if self.expo == 1 else f'{self.e.symbol}^{self.expo}'
 
     def insert(self, value):
         self.value = value
@@ -124,39 +113,62 @@ class Symbol(object):
             res = self.coeff * res
             return res
     def eval(self):
-        return self.value.eval() if isinstance(self.value, Expr) else float(self.value)
-'''
+        return self
+
 class Symbol(object):
-    def __init__(self, symbol,subExpr = None):
+    def __init__(self, symbol):
         self.symbol = symbol
         self.value = None
-        self.subExpr = subExpr
+
         
-    def insert(self, value, subExpr = None):
+    def insert(self, value):
         self.value = value
-        self.subExpr = subExpr
     
     def eval(self):
         return self.value.eval() if isinstance(self.value, Expr) else float(self.value)
     
     def __repr__(self):
-        return f'({repr(self.symbol)}' if self.subExpr is not None else f'({repr(self.symbol)})'
-    def __str__(self):
-        return f'({self.subExpr})' if self.subExpr is not None else f'({self.value})'
-'''
-class Constant(Node):
-    def __init__(self,e):
+        return f'{self.symbol}'
+
+class Constant(object):
+    def __init__(self,value):
         super(__class__,self)
-        self.e = float(e)
+        self.value = float(value)
 
     def eval(self):
-        return self.e
+        return self
     
     def canonicalize(self):
         return self
     
+    def __add__(self, other):
+        if isinstance(other, Variable):
+            return [self, '+', other]
+        else:
+            return Constant(self.value + other.value)
+    
+    def __sub__(self, other):
+        if isinstance(other, Variable):
+            return [self, '-', other]
+        else:
+            return Constant(self.value - other.value)
+    
+    def __mul__(self,other):
+        if isinstance(other, Variable):
+            coeff = self.value * other.coeff
+            return Variable(other.e, coeff = coeff, expo = other.expo )
+        else:
+            return Constant(self.value * other.value)
+    
+    def __truediv__(self,other):
+        if isinstance(other, Variable):
+            coeff = self.value / other.coeff
+            return Variable(other.e, coeff = coeff, expo = other.expo )
+        else:
+            return Constant(self.value / other.value)
+    
     def __str__(self):
-        return str(self.e)
+        return str(self.value)
     
     def __repr__(self):
-        return f'Constant({repr(self.e)})'
+        return f'Constant({repr(self.value)})'
