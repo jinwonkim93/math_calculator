@@ -4,7 +4,7 @@ from term import Term
 from term_tail import TermTail
 from factor_new import Factor, Variable, Constant, Symbol
 from math_function import Log,  AngleFunction
-from exponenetial import Exponential
+from factor_tail import FactorTail
 from error import Error
 from empty import Empty
 from mathematical_constant import *
@@ -69,30 +69,30 @@ class Parser(object):
             self.tokens.takeIt()
             e = self.parseExpr()
             self.tokens.takeIt()
-            expo = self.parseExponential()
+            expo = self.parseFactorTail()
             return Factor(e, expo = expo)
         elif self.tokens.isType(['+','-']):
             sign = self.tokens.takeIt()
             f = self.parseFactor()
-            expo = self.parseExponential()
+            expo = self.parseFactorTail()
             return Factor(f, sign = sign, expo = expo)
         elif self.tokens.isType(self.tokens.isAlpha):
             var = self.parseVariable()
-            expo = self.parseExponential()
+            expo = self.parseFactorTail()
             return Factor(var, expo = expo)
         elif self.tokens.isType(self.tokens.isDigit):
             num = Constant(self.tokens.isSpecialNum(self.tokens.takeIt()))
-            expo = self.parseExponential()
+            expo = self.parseFactorTail()
             return Factor(num, expo = expo)
         else:
             raise Exception("Invalid Factor")
             
-    def parseExponential(self):
+    def parseFactorTail(self):
         if self.tokens.isType(['^']):
             self.tokens.takeIt()
             f = self.parseFactor()
-            expo = self.parseExponential()
-            return Exponential(f, expo)
+            expo = self.parseFactorTail()
+            return FactorTail(f, expo)
         return Empty()
     
     def parseVariable(self):

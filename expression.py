@@ -11,8 +11,9 @@ class Expr(Node):
     def eval(self):
         result = self.et.eval(self.t.eval())
         if isinstance(result, list):
-            [print(type(x)) for x in result]
-        return  ''.join(list(map(str,result))) if isinstance(result,list) else result
+            [x for x in result]
+        #return  ''.join(list(map(str,result))) if isinstance(result,list) else result
+        return result
 
     def canonicalize(self):
         term = []

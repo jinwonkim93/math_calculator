@@ -10,21 +10,35 @@ def lognNew(n, x = E):
     return math.log(n) / math.log(x)
 
 def triangleFunction(func, expr):
-    if func == 'sin':
-        return math.sin(expr)
-    elif func == 'cos':
-        return math.cos(expr)
-    elif func == 'tan':
-        return math.tan(expr)
+    print(type(expr))
+    if func.symbol == 'sin':
+        if isinstance(expr, Constant):
+            return math.sin(expr.value)
+        elif isinstance(expr, float):
+            return Constant(math.sin(expr))
+        else:
+            return func
+    elif func.symbol == 'cos':
+        if isinstance(expr, Constant):
+            return math.cos(expr.value)
+        elif isinstance(expr, float):
+            return math.cos(expr)
+        else:
+            return func
+    elif func.symbol == 'tan':
+        if isinstance(expr, Constant):
+            return math.tan(expr.value)
+        elif isinstance(expr, float):
+            return math.tan(expr)
+        else:
+            return func
 
 def pow(base,expo):
     if isinstance(base, Variable):
-        print(base, expo)
-        base.expo = base.expo * expo
-        print(base.expo)
-        return base
+        new_expo = base.expo * expo
+        return Variable(base.e, coeff = base.coeff, expo = new_expo)
     elif isinstance(base, Constant):
-        return base.e ** expo
+        return base ** expo
 
 def checkTerm(left,right):
     if isinstance(left,right.__class__):
@@ -39,7 +53,6 @@ def checkTerm(left,right):
         return False
 
 def calcByTerm(op, left,right):
-    print(left, right)
     temp = []
     flag = False
     if isinstance(left, list):
@@ -66,3 +79,6 @@ def calc(op, left, right):
         return left * right
     elif op is '/':
         return left / right
+
+def calcVariable(variable):
+    return Constant(variable * pow(variable.e, variable.expo))

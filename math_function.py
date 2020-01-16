@@ -3,32 +3,71 @@ from node import Node
 from expression import Expr
 from empty import Empty
 from utils import lognNew, triangleFunction
-
+from factor_new import Constant
 
 class AngleFunction(Node):
-    def __init__(self, angleF, e):
+    def __init__(self, symbol, e):
         super(__class__,self)
-        self.angleF = angleF
+        self.symbol = symbol
         self.e = e
     def eval(self):
-        return triangleFunction(self.angleF, self.e.eval())
+        self.e = self.e.eval()
+        return triangleFunction(self, self.e)
     
     def __str__(self):
-        return f'{str(self.angleF)}({str(self.e)})'
+        return f'{str(self.symbol)}({str(self.e)})'
     def __repr__(self):
-        return f'AngleFunction({repr(self.angleF)},{repr(self.e)})'
+        return f'AngleFunction({repr(self.symbol)},{repr(self.e)})'
 
 class Log(Node):
-    def __init__(self, logarithm, e):
+    def __init__(self, symbol, e):
         super(__class__,self)
-        self.logarithm = logarithm
+        self.symbol = symbol
         self.e = e
     
     def eval(self):
-        return lognNew(self.e.eval(),self.logarithm)
+        return lognNew(self.e.eval(),self.symbol)
         
     def __str__(self):
-        return f'log{str(self.logarithm):.4}({str(self.e)})'
+        return f'log{str(self.symbol):.4}({str(self.e)})'
     def __repr__(self):
-        return f'Log({repr(self.logarithm)},{repr(self.e)})'
+        return f'Log({repr(self.symbol)},{repr(self.e)})'
 
+class Sin(object):
+    def __init__(self,e):
+        self.e = e
+    
+    def eval(self):
+        pass
+
+    def __str__(self):
+        pass
+    
+    def __repr__(self):
+        pass
+
+class Cos(object):
+    def __init__(self, e):
+        self.e = e
+    
+    def eval(self):
+        pass
+
+    def __str__(self):
+        pass
+    
+    def __repr__(self):
+        pass
+
+class Tan(object):
+    def __init__(self, e):
+        self.e = e
+    
+    def eval(self):
+        pass
+
+    def __str__(self):
+        pass
+    
+    def __repr__(self):
+        pass

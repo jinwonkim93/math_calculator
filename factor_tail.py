@@ -1,9 +1,10 @@
 from node import Node
 from empty import Empty
-from factor import Symbol, Constant
+from expression import Expr
+from factor_new import Symbol, Constant
 from utils import pow
 
-class Exponential(Node):
+class FactorTail(Node):
     def __init__(self, f, expo):
         super(__class__,self)
         self. f = f
@@ -12,8 +13,7 @@ class Exponential(Node):
     def eval(self, left):
         eval_factor = self.expo.eval(self.f.eval())
         try:
-            print(type(left), type(eval_factor))
-            return pow(left,eval_factor)
+            return pow(left,eval_factor) if isinstance(eval_factor, Constant) else self
         except:
             raise Exception("OverflowError: Numerical result out of range")
 
@@ -30,4 +30,4 @@ class Exponential(Node):
         else:
             return f'^({str(self.f)})^{str(self.expo)}' if isinstance(self.f, Expr) else f'^{str(self.f)}{str(self.expo)}'
     def __repr__(self):
-        return f'Exponential({repr(self.f)},{repr(self.expo)})'
+        return f'FactorTail({repr(self.f)},{repr(self.expo)})'

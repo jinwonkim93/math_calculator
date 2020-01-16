@@ -172,7 +172,7 @@ class AngleFunction(Node):
     def __repr__(self):
         return f'AngleFunction({repr(self.angleF)},{repr(self.e)})'
 
-class Exponential(Node):
+class FactorTail(Node):
     def __init__(self, f, expo):
         super(__class__,self)
         self. f = f
@@ -192,7 +192,7 @@ class Exponential(Node):
         else:
             return f'^({str(self.f)})^{str(self.expo)}' if isinstance(self.f, Expr) else f'^{str(self.f)}{str(self.expo)}'
     def __repr__(self):
-        return f'Exponential({repr(self.f)},{repr(self.expo)})'
+        return f'FactorTail({repr(self.f)},{repr(self.expo)})'
 
 class Log(Node):
     def __init__(self, logarithm, e):
@@ -357,7 +357,7 @@ class Parser(object):
             self.tokens.takeIt()
             f = self.parseFactor()
             expo = self.parseExponential()
-            return Exponential(f, expo)
+            return FactorTail(f, expo)
         return Empty()
     
     def parseVariable(self):
