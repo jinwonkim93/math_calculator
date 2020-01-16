@@ -15,19 +15,18 @@ Factor := '(' Expr ')' | [+-] Factor | number
 <ExprTail> := [+-] <Term> <ExprTail> | e
 <Term> := <Factor> <TermTail>
 <TermTail> := [*/] <Factor> <TermTail> | e
-<Factor> := '(' <Expr> ')' <Expo> | <Variable> <Expo> | [+-] <Factor> <Expo> | number <Expo>
+<Factor> := '(' <Expr> ')' <Expo> | <Variable> <Expo> | [+-] <Factor> <Expo> | Constant <Expo>
 <Expo> := '^'<Factor> <Expo> | e
 <Variable> := <AngleF> | <Log> | <Symbol>
 <Symbol> := <Expr> | letter
 <AngleF> := [sin, cos, tan]'(' <Expr> ')'
 <Log> := [log]'('<Expr>')'
 
-곱셈 생략 없음 지원안함
-수학상수 sender가 이해 못함 아직
-tan^2 이건뭐야
-미분 = d()/dx
-지수함수 = x^(y+1) 완료
-log함수 = log(x) 
--3^2 = 9일지 -9일지 정의
+현재 안되는거
+삼각함수 - has no attribute symbol
+로그 - has no attribute symgbol
+삼각함수 - 제곱 안됌
+정의역 치역
+
 +- |   */  |  -  | ^  | log sin  |  int
-```
+````

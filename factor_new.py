@@ -18,7 +18,9 @@ class Factor(object):
             return self.expo.eval(self.e.eval()) if isinstance(self.e, (Expr, Variable, Factor)) else self.expo.eval(float(self.e))
     """
     def eval(self):
+        #factor = self.expo.eval(self.e.eval())
         return -self.expo.eval(self.e.eval()) if self.sign is '-' else self.expo.eval(self.e.eval())
+
     
     def canonicalize(self):
         canonicalized_e = self.expo.canonicalize(self.e.canonicalize())
@@ -165,45 +167,53 @@ class Symbol(object):
         return f'{self.symbol}'
 
 class Constant(object):
-    def __init__(self,value):
+    def __init__(self,value, expo = Empty()):
         self.value = float(value)
-
-    def eval(self):
-        return self
+        self.expo = expo
     
-    def canonicalize(self):
+    def eval(self):
         return self
     
     def __add__(self, other):
         if isinstance(other, Variable):
             return [self, '+', other]
-        else:
+        elif isinstance(other, Constant):
             return Constant(self.value + other.value)
+        else:
+            return Constant(self.value + other)
     
     def __radd__(self, other):
         if isinstance(other, Variable):
             return [other, '+', self]
+        elif isinstance(other, Constant):
+            return Constant(self.value + other.value)
         else:
-            return Constant(self.value + other.value)   
+            return Constant(self.value + other)
     
     def __sub__(self, other):
         if isinstance(other, Variable):
             return [self, '-', other]
-        else:
+        elif isinstance(other, Constant):
             return Constant(self.value - other.value)
+        else:
+            return Constant(self.value - other)
     
     def __rsub__(self, other):
         if isinstance(other, Variable):
             return [other, '-', self]
+        elif isinstance(other, Constant):
+            return Constant(other.value - self.value)
         else:
-            return Constant(self.value - other.value)
+            return Constant(other -  self.value)
     
     def __mul__(self,other):
         if isinstance(other, Variable):
             coeff = self.value * other.coeff
             return Variable(other.e, coeff = coeff, expo = other.expo )
-        else:
+        elif isinstance(other, Constant):
             return Constant(self.value * other.value)
+        else:
+            return Constant(self.value * other)
     
     def __rmul__(self,other):
         if isinstance(other, Variable):
@@ -252,4 +262,4 @@ class Constant(object):
         return str(self.value)
     
     def __repr__(self):
-        return str(self.value)
+        return f'{self.value}' if isinstance(self.expo, Empty) else f'{self.value}^{self.expo}'

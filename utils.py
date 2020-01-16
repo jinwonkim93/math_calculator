@@ -1,6 +1,7 @@
 import math
 from factor_new import Variable, Constant
 from mathematical_constant import *
+from empty import Empty
 
 def logn(n, x = math.e):
     print(n/x)
@@ -35,10 +36,17 @@ def triangleFunction(func, expr):
 
 def pow(base,expo):
     if isinstance(base, Variable):
-        new_expo = base.expo * expo
+        new_expo = Empty()
+        if isinstance(expo, (list, Variable)):
+            new_expo = expo  
+        elif isinstance(expo, Constant):
+            new_expo = base.expo * expo
         return Variable(base.e, coeff = base.coeff, expo = new_expo)
     elif isinstance(base, Constant):
-        return base ** expo
+        if isinstance(expo, (list, Variable)):
+            return Constant(base.value, expo = base.expo)
+        elif isinstance(expo, Constant):
+            return base ** expo
 
 def checkTerm(left,right):
     if isinstance(left,right.__class__):

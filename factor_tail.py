@@ -13,7 +13,7 @@ class FactorTail(Node):
     def eval(self, left):
         eval_factor = self.expo.eval(self.f.eval())
         try:
-            return pow(left,eval_factor) if isinstance(eval_factor, Constant) else self
+            return pow(left,eval_factor)
         except:
             raise Exception("OverflowError: Numerical result out of range")
 
