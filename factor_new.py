@@ -44,7 +44,7 @@ class Variable(object):
     
     def __add__(self, other):
         if isinstance(other, Variable):
-            if type(self.e) == type(other):
+            if type(self.e) == type(other.e):
                 if self.e.symbol == other.e.symbol and self.expo == other.expo:
                     coeff = self.coeff + other.coeff
                     return Variable(self.e, coeff = coeff, expo = self.expo) if coeff is not 0 else Constant(0)
@@ -52,7 +52,7 @@ class Variable(object):
     
     def __radd__(self, other):
         if isinstance(other, Variable):
-            if type(self.e) == type(other):
+            if type(self.e) == type(other.e):
                 if self.e.symbol == other.e.symbol and self.expo == other.expo:
                     coeff = other.coeff + self.coeff
                     return Variable(self.e, coeff = coeff, expo = self.expo) if coeff is not 0 else Constant(0)
@@ -61,7 +61,7 @@ class Variable(object):
     def __sub__(self,other):
         print('step 3 = ', self, other)
         if isinstance(other, Variable):
-            if type(self.e) == type(other):
+            if type(self.e) == type(other.e):
                 
                 if self.e.symbol == other.e.symbol and self.expo == other.expo:
                     coeff = self.coeff - other.coeff
@@ -98,9 +98,11 @@ class Variable(object):
                 else:
                     return [self, "*", other]
         elif isinstance(other, Constant):
-            coeff = other.eval() / self.coeff
-        coeff = other * self.coeff
-        return Variable(self.e, coeff = coeff, expo = self.expo) if coeff is not 0 else Constant(0)
+            coeff = other.eval() * self.coeff
+            return Variable(self.e, coeff = coeff, expo = self.expo) if coeff is not 0 else Constant(0)
+        else:
+            coeff = other * self.coeff
+            return Variable(self.e, coeff = coeff, expo = self.expo) if coeff is not 0 else Constant(0)
               
     def __truediv__(self, other):
         print(type(other))
