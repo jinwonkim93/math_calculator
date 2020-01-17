@@ -33,20 +33,35 @@ def triangleFunction(func, expr):
             return math.tan(expr)
         else:
             return func
-
+"""
 def pow(base,expo):
     if isinstance(base, Variable):
         new_expo = Empty()
         if isinstance(expo, (list, Variable)):
             new_expo = expo  
         elif isinstance(expo, Constant):
-            new_expo = base.expo * expo
+            new_expo = base.expo * expo.eval()
         return Variable(base.e, coeff = base.coeff, expo = new_expo)
     elif isinstance(base, Constant):
         if isinstance(expo, (list, Variable)):
-            return Constant(base.value, expo = base.expo)
+            return Constant(base.eval(), expo = base.expo)
         elif isinstance(expo, Constant):
-            return base ** expo
+            return Constant(base.eval() ** expo.eval())
+"""
+def pow(base,expo):
+    if isinstance(base, Variable):
+        if isinstance(expo, (str,Variable)):
+            return Variable(base.e, coeff = base.coeff, expo = expo)
+        else:
+            return Variable(base.e, coeff= base.coeff, expo= base.expo*expo)
+    else:
+        if isinstance(expo, (str,Variable)):
+            #print(Variable(Empty(), coeff=base, expo = expo))
+
+            return Variable(Empty(), coeff=base, expo = expo)
+        else:
+            return base**expo
+        
 
 def checkTerm(left,right):
     if isinstance(left,right.__class__):

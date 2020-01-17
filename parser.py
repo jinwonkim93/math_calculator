@@ -3,7 +3,7 @@ from expression_tail import ExprTail
 from term import Term
 from term_tail import TermTail
 from factor_new import Factor, Variable, Constant, Symbol
-from math_function import Log,  AngleFunction
+from math_function import Log,  Sin, Cos, Tan
 from factor_tail import FactorTail
 from error import Error
 from empty import Empty
@@ -29,7 +29,6 @@ class Parser(object):
                 sub_parser.insertValue()
                 symbol.insert(sub_expr.eval(), subExpr = sub_expr)
                 
-            
     def parse(self):
         try:
             e = self.parseExpr()
@@ -118,7 +117,13 @@ class Parser(object):
         self.tokens.takeIt()
         e = self.parseExpr()
         self.tokens.takeIt()
-        return AngleFunction(angleF, e)
+        if angleF == 'sin':
+            return Sin(e)
+        elif angleF == 'cos':
+            return Cos(e)
+        elif angleF == 'tan':
+            return Tan(e)
+         
     
     def parseLog(self):
         log = self.tokens.takeIt()

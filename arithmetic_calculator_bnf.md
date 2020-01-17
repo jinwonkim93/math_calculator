@@ -27,6 +27,6 @@ Factor := '(' Expr ')' | [+-] Factor | number
 로그 - has no attribute symgbol
 삼각함수 - 제곱 안됌
 정의역 치역
-
+1/x 가 안되고 있었음 ㄷㄷ
 +- |   */  |  -  | ^  | log sin  |  int
 ````
