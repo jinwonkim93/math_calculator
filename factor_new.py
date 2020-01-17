@@ -70,7 +70,7 @@ class Variable(object):
 
     def __rsub__(self,other):
         if isinstance(other, Variable):
-            if type(self.e) == type(other):
+            if type(self.e) == type(other.e):
                 if self.e.symbol == other.e.symbol and self.expo == other.expo:
                     coeff = other.coeff - self.coeff
                     return Variable(self.e, coeff = coeff, expo = self.expo) if coeff is not 0 else Constant(0)
@@ -78,7 +78,7 @@ class Variable(object):
     
     def __mul__(self, other):
         if isinstance(other, Variable):
-            if type(self.e) == type(other):
+            if type(self.e) == type(other.e):
                 if self.e.symbol == other.e.symbol:
                     coeff = self.coeff * other.coeff
                     expo = self.expo + other.expo
@@ -90,7 +90,7 @@ class Variable(object):
     
     def __rmul__(self, other):
         if isinstance(other, Variable):
-            if type(self.e) == type(other):
+            if type(self.e) == type(other.e):
                 if self.e.symbol == other.e.symbol:
                     coeff = self.coeff * other.coeff
                     expo = self.expo + other.expo
@@ -153,9 +153,10 @@ class Variable(object):
         elif isinstance(self.e, Empty):
             return f'{self.coeff}' if self.expo == 1 else f'{self.coeff}^{self.expo}'
         
-        elif isinstance(self.expo, (list, Variable)):
+        elif isinstance(self.expo, list):
+            return f'{self.coeff}*{self.e}^({self.expo})' if self.coeff != 1 else f'{self.e}^({self.expo})'
+        elif isinstance(self.expo, Variable):
             return f'{self.coeff}*{self.e}^{self.expo}' if self.coeff != 1 else f'{self.e}^{self.expo}'
-        
         elif self.coeff != 1:
             if self.expo == 0:
                 return f'{self.coeff}'
