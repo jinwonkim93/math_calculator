@@ -59,8 +59,10 @@ class Variable(object):
         return [other, "+", self]
     
     def __sub__(self,other):
+        print('step 3 = ', self, other)
         if isinstance(other, Variable):
             if type(self.e) == type(other):
+                
                 if self.e.symbol == other.e.symbol and self.expo == other.expo:
                     coeff = self.coeff - other.coeff
                     return Variable(self.e, coeff = coeff, expo = self.expo) if coeff is not 0 else Constant(0)
@@ -177,8 +179,8 @@ class Variable(object):
         self.value = value
     
     def calcSymbol(self):
-        if self.value is not None:
-            res = self.value**self.expo
+        if isinstance(self.e, Empty):
+            res = self.coeff**self.expo
             res = self.coeff * res
             return res
     

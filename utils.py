@@ -50,14 +50,18 @@ def pow(base,expo):
 """
 def pow(base,expo):
     if isinstance(base, Variable):
-        if isinstance(expo, (str,Variable)):
+        if isinstance(expo, (list,Variable)):
             return Variable(base.e, coeff = base.coeff, expo = expo)
+        elif isinstance(base.e, Empty):
+            return base.coeff**expo
+        elif isinstance(base.e, float):
+            return base.e**expo
         else:
             return Variable(base.e, coeff= base.coeff, expo= base.expo*expo)
+    elif isinstance(base,list):
+        return Variable(Empty(), coeff=base, expo=expo)
     else:
-        if isinstance(expo, (str,Variable)):
-            #print(Variable(Empty(), coeff=base, expo = expo))
-
+        if isinstance(expo, (list,Variable)):
             return Variable(Empty(), coeff=base, expo = expo)
         else:
             return base**expo
@@ -78,6 +82,8 @@ def checkTerm(left,right):
 def calcByTerm(op, left,right):
     temp = []
     flag = False
+    print('step 1 = ', left, op, right)
+    print('step 2 = ', type(left), op, type(right))
     if isinstance(left, list):
         for idx, element in enumerate(left):
             if checkTerm(element,right):

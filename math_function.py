@@ -57,7 +57,7 @@ class Sin(object):
             return self
 
     def __repr__(self):
-        return f'sin({self.e})' if isinstance(self.e.eval(), (str, Variable)) else f'{self.eval()}'
+        return f'sin({self.e})' if isinstance(self.e.eval(), (list, Variable)) else f'{self.eval()}'
 
 class Cos(object):
     def __init__(self, e):
@@ -77,7 +77,7 @@ class Cos(object):
         pass
     
     def __repr__(self):
-        return f'cos({self.e})' if isinstance(self.e.eval(), (str, Variable)) else f'{self.eval()}'
+        return f'cos({self.e})' if isinstance(self.e.eval(), (list, Variable)) else f'{self.eval()}'
 
 class Tan(object):
     def __init__(self, e):
@@ -94,4 +94,4 @@ class Tan(object):
             return self
     
     def __repr__(self):
-        return f'tan({self.e})' if isinstance(self.e.eval(), (str, Variable)) else f'{self.eval()}'
+        return f'tan({self.e})' if isinstance(self.e.eval(), (list, Variable)) else f'{self.eval()}'
