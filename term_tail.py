@@ -10,14 +10,12 @@ class TermTail(Node):
     
     def eval(self, left):
         eval_factor = self.f.eval()
-        #left = self.calc(left, eval_factor)
         left = calcByTerm(self.op, left,eval_factor)
         return self.tt.eval(left)
-    
-    def canonicalize(self, seq):
-        pass
-
-
+    def getCalc(self, left):
+        eval_factor = self.f.getCalc()
+        left = calcByTerm(self.op, left,eval_factor)
+        return self.tt.getCalc(left)
 
     def __str__(self):
         return  f'{str(self.op)}{str(self.f)}{str(self.tt)}'

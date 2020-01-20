@@ -18,11 +18,6 @@ class Factor(Node):
     """
     def eval(self):
         return -self.expo.eval(self.e.eval()) if self.sign is '-' else self.expo.eval(self.e.eval())
-    
-    def canonicalize(self):
-        canonicalized_e = self.expo.canonicalize(self.e.canonicalize())
-        if isinstance(canonicalized_e, Variable):
-            return -self.expo.canonicalize(self.e.canonicalize()) if self.sign is '-' else self.expo.canonicalize(self.e.canonicalize())
 
     def __str__(self):
         return f'({self.sign}{self.e}{self.expo})' if isinstance(self.e, Expr) else f'{self.sign}{self.e}{self.expo}'

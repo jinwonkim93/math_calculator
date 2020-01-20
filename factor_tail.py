@@ -16,14 +16,12 @@ class FactorTail(Node):
             return pow(left,eval_factor)
         except:
             raise Exception("OverflowError: Numerical result out of range")
-
-    def canonicalize(self, left):
-        #지수함수에 변수 안됌 아직
-        canonicalized_factor = self.expo.canonicalize(self.f.eval())
-        left = pow(left,canonicalized_factor)
-        return left
-
-
+    def getCalc(self,left):
+        eval_factor = self.expo.getCalc(self.f.getCalc())
+        try:
+            return pow(left,eval_factor)
+        except:
+            raise Exception("OverflowError: Numerical result out of range")
     def __str__(self):
         if isinstance(self.expo, Empty):
             return f'^({str(self.f)})' if isinstance(self.f, Expr) else f'^{str(self.f)}'

@@ -55,9 +55,20 @@ class Sin(object):
             return 0
         except TypeError:
             return self
+    
+    def getCalc(self):
+        try:
+            return sin(self.e.getCalc())
+        except ZeroDivisionError:
+            raise ZeroDivisionError
+        except ValueError:
+            return 0
 
+    def __eq__(self,other):
+        if self.__class__ == other.__class__ and repr(self.e) == repr(other.e):return True
+        else: return False
     def __repr__(self):
-        return f'sin({self.e})' if isinstance(self.e.eval(), (list, Variable)) else f'{self.eval()}'
+        return f'sin({self.e})' if isinstance(self.e.eval(), (list, Variable)) else f'{self.e.eval()}'
 
 class Cos(object):
     def __init__(self, e):
@@ -72,12 +83,18 @@ class Cos(object):
             return 0
         except TypeError:
             return self
-
-    def __str__(self):
-        pass
-    
+    def getCalc(self):
+        try:
+            return sin(self.e.getCalc())
+        except ZeroDivisionError:
+            raise ZeroDivisionError
+        except ValueError:
+            return 0
+    def __eq__(self,other):
+        if self.__class__ == other.__class__ and repr(self.e) == repr(other.e):return True
+        else: return False
     def __repr__(self):
-        return f'cos({self.e})' if isinstance(self.e.eval(), (list, Variable)) else f'{self.eval()}'
+        return f'cos({self.e})' if isinstance(self.e.eval(), (list, Variable)) else f'{self.e.eval()}'
 
 class Tan(object):
     def __init__(self, e):
@@ -92,6 +109,15 @@ class Tan(object):
             return 0
         except TypeError:
             return self
-    
+    def getCalc(self):
+        try:
+            return sin(self.e.getCalc())
+        except ZeroDivisionError:
+            raise ZeroDivisionError
+        except ValueError:
+            return 0
+    def __eq__(self,other):
+        if self.__class__ == other.__class__ and repr(self.e) == repr(other.e):return True
+        else: return False
     def __repr__(self):
-        return f'tan({self.e})' if isinstance(self.e.eval(), (list, Variable)) else f'{self.eval()}'
+        return f'tan({self.e})' if isinstance(self.e.eval(), (list, Variable)) else f'{self.e.eval()}'

@@ -6,7 +6,8 @@ class Empty(object):
     
     def eval(self, left):
         return left
-    
+    def getCalc(self, left):
+        return left
     def canonicalize(self, left):
         return left
 

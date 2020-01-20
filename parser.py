@@ -27,7 +27,7 @@ class Parser(object):
                 sub_parser = Parser(tok)
                 sub_expr = sub_parser.parse()
                 sub_parser.insertValue()
-                symbol.insert(sub_expr.eval(), subExpr = sub_expr)
+                symbol.insert(sub_expr.eval())
                 
     def parse(self):
         try:

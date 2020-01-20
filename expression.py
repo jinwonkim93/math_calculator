@@ -10,19 +10,14 @@ class Expr(Node):
     
     def eval(self):
         result = self.et.eval(self.t.eval())
-        if isinstance(result, list):
-            [x for x in result]
-        #return  ''.join(list(map(str,result))) if isinstance(result,list) else result
         return result
-
-    def canonicalize(self):
-        term = []
-        constant = None
-        seq = self.et.canonicalize(self.t.canonicalize([term,constant]))
-    
+    def getCalc(self):
+        result = self.et.getCalc(self.t.getCalc())
+        return result
     def __str__(self):
         return f'{str(self.t)}{str(self.et)}'
     
     def __repr__(self):
         return f'Expr({repr(self.t)}, {repr(self.et)})'
+
 

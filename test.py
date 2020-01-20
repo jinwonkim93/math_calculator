@@ -11,7 +11,8 @@ def test(case):
     print(parser.variables)
     parser.insertValue()
     print(tree.eval())
-    #print(repr(tree))
+    print(tree.getCalc())
+    print(repr(tree))
     #print(tree)
     print('-'*50)
 
@@ -19,3 +20,8 @@ def test(case):
 with open('../parser/test_case.txt','r') as question:
     for ql in question:
         test(ql)
+"""
+with open('rule.txt','r') as question:
+    for ql in question:
+        test(ql)
+"""

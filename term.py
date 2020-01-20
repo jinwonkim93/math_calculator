@@ -7,12 +7,8 @@ class Term(Node):
     
     def eval(self):
         return self.tt.eval(self.f.eval())
-    
-    def canonicalize(self, seq):
-        term = list(seq[0])
-        constant = seq[1]
-
-        return self.tt.canonicalize(self.f.canonicalize())
+    def getCalc(self):
+        return self.tt.getCalc(self.f.getCalc())
 
     def __str__(self):
         return f'{str(self.f)}{str(self.tt)}'

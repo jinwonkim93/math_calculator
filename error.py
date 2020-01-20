@@ -10,3 +10,5 @@ class Error(object):
     
     def eval(self):
         return self.error
+    def getCalc(self):
+        return self.error
