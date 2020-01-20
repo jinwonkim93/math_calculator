@@ -33,7 +33,7 @@ class Log(Node):
         except ZeroDivisionError:
             raise ZeroDivisionError
         except ValueError:
-            return 0
+            raise ValueError
         except TypeError:
             return self
         

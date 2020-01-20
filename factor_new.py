@@ -103,8 +103,12 @@ class Variable(object):
                 return Variable(self.e, coeff = coeff, expo = expo)
             else:
                 return [self, "/", other]
-        coeff = self.coeff / other.eval()
-        return Variable(self.e, coeff = coeff, expo = self.expo) if coeff is not 0 else 0
+        elif isinstance(other, Constant):
+            coeff = self.coeff / other.eval()
+            return Variable(self.e, coeff = coeff, expo = self.expo) if coeff is not 0 else 0
+        else:
+            coeff = self.coeff / other
+            return Variable(self.e, coeff = coeff, expo = self.expo) if coeff is not 0 else 0
     
     def __rtruediv__(self, other):
         value =  None
@@ -121,7 +125,7 @@ class Variable(object):
         else:
             value = other
         coeff = value/self.coeff
-        if coeff > 1:
+        if coeff >= 1:
             return [coeff, '/', Variable(self.e, expo = self.expo)]
         else:
             return Variable(self.e, coeff = coeff, expo = self.expo)
@@ -171,12 +175,11 @@ class Variable(object):
             res = self.coeff**self.expo
             res = self.coeff * res
             return res
-        if isinstance(self.e, float):
+        if isinstance(self.e, (int,float)):
             res = self.e ** self.expo
             res = self.coeff * res
             return res
         else:
-            print('who are you',self.e.getCalc(), type(self.e.getCalc()))
             res = self.e.getCalc()**self.expo
             res = self.coeff * res
             return res

@@ -75,7 +75,6 @@ def checkTerm(left,right):
         if isinstance(left, float):
             return True
         else:
-            print('checkTerm', left.e, right.e, left.e==right.e)
             if isinstance(left.e, Symbol):
                 if left.e == right.e and left.expo == right.expo:
                         return True
@@ -139,10 +138,8 @@ def calcByTerm(op, left,right):
                 return clearExpr(temp)
         else:
             if op in ('+', '-'):
-                print(left)
                 temp = left[:]
                 temp.extend([op,right])
-                print(temp)
                 temp = clearExpr(temp)
                 return clearExpr(temp)
             # * /
@@ -217,19 +214,21 @@ def clearExpr(left):
                                 right = -right
                                 right_op = '+'
                             variable_res = calc(op,element, right)
-                            print('계산후', variable_res)
                             no_same_term = False
-                            if variable_res == 0: break
-                            res_list = ['+',variable_res] if len(temp) > 0 else [variable_res]
-                            temp.extend(res_list)
-                            
-                            break
+                            if variable_res == 0: 
+                                temp.extend(variable_list[variable_idx+1:])
+                                break
+                            else:
+                                res_list = ['+',variable_res] if len(temp) > 0 else [variable_res]
+                                temp.extend(res_list)
+                                temp.extend(variable_list[variable_idx+1:])
+                                break
                         
-                        temp.extend([left_op,right]) if variable_idx != 0 else temp.append(right)
+                        temp.extend([right_op,right]) if variable_idx != 0 else temp.append(right)
                     
                     if no_same_term: temp.extend([op,element])
+                    
                     variable_list = temp
-        print(variable_list)
     if len(variable_list) != 0:
         if res != 0:
             variable_list.extend(['+',res])

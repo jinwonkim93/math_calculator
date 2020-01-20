@@ -11,6 +11,7 @@ def test(case):
     print(parser.variables)
     parser.insertValue()
     print(tree.eval())
+    print(tree.getCalc())
     #print(repr(tree))
     #print(tree)
     print('-'*50)
