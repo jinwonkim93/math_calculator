@@ -89,7 +89,7 @@ def checkTerm(left,right):
 def calcByTerm(op, left,right):
     temp = []
     no_same_term = True
-    print('step 1 = ', left, op, right)
+    #print('step 1 = ', left, op, right)
     #if left == (x+1)
     if isinstance(left, list):
         #if right == (x+10)
@@ -238,3 +238,9 @@ def clearExpr(left):
 
 def calcVariable(variable):
     return Constant(variable * pow(variable.e, variable.expo))
+
+def isExpr(expr):
+    sub_expr = expr.eval() 
+    print(sub_expr, type(sub_expr), 'isExpr')
+    if isinstance(sub_expr, list): return sub_expr.e
+    return isExpr(sub_expr.e)

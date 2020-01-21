@@ -12,3 +12,5 @@ class Error(object):
         return self.error
     def getCalc(self):
         return self.error
+    def getDerivative(self, symbol):
+        return self.error

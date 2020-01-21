@@ -1,0 +1,4 @@
+sin(sin(x))
+cos(cos(x))
+tan(tan(x))
+sec(sec(x))

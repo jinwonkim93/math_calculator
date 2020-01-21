@@ -16,7 +16,6 @@ class ExprTail(Node):
         return self.et.eval(left)
     def getCalc(self, left):
         eval_term = self.t.getCalc()
-        #left = self.calc(left, eval_term)
         left = calcByTerm(self.op, left, eval_term)
         return self.et.getCalc(left)
     def __str__(self):

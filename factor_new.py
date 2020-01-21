@@ -2,7 +2,6 @@
 from empty import Empty
 from expression import Expr
 import math
-from fractions import Fraction
 
 class Factor(object):
     def __init__(self, e, sign = Empty(), expo = Empty()):
@@ -158,7 +157,7 @@ class Variable(object):
             elif self. expo == 1:
                 return f'{self.coeff}*{self.e}'
             else:
-                return f'{self.coeff}{self.e}^{self.expo}'
+                return f'{self.coeff}*{self.e}^{self.expo}'
         else:
             if self.expo == 0:
                 return f'{self.coeff}'
@@ -191,6 +190,26 @@ class Variable(object):
             self.e = self.e.eval()
             return self if self.coeff != 0 else 0
 
+    def getDerivative(self, symbol):
+        if isinstance(self.e, (int,float)): return NotImplemented
+        if isinstance(self.e, Empty):
+            return 0
+        elif isinstance(self.e, Symbol):
+            if self.e == symbol:
+                if self.expo > 1:
+                    self.coeff = self.coeff * self.expo
+                    self.expo -= 1
+                    return self
+                elif self.expo == 1:
+                    return self.coeff*self.expo
+                else:
+                    return 0
+            else:
+                return 0
+        else:
+            return self.e.getDerivative(self,symbol)
+
+
 class Symbol(object):
     def __init__(self, symbol):
         self.symbol = symbol
@@ -202,8 +221,10 @@ class Symbol(object):
     
     def eval(self):
         return self
+    
     def getCalc(self):
         return self.value
+    
     def __eq__(self, other):
         if self.symbol == other.symbol: return True
         else: return False

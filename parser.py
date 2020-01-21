@@ -3,7 +3,7 @@ from expression_tail import ExprTail
 from term import Term
 from term_tail import TermTail
 from factor_new import Factor, Variable, Constant, Symbol
-from math_function import Log,  Sin, Cos, Tan
+from math_function import Log,  Sin, Cos, Tan, Sec, Csc, Cot
 from factor_tail import FactorTail
 from error import Error
 from empty import Empty
@@ -28,7 +28,32 @@ class Parser(object):
                 sub_expr = sub_parser.parse()
                 sub_parser.insertValue()
                 symbol.insert(sub_expr.eval())
-                
+
+    def getDerivative(self, semi_expression):
+        if self.variables:
+            for name, symbol in self.variables.items():
+                print(name, type(name))
+                print(symbol, type(symbol))
+                try:
+                    #semi_expression = self.parse().eval()
+                    temp = []
+                    if isinstance(semi_expression, list):
+                        for value in semi_expression:
+                            if isinstance(value, (int,float)):
+                                if len(temp) > 0: temp.pop()
+                            elif value in ('+', '-', '*', '/'):
+                                temp.append(value)
+                            else:
+                                temp.append(value.getDerivative(symbol))
+                        print(f'd({semi_expression})/d{name} = ', temp)
+                    else:
+                        if isinstance(semi_expression, (int,float)):
+                            return NotImplemented
+                        else:
+                            print(f'd({semi_expression})/d{name} = ', semi_expression.getDerivative(symbol))
+                except:
+                    return semi_expression
+
     def parse(self):
         try:
             e = self.parseExpr()
@@ -95,7 +120,7 @@ class Parser(object):
         return Empty()
     
     def parseVariable(self):
-        if self.tokens.isType(['sin','cos','tan']):
+        if self.tokens.isType(trigonometric_functions):
             angleF = self.parseAngleFunction()
             return Variable(angleF)
         elif self.tokens.isType(['log','ln']):
@@ -123,6 +148,12 @@ class Parser(object):
             return Cos(e)
         elif angleF == 'tan':
             return Tan(e)
+        elif angleF == 'csc':
+            return Csc(e)
+        elif angleF == 'sec':
+            return Sec(e)
+        elif angleF == 'cot':
+            return Cot(e)
          
     
     def parseLog(self):

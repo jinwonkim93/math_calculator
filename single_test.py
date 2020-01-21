@@ -12,6 +12,7 @@ def test(case):
     parser.insertValue()
     print(tree.eval())
     print(tree.getCalc())
+    print(parser.getDerivative(tree))
     #print(repr(tree))
     #print(tree)
     print('-'*50)

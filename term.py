@@ -10,6 +10,8 @@ class Term(Node):
     def getCalc(self):
         return self.tt.getCalc(self.f.getCalc())
 
+    def getDerivative(self):
+        pass
     def __str__(self):
         return f'{str(self.f)}{str(self.tt)}'
     def __repr__(self):

@@ -1,15 +1,13 @@
 equation, expected answer
 1 + 2 * (3 - 4) / 5, [3/5]
-x^2 + x^2 + x^3 + 20, [x^3 + 2*x^2 + 20, d(x^2 + x^2 + x^3 + 20)/dx = 3*x^2 + 4*x, x = 1 is differentiable]
+x^2 + x^2 + x^3 + 20, [x^3 + 2*x^2 + 20, d(x^2 + x^2 + x^3 + 20)/dx = 3*x^2 + 4*x]
 cot(x), [cot(x), d(cot(x))/dx = -csc(x)^2, x = 2*pi is non-differentiable  ]
-log(x^y), [y*log(x), d(log(x^y))/dx = y/x, d(log(x^y))/dy = log(x)]
+log(x^2), [2*log(x), d(log(x^2))/dx = 2/x]
 sin(sin(x)), [sin(sin(x)), d(sin(sin(x)))/dx =  cos(x) cos(sin(x))]
-(x+y) * (x-y), [x^2 - y^2 , d((x+y) * (x-y)).dx = 2x, d((x+y) * (x-y))/dy = 2y]
+(x+y) * (x-y), [x^2 - y^2 , d((x+y) * (x-y)).dx = 2x, d((x+y) * (x-y))/dy = -2y]
 x^2/x^3, [1/x, d(x^2/x^3)/dx = -1/x^2]
 ---, Error
-e^x + 5, [e^x + 5, d(e^x + 5)/dx = e^x]
-x * (1 + 5), [6x, d(x * (1 + 5))/dx = 6]
+e + pi + 3, [8.859874482048838]
 x * (1 +y), [x*y + x, d(x * (1 +y))/dx = y+1, d(x * (1 +y))/dy = x]
-.
-
+sin(0), [inf, 0 non-differentiable]
 
