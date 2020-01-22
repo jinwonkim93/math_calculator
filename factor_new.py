@@ -74,6 +74,13 @@ class Variable(object):
                 coeff = self.coeff * other.coeff
                 expo = self.expo + other.expo
                 return Variable(self.e, coeff = coeff, expo = expo) if coeff is not 0 else 0
+            elif self.e.__class__ == other.e.__class__:
+                if self.e > other.e:
+                    coeff = self.coeff * other
+                    return Variable(self.e, coeff = coeff, expo = self.expo)
+                else:
+                    coeff = other.coeff * self
+                    return Variable(other.e, coeff = coeff, expo = self.expo)
             else:
                 return [self, "*", other]
         coeff = self.coeff * other
@@ -124,10 +131,7 @@ class Variable(object):
         else:
             value = other
         coeff = value/self.coeff
-        if coeff >= 1:
-            return [coeff, '/', Variable(self.e, expo = self.expo)]
-        else:
-            return Variable(self.e, coeff = coeff, expo = self.expo)
+        return Variable(self.e, coeff = coeff, expo = -self.expo).eval()
 
     def __neg__(self):
         return Variable(self.e,coeff= -self.coeff, expo = self.expo) if self.coeff is not 0 else 0
@@ -153,7 +157,7 @@ class Variable(object):
                 return f'{self.coeff}'
             
             elif self.expo < 0:
-                return f'{self.coeff}/{self.e}^{~self.expo}'
+                return f'{self.coeff}*{self.e}^{self.expo}'
             elif self. expo == 1:
                 return f'{self.coeff}*{self.e}'
             else:
@@ -163,7 +167,7 @@ class Variable(object):
                 return f'{self.coeff}'
             
             elif self.expo < 0:
-                return f'{self.coeff}/{self.e}^{~self.expo}'
+                return f'{self.coeff}*{self.e}^{self.expo}'
             elif self. expo == 1:
                 return f'{self.e}'
             else:
@@ -184,30 +188,39 @@ class Variable(object):
             return res
     
     def eval(self):
+
         if isinstance(self.e, float):
             return self.e
         else:
             self.e = self.e.eval()
+            if not isinstance(self.e, (int,float,Symbol,Empty)):
+                if self.expo < 0:
+                    self.e = self.e.convert()
+                    self.expo = -self.expo
             return self if self.coeff != 0 else 0
+
 
     def getDerivative(self, symbol):
         if isinstance(self.e, (int,float)): return NotImplemented
+        if isinstance(self.coeff, (Variable)):
+            coeff = self.coeff.getDerivative(symbol)
+            if coeff != 0:
+                coeff = coeff * Variable(self.e,expo = self.expo)
+                return coeff
         if isinstance(self.e, Empty):
             return 0
         elif isinstance(self.e, Symbol):
             if self.e == symbol:
-                if self.expo > 1:
-                    self.coeff = self.coeff * self.expo
-                    self.expo -= 1
-                    return self
+                if self.expo != 1:
+                    coeff = self.coeff * self.expo
+                    return Variable(self.e,coeff = coeff, expo = self.expo-1)
                 elif self.expo == 1:
                     return self.coeff*self.expo
-                else:
-                    return 0
             else:
                 return 0
         else:
-            return self.e.getDerivative(self,symbol)
+            return self.e.getDerivative(self.symbol)
+
 
 
 class Symbol(object):
@@ -224,9 +237,13 @@ class Symbol(object):
     
     def getCalc(self):
         return self.value
-    
+    def __lt__(self, other):
+        return self.symbol < other.symbol
+    def __gt__(self, other):
+        return self.symbol > other.symbol
     def __eq__(self, other):
-        if self.symbol == other.symbol: return True
+        if other.__class__ != self.__class__: return False
+        elif self.symbol == other.symbol: return True
         else: return False
 
     def __repr__(self):

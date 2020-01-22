@@ -2,3 +2,4 @@ sin(sin(x))
 cos(cos(x))
 tan(tan(x))
 sec(sec(x))
+1/tan(x)+100000000000 

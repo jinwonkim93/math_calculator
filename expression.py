@@ -31,14 +31,11 @@ class Expr(Node):
                         else:
                             if len(temp) == 1: temp.pop()
                             temp.append(derivation)
-                try:
-                    d = ''
-                    if len(temp) == 1: return temp[0]
-                    for element in temp:
-                        d += str(element)
-                    print(d)
-                except Exception as e:
-                    print(e)
+
+                d = ''
+                if len(temp) == 1: return temp[0] #하나면 숫자를 두개 이상이면 str
+                for element in temp:
+                    d += str(element)
                 return d
             else:
                 if isinstance(semi_expression, (int,float)):

@@ -2,7 +2,7 @@ import math
 from factor_new import Variable, Constant, Symbol
 from mathematical_constant import *
 from empty import Empty
-
+from copy import deepcopy
 def logn(n, x = math.e):
     print(n/x)
     return 1 + logn(n/x, x) if n > (x-1) else 0
@@ -59,7 +59,15 @@ def pow(base,expo):
         else:
             return Variable(base.e, coeff= base.coeff, expo= base.expo*expo)
     elif isinstance(base,list):
-        return Variable(Empty(), coeff=base, expo=expo)
+        if isinstance(expo, (int,float)):
+            right = deepcopy(base)
+            left = deepcopy(base)
+            print(left)
+            while (expo > 1):
+                expo -= 1
+                left = calcByTerm('*',left,right)
+                print(left)
+            return Variable(Empty(), coeff=left)
     else:
         if isinstance(expo, (list,Variable)):
             return Variable(Empty(), coeff=base, expo = expo)
@@ -109,6 +117,7 @@ def calcByTerm(op, left,right):
                 temp = clearExpr(temp)
                 return clearExpr(temp)
             else:
+
                 for left_idx in range(0, len(left), 2):
                     left_op, left_element = None, None
                     if left_idx == 0:

@@ -15,7 +15,7 @@ class Parser(object):
     def __init__(self, scanner):
         self.tokens = scanner
         self.variables = {}
-    
+        self.domain = {}
     
     def insertValue(self):
         for name, symbol in self.variables.items():
@@ -28,31 +28,74 @@ class Parser(object):
                 sub_expr = sub_parser.parse()
                 sub_parser.insertValue()
                 symbol.insert(sub_expr.eval())
-
+    
+    def getInvalidDomain(self,v,invalid):
+        if isinstance(v, Variable):
+            if len(self.domain) == 0: 
+                self.domain[v] = invalid
+                return True
+            else:
+                for key in self.domain.keys():
+                    if not key == v.e:
+                        self.domain[v] = invalid
+                        return True
+        elif isinstance(v,list):
+            d = ''
+            for e in v:
+                d +=str(e)
+            if len(self.domain) == 0: 
+                self.domain[d] = invalid
+                return True
+            else:
+                for key in self.domain.keys():
+                    if not key == d:
+                        self.domain[d] = invalid
+                        return True
+        return False
+        
     def getDerivative(self, semi_expression):
         if self.variables:
+            semi_expression = semi_expression.eval()
+            derivatives = []
             for name, symbol in self.variables.items():
-                print(name, type(name))
-                print(symbol, type(symbol))
                 try:
-                    #semi_expression = self.parse().eval()
                     temp = []
                     if isinstance(semi_expression, list):
                         for value in semi_expression:
                             if isinstance(value, (int,float)):
                                 if len(temp) > 0: temp.pop()
+
                             elif value in ('+', '-', '*', '/'):
-                                temp.append(value)
+                                temp.append(value)                            
                             else:
-                                temp.append(value.getDerivative(symbol))
-                        print(f'd({semi_expression})/d{name} = ', temp)
+                                derivation = value.getDerivative(symbol)
+                                if isinstance(derivation, Variable):
+                                    if derivation.coeff == 0:
+                                        if len(temp) >0:temp.pop()
+                                    else:
+                                        if len(temp) == 1: temp.pop()
+                                        temp.append(derivation)
+                                
+                                elif derivation == 0:
+                                    if len(temp) > 0: temp.pop()
+                                else:
+                                    if len(temp) == 1: temp.pop()
+                                    temp.append(derivation)
+
+                        d = ''
+                        for element in temp:
+                            d += str(element)
+                        print(f'd({semi_expression})/d{name} = ', d)
+                        derivatives.append((name,d))
                     else:
                         if isinstance(semi_expression, (int,float)):
                             return NotImplemented
                         else:
                             print(f'd({semi_expression})/d{name} = ', semi_expression.getDerivative(symbol))
+                            derivatives.append((name,semi_expression.getDerivative(symbol)))
                 except:
                     return semi_expression
+            return derivatives
 
     def parse(self):
         try:
@@ -84,6 +127,10 @@ class Parser(object):
         if self.tokens.isType(['*', '/']):
             op = self.tokens.takeIt()
             f = self.parseFactor()
+            if op == '/': 
+                v = f.eval()
+                print('vvvv',v, type(v))
+                self.getInvalidDomain(v,'!=0')
             tt = self.parseTermTail()
             return TermTail(op, f, tt)
         return Empty()
@@ -125,6 +172,8 @@ class Parser(object):
             return Variable(angleF)
         elif self.tokens.isType(['log','ln']):
             log = self.parseLog()
+            v = log.e.eval()
+            self.getInvalidDomain(v,'> 0')
             return Variable(log)
         else:
             alpha = self.tokens.takeIt(self.tokens.isAlpha)
@@ -147,13 +196,25 @@ class Parser(object):
         elif angleF == 'cos':
             return Cos(e)
         elif angleF == 'tan':
-            return Tan(e)
+            tan = Tan(e)
+            v = tan.e.eval()
+            self.getInvalidDomain(v,'n*pi + pi/2 (n is real_number)')
+            return tan
         elif angleF == 'csc':
-            return Csc(e)
+            csc = Csc(e)
+            v = csc.e.eval()
+            self.getInvalidDomain(v,'n*pi (n is real_number)')
+            return csc
         elif angleF == 'sec':
-            return Sec(e)
+            sec = Sec(e)
+            v = sec.e.eval()
+            self.getInvalidDomain(v,'n*pi + pi/2(n is real_number)')
+            return sec
         elif angleF == 'cot':
-            return Cot(e)
+            cot = Cot(e)
+            v = cot.e.eval()
+            self.getInvalidDomain(v,'n*pi (n is real_number)')
+            return cot
          
     
     def parseLog(self):
