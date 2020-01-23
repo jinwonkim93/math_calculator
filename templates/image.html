@@ -24,8 +24,10 @@
     {{d}}<br>
     {% endfor %}
     <br>
-    {% for pic in pics %}  
-    <img src='/static/{{pic}}'/><br></br>
+     {% for pic in pics %} 
+     <div>
+     {{ pic|safe }}
+    </div>
     {% endfor %}
 </body>
 </html>

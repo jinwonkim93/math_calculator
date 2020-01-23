@@ -1,6 +1,6 @@
 from scanner import Scanner
 from parser import Parser
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt, mpld3
 import matplotlib as mpl
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
@@ -12,12 +12,14 @@ def draw2D(parser, tree, start,end, figure_num):
         parser.insertValue(value)
         ans = tree.getCalc()
         y.append(ans)
-    plt.figure(figure_num)
+    fig = plt.figure(figure_num)
     title = tree.eval()
     plt.title(title)
     plt.plot(x,y)
     plt.savefig(f'./static/{title}2d.png')
     plt.close()
+    #mpld3.save_html(fig,f'./static/temp22.html')
+    return mpld3.fig_to_html(fig,template_type ='simple')
     return f'{title}2d.png'
 
 def drawMulti(parser, tree, start, end, figure_num):
@@ -46,6 +48,7 @@ def drawMulti(parser, tree, start, end, figure_num):
     # vmin = np.nanmin(y), vmax = np.nanmax(y)
     plt.savefig(f'./static/{title}3d.png')
     plt.close()
+    return mpld3.fig_to_html(fig,template_type ='simple')
     return f'{title}3d.png'
     
 def list2str(list):
@@ -71,17 +74,16 @@ def test2(case):
     derivatives = parser.getDerivative(tree)
     print(derivatives)
 
-def test(case):
+def test(case, start_end):
     pics = []
     partial_derivatives = []
     parser = getTree(case)
     tree = parser.parse()
     canonicalization = tree.eval()
     variable_num = len(parser.variables)
-    start = -1
-    end = 1
+    start, end = start_end
+    print(start, end)
     figure_num = 1
-    
     if variable_num > 1:
         pics.append(drawMulti(parser,tree, start, end, figure_num))  
     elif variable_num == 1:
