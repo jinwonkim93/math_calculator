@@ -202,7 +202,7 @@ class Variable(object):
 
     def getDerivative(self, symbol):
         if isinstance(self.e, (int,float)): return NotImplemented
-        if isinstance(self.coeff, (Variable)):
+        if isinstance(self.coeff, Variable):
             coeff = self.coeff.getDerivative(symbol)
             if coeff != 0:
                 coeff = coeff * Variable(self.e,expo = self.expo)
@@ -219,7 +219,7 @@ class Variable(object):
             else:
                 return 0
         else:
-            return self.e.getDerivative(self.symbol)
+            return self.e.getDerivative(self,symbol)
 
 
 

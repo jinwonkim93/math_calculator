@@ -95,11 +95,9 @@ class Sin(object):
         elif variable.expo > 1:
             try:
                 coeff1 = self.e.getDerivative(symbol)
-                print(coeff1, '1')
                 coeff = variable.expo * coeff1 * variable.coeff
                 expo = variable.expo - 1
                 new_e = variable.e
-                print(Variable(Cos(self.e), coeff = Variable(new_e, coeff = coeff, expo = expo)))
                 return Variable(Cos(self.e), coeff = Variable(new_e, coeff = coeff, expo = expo))
             except Exception as e:
                 print(e)

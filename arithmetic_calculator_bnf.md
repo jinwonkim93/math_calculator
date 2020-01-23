@@ -22,11 +22,8 @@ Factor := '(' Expr ')' | [+-] Factor | number
 <AngleF> := [sin, cos, tan]'(' <Expr> ')'
 <Log> := [log]'('<Expr>')'
 
-현재 안되는거
-삼각함수 - has no attribute symbol
-로그 - has no attribute symgbol
-삼각함수 - 제곱 안됌
-정의역 치역
-1/x 가 안되고 있었음 ㄷㄷ
+그림 그리기
+점 갯수 한정
+plot 위치 지정
 +- |   */  |  -  | ^  | log sin  |  int
 ````
