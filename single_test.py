@@ -8,37 +8,53 @@ import io
 import base64
 mpl.use('Agg')
 
-#def isContinuous(parser,tree)
-def plot2D(parser, tree, start, end):
-    values = np.linspace(start * np.pi, end * np.pi, 1000)
-    x = []
-    y = []
-    domain = parser.getDomain()
-    #print('plot start')
-    #print(domain)
+def isContinuous(parser,tree, value):
     alpha = float(0.00000001)
     tolerance = float(0.0000001)
+    parser.insertValue(value)
+    mid = tree.getCalc() 
+    parser.insertValue(value-alpha)
+    left = tree.getCalc()
+    parser.insertValue(value+alpha)
+    right = tree.getCalc()
+    return abs(left-mid)<tolerance and abs(mid-right)<tolerance
+
+def isDerivative(parser, tree, value):
+    if isContinuous(parser, tree, value) != True: return False
+    result = True
+    derivatives = parser.getDerivative()
+    if derivatives is not None:
+        for d in derivatives:
+            semi_expr = str(d[1])
+            d_parser = getParser(semi_expr)
+            d_tree = d_parser.parse()
+            d_parser.insertValue(value)
+            try:
+                val = d_tree.getCalc()
+                print(val)
+                result = True
+            except:
+                result = False
+    return result
+
+
+def plot2D(parser, tree, start, end):
+    values = np.linspace(start, end , 1000)
+    x = []
+    y = []
+
     
     for value in values:
         result=True
         parser.insertValue(value)
         mid = tree.getCalc()        
-        parser.insertValue(value-alpha)
-        left = tree.getCalc()
-        parser.insertValue(value+alpha)
-        right = tree.getCalc()
-        print('left-mid ',abs(left-mid), abs(left-mid)<tolerance)
-        print('mid-right ', abs(mid-right), abs(mid-right)<tolerance)
-        if abs(left-mid)<tolerance and abs(mid-right)<tolerance:
+
+        if isContinuous(parser,tree, value):
             x.append(value)
             y.append(mid)
         else:
             x.append(np.nan)
             y.append(np.nan)
-        #if domain:
-            #if mid > 10: ans = np.nan
-            #elif mid < -10: ans = np.nan
-        #print(ans)
 
     x = np.asarray(x)
     y = np.asarray(y)
@@ -46,7 +62,7 @@ def plot2D(parser, tree, start, end):
 
 def plot3D(parser, tree, start, end):
     #x = np.arange(start,end, 0.1)
-    x = np.linspace(start * np.pi, end * np.pi, 300)
+    x = np.linspace(start, end, 300)
     y = []
     for value1 in x:
         parser.insertValue2(value1,'x')
@@ -133,7 +149,7 @@ def test(case, start_end):
     
     derivatives = parser.getDerivative(tree)
     domain = parser.getDomain()
-    
+    print(isDerivative(parser,tree,-1))
     if derivatives is not None:
         for d in derivatives:
             partial_derivatives.append(list2str(d))

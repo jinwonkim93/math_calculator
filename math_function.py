@@ -150,10 +150,7 @@ class Tan(object):
     
     def getCalc(self):
         try:
-            res = tan(self.e.getCalc())
-            #if res > 10: return np.nan
-            #elif res < -10: return np.nan
-            return res
+            return tan(self.e.getCalc())
         except ZeroDivisionError:
             return np.inf
     
@@ -189,10 +186,7 @@ class Csc(object):
     
     def getCalc(self):
         try:
-            res = 1/sin(self.e.getCalc())
-            if res > 10: return np.nan
-            elif res < -10: return np.nan
-            return res
+            return 1/sin(self.e.getCalc())
         except ZeroDivisionError:
             return np.inf
 
@@ -228,10 +222,7 @@ class Sec(object):
             return self
     def getCalc(self):
         try:
-            res = 1/cos(self.e.getCalc())
-            if res > 10: return np.nan
-            elif res < -10: return np.nan
-            return res
+            return 1/cos(self.e.getCalc())
         except ZeroDivisionError:
             return np.inf
 
@@ -266,10 +257,7 @@ class Cot(object):
             return self
     def getCalc(self):
         try:
-            res = 1/tan(self.e.getCalc())
-            if res > 10: return np.nan
-            elif res < -10: return np.nan
-            return res
+            return 1/tan(self.e.getCalc())
         except ZeroDivisionError:
             return np.inf
     def getDerivative(self, variable, symbol):
