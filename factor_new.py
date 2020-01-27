@@ -2,6 +2,7 @@
 from empty import Empty
 from expression import Expr
 import math
+from mathematical_constant import PI, E
 
 class Factor(object):
     def __init__(self, e, sign = Empty(), expo = Empty()):
@@ -12,6 +13,7 @@ class Factor(object):
 
     def eval(self):
         return -self.expo.eval(self.e.eval()) if self.sign is '-' else self.expo.eval(self.e.eval())
+
 
     def getCalc(self):
         return -self.expo.getCalc(self.e.getCalc()) if self.sign is '-' else self.expo.getCalc(self.e.getCalc())
@@ -256,8 +258,10 @@ class Constant(object):
     
     def eval(self):
         return self.value
+    
     def getCalc(self):
         return self.value
+    
     def __eq__(self,other):
         if isinstance(other, Constant):
             return True if self.value == other.value else False
@@ -270,6 +274,10 @@ class Constant(object):
         return -self.value
 
     def __str__(self):
+        if self.value == PI:
+            return 'pi'
+        elif self.value == E:
+            return 'e'
         return str(self.value)
     
     def __repr__(self):

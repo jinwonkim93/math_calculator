@@ -4,8 +4,9 @@ from mathematical_constant import greeks, E, PI
 
 class Scanner(object):
     def __init__(self, line):
+        line = line.replace(' ', '')
         self.tokens = re.findall(r'[-+]|[a-z|A-Z]+|[0-9]*\.?[0-9]+|[*+-/()^]', line) + ['EOL']
-        
+
     def peak(self):
         if len(self.tokens):
             return self.tokens[0]

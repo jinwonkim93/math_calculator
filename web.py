@@ -14,7 +14,7 @@ def calcExpr():
    if request.method == 'POST':
       expr = request.form['Expression']
       expr_range = request.form['Range']
-      if expr_range == '': expr_range = [-1,1]
+      if expr_range == '': expr_range = '-1,1'
       expr_range = list(map(int,expr_range.split(',')))
       pics, canonicalization, partial_derivatives, domain = test(expr,expr_range)
       return render_template('image.html',

@@ -1,27 +1,12 @@
-
-from node import Node
 from expression import Expr
 from empty import Empty
-from utils import lognNew, triangleFunction, isExpr
+from utils import lognNew, isExpr
 from factor_new import Variable, Constant
 from math import sin, cos, tan
+from mathematical_constant import PI
 import numpy as np
 
-class AngleFunction(Node):
-    def __init__(self, symbol, e):
-        super(__class__,self)
-        self.symbol = symbol
-        self.e = e
-    def eval(self):
-        self.e = self.e.eval()
-        return triangleFunction(self, self.e)
-    
-    def __str__(self):
-        return f'{str(self.symbol)}({str(self.e)})'
-    def __repr__(self):
-        return f'AngleFunction({repr(self.symbol)},{repr(self.e)})'
-
-class Log(Node):
+class Log(object):
     def __init__(self, symbol, e, name = 'log'):
         super(__class__,self)
         self.symbol = float(symbol)
@@ -34,7 +19,7 @@ class Log(Node):
         except ZeroDivisionError:
             return np.inf
         except ValueError:
-            return np.inf
+            return np.nan
         except TypeError:
             return self
     
@@ -44,7 +29,7 @@ class Log(Node):
         except ZeroDivisionError:
             return np.inf
         except ValueError:
-            return np.inf
+            return np.nan
     
     def getDerivative(self, variable, symbol):
         if isinstance(self.e, (int,float)): return NotImplemented
@@ -165,7 +150,10 @@ class Tan(object):
     
     def getCalc(self):
         try:
-            return tan(self.e.getCalc())
+            res = tan(self.e.getCalc())
+            #if res > 10: return np.nan
+            #elif res < -10: return np.nan
+            return res
         except ZeroDivisionError:
             return np.inf
     
@@ -201,7 +189,10 @@ class Csc(object):
     
     def getCalc(self):
         try:
-            return 1/sin(self.e.getCalc())
+            res = 1/sin(self.e.getCalc())
+            if res > 10: return np.nan
+            elif res < -10: return np.nan
+            return res
         except ZeroDivisionError:
             return np.inf
 
@@ -237,7 +228,10 @@ class Sec(object):
             return self
     def getCalc(self):
         try:
-            return 1/cos(self.e.getCalc())
+            res = 1/cos(self.e.getCalc())
+            if res > 10: return np.nan
+            elif res < -10: return np.nan
+            return res
         except ZeroDivisionError:
             return np.inf
 
@@ -272,7 +266,10 @@ class Cot(object):
             return self
     def getCalc(self):
         try:
-            return 1/tan(self.e.getCalc())
+            res = 1/tan(self.e.getCalc())
+            if res > 10: return np.nan
+            elif res < -10: return np.nan
+            return res
         except ZeroDivisionError:
             return np.inf
     def getDerivative(self, variable, symbol):

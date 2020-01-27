@@ -3,6 +3,7 @@ from factor_new import Variable, Constant, Symbol
 from mathematical_constant import *
 from empty import Empty
 from copy import deepcopy
+
 def logn(n, x = math.e):
     print(n/x)
     return 1 + logn(n/x, x) if n > (x-1) else 0
@@ -10,44 +11,6 @@ def logn(n, x = math.e):
 def lognNew(n, x = E):
     return math.log(n) / math.log(x)
 
-def triangleFunction(func, expr):
-    print(type(expr))
-    if func.symbol == 'sin':
-        if isinstance(expr, Constant):
-            return math.sin(expr.value)
-        elif isinstance(expr, float):
-            return Constant(math.sin(expr))
-        else:
-            return func
-    elif func.symbol == 'cos':
-        if isinstance(expr, Constant):
-            return math.cos(expr.value)
-        elif isinstance(expr, float):
-            return math.cos(expr)
-        else:
-            return func
-    elif func.symbol == 'tan':
-        if isinstance(expr, Constant):
-            return math.tan(expr.value)
-        elif isinstance(expr, float):
-            return math.tan(expr)
-        else:
-            return func
-"""
-def pow(base,expo):
-    if isinstance(base, Variable):
-        new_expo = Empty()
-        if isinstance(expo, (list, Variable)):
-            new_expo = expo  
-        elif isinstance(expo, Constant):
-            new_expo = base.expo * expo.eval()
-        return Variable(base.e, coeff = base.coeff, expo = new_expo)
-    elif isinstance(base, Constant):
-        if isinstance(expo, (list, Variable)):
-            return Constant(base.eval(), expo = base.expo)
-        elif isinstance(expo, Constant):
-            return Constant(base.eval() ** expo.eval())
-"""
 def pow(base,expo):
     if isinstance(base, Variable):
         if isinstance(expo, (list,Variable)):
@@ -99,77 +62,80 @@ def calcByTerm(op, left,right):
     no_same_term = True
     #print('step 1 = ', left, op, right)
     #if left == (x+1)
-    if isinstance(left, list):
-        #if right == (x+10)
-        if isinstance(right, list):
-            if op in ('+', '-'):
-                right_temp = []
-                for element in right:
-                    if isOperator(element):
-                        if op == '-':
-                            if element == '+':
-                                element = '-'
-                            else:
-                                element = '+'
-                    right_temp.append(element)
-                right_temp.insert(0,op)
-                temp = left + right_temp
-                temp = clearExpr(temp)
-                return clearExpr(temp)
-            else:
+    try:
+        if isinstance(left, list):
+            #if right == (x+10)
+            if isinstance(right, list):
+                if op in ('+', '-'):
+                    right_temp = []
+                    for element in right:
+                        if isOperator(element):
+                            if op == '-':
+                                if element == '+':
+                                    element = '-'
+                                else:
+                                    element = '+'
+                        right_temp.append(element)
+                    right_temp.insert(0,op)
+                    temp = left + right_temp
+                    temp = clearExpr(temp)
+                    return clearExpr(temp)
+                else:
 
-                for left_idx in range(0, len(left), 2):
-                    left_op, left_element = None, None
-                    if left_idx == 0:
-                        left_element = left[left_idx]
-                    
-                    else:
-                        left_op = left[left_idx-1]
-                        left_element = left[left_idx]
-                    
-                    if left_op == '-':
-                        left_element = -left_element
-                    
-                    for right_idx in range(0,len(right),2):
-                        right_op, right_element = None, None
-                        if right_idx == 0:
-                            right_element = right[right_idx]
-                        else:
-                            right_op = right[right_idx-1]
-                            right_element = right[right_idx]
+                    for left_idx in range(0, len(left), 2):
+                        left_op, left_element = None, None
+                        if left_idx == 0:
+                            left_element = left[left_idx]
                         
-                        if right_op == '-':
-                            right_element = -right_element
-                        res = calc(op,left_element,right_element)
-                        res_list = ['+',res] if len(temp) > 0 else [res]
-                        temp.extend(res_list)
-                temp = clearExpr(temp)      
-                return clearExpr(temp)
-        else:
-            if op in ('+', '-'):
-                temp = left[:]
-                temp.extend([op,right])
-                temp = clearExpr(temp)
-                return clearExpr(temp)
-            # * /
-            else:
-                for idx in range(0,len(left),2):
-                    left_op, element = None, None
-                    if idx == 0:
-                        element = left[idx]
-                        temp.append(calc(op,element,right))
-                    else:
-                        left_op = left[idx-1]
-                        element = left[idx]
+                        else:
+                            left_op = left[left_idx-1]
+                            left_element = left[left_idx]
+                        
                         if left_op == '-':
-                            element = -element
-                        res = calc(op,element,right)
-                        res_list = ['+',res]
-                        temp.extend(res_list)                    
-                temp = clearExpr(temp)
-                return clearExpr(temp)
-    else:
-        return calc(op, left, right)
+                            left_element = -left_element
+                        
+                        for right_idx in range(0,len(right),2):
+                            right_op, right_element = None, None
+                            if right_idx == 0:
+                                right_element = right[right_idx]
+                            else:
+                                right_op = right[right_idx-1]
+                                right_element = right[right_idx]
+                            
+                            if right_op == '-':
+                                right_element = -right_element
+                            res = calc(op,left_element,right_element)
+                            res_list = ['+',res] if len(temp) > 0 else [res]
+                            temp.extend(res_list)
+                    temp = clearExpr(temp)      
+                    return clearExpr(temp)
+            else:
+                if op in ('+', '-'):
+                    temp = left[:]
+                    temp.extend([op,right])
+                    temp = clearExpr(temp)
+                    return clearExpr(temp)
+                # * /
+                else:
+                    for idx in range(0,len(left),2):
+                        left_op, element = None, None
+                        if idx == 0:
+                            element = left[idx]
+                            temp.append(calc(op,element,right))
+                        else:
+                            left_op = left[idx-1]
+                            element = left[idx]
+                            if left_op == '-':
+                                element = -element
+                            res = calc(op,element,right)
+                            res_list = ['+',res]
+                            temp.extend(res_list)                    
+                    temp = clearExpr(temp)
+                    return clearExpr(temp)
+        else:
+            return calc(op, left, right)
+    except ZeroDivisionError:
+        raise ZeroDivisionError
 
 def calc(op, left, right):
     if op is '+':

@@ -21,7 +21,6 @@ class Parser(object):
         if self.tokens.isDigit(value):
             self.variables[name].insert(value)
     def insertValue(self, value):
-        
         for name, symbol in self.variables.items():
             #value = input(f'what is value of {name}: ')
             if self.tokens.isDigit(value):
@@ -43,6 +42,7 @@ class Parser(object):
                     if not key == v.e:
                         self.domain[v] = invalid
                         return True
+        
         elif isinstance(v,list):
             d = ''
             for e in v:
@@ -56,6 +56,7 @@ class Parser(object):
                         self.domain[d] = invalid
                         return True
         return False
+    
     def expr2str(self,expr):
         d = ''
         for value in expr:
@@ -105,7 +106,12 @@ class Parser(object):
                 except:
                     return semi_expression
             return derivatives
-
+    
+    def getDomain(self):
+        return self.domain
+    def getVariables(self):
+        return self.variables
+    
     def parse(self):
         try:
             e = self.parseExpr()

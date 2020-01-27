@@ -1,7 +1,6 @@
-from node import Node
 from utils import calcByTerm
-
-class TermTail(Node):
+import numpy as np
+class TermTail(object):
     def __init__(self, op, f,  tt):
         super(__class__,self)
         self.op = op
@@ -9,13 +8,19 @@ class TermTail(Node):
         self.tt = tt
     
     def eval(self, left):
-        eval_factor = self.f.eval()
-        left = calcByTerm(self.op, left,eval_factor)
-        return self.tt.eval(left)
+        try:
+            eval_factor = self.f.eval()
+            left = calcByTerm(self.op, left,eval_factor)
+            return self.tt.eval(left)
+        except ZeroDivisionError:
+            return np.inf
     def getCalc(self, left):
-        eval_factor = self.f.getCalc()
-        left = calcByTerm(self.op, left,eval_factor)
-        return self.tt.getCalc(left)
+        try:
+            eval_factor = self.f.getCalc()
+            left = calcByTerm(self.op, left,eval_factor)
+            return self.tt.getCalc(left)
+        except ZeroDivisionError:
+            return np.inf
 
     def __str__(self):
         return  f'{str(self.op)}{str(self.f)}{str(self.tt)}'
