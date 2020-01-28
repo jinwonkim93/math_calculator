@@ -20,30 +20,45 @@ class Factor(object):
 
     def __str__(self):
         return f'({self.sign}{self.e}{self.expo})' if isinstance(self.e, Expr) else f'{self.sign}{self.e}{self.expo}'
+        #return f'{self.sign}{self.e}{self.expo}'
     def __repr__(self):
         return f'Factor({repr(self.sign)},{repr(self.e)},{repr(self.expo)})'
 
 
 from copy import deepcopy
 class Variable(object):
-    def __init__(self, e, coeff = 1, expo = 1):
+    def __init__(self, e, coeff = 1.0, expo = 1.0):
         self.coeff = coeff
         self.e = e
         self.expo = expo
     
-    
+    def checkVariable(self, myExpr, other):
+        if myExpr.e == other.e and myExpr.expo == other.expo:
+            if isinstance(myExpr.coeff, (int,float)) and isinstance(other.coeff, (int,float)):
+                return True
+            elif isinstance(myExpr.coeff, Variable) and isinstance(other.coeff, Variable):
+                 return self.checkVariable(myExpr.coeff, other.coeff)
+            else:
+                return False
+        return False
+
+            
     def __add__(self, other):
         if isinstance(other, Variable):
-            if self.e == other.e and self.expo == other.expo:
+            print(self, other)
+            if self.checkVariable(self,other):
                 coeff = self.coeff + other.coeff
                 return Variable(self.e, coeff = coeff, expo = self.expo) if coeff != 0 else 0
+            if isinstance(self.expo, Variable):
+                return [other, "+", self]
             if other.expo > self.expo:
                 return [other, "+", self]
+            
         return [self,"+", other]
     
     def __radd__(self, other):
         if isinstance(other, Variable):
-            if self.e == other.e and self.expo == other.expo:
+            if self.checkVariable(self,other):
                 coeff = other.coeff + self.coeff
                 return Variable(self.e, coeff = coeff, expo = self.expo) if coeff != 0 else 0
             if other.expo > self.expo:
@@ -52,7 +67,7 @@ class Variable(object):
     
     def __sub__(self,other):
         if isinstance(other, Variable):
-            if self.e == other.e and self.expo == other.expo:
+            if self.checkVariable(self,other):
                 coeff = self.coeff - other.coeff
                 return Variable(self.e, coeff = coeff, expo = self.expo) if coeff != 0 else 0
             if other.expo > self.expo:
@@ -61,7 +76,7 @@ class Variable(object):
 
     def __rsub__(self,other):
         if isinstance(other, Variable):
-            if self.e.symbol == other.e.symbol and self.expo == other.expo:
+            if self.checkVariable(self,other):
                 coeff = other.coeff - self.coeff
                 return Variable(self.e, coeff = coeff, expo = self.expo) if coeff != 0 else 0
             if other.expo > self.expo:
@@ -82,11 +97,10 @@ class Variable(object):
                     return Variable(self.e, coeff = coeff, expo = self.expo)
                 else:
                     coeff = other.coeff * self
-                    return Variable(other.e, coeff = coeff, expo = self.expo)
-            else:
-                return [self, "*", other]
-        coeff = self.coeff * other
-        return Variable(self.e, coeff = coeff, expo = self.expo) if coeff is not 0 else 0
+                    return Variable(other.e, coeff = coeff, expo = other.expo)
+        else:
+            coeff = self.coeff * other
+            return Variable(self.e, coeff = coeff, expo = self.expo) if coeff is not 0 else 0
     
     def __rmul__(self, other):
         if isinstance(other, Variable):
@@ -108,7 +122,7 @@ class Variable(object):
             if self.e == other.e:
                 coeff = self.coeff / other.coeff
                 expo = self.expo - other.expo
-                return Variable(self.e, coeff = coeff, expo = expo)
+                return Variable(self.e, coeff = coeff, expo = expo) if expo != 0 else coeff
             else:
                 return [self, "/", other]
         elif isinstance(other, Constant):
@@ -121,6 +135,7 @@ class Variable(object):
     def __rtruediv__(self, other):
         value =  None
         if isinstance(other, Variable):
+            if isinstance(self.e, Empty) and isinstance(other.e, Empty): return [other, "/", self]
             if self.e == other.e:
                 coeff = other.coeff / self.coeff
                 expo = other.expo - self.expo
@@ -130,10 +145,19 @@ class Variable(object):
 
         elif isinstance(other, Constant):
             value = other.eval()
-        else:
+            coeff = value/self.coeff
+            return Variable(self.e, coeff = coeff, expo = -self.expo).eval()
+        elif isinstance(other, (int,float)):
+            #print(other, type(other))
+            #print(self.coeff, type(self.coeff))
             value = other
-        coeff = value/self.coeff
-        return Variable(self.e, coeff = coeff, expo = -self.expo).eval()
+            if isinstance(self.e, Empty):
+                coeff =  [other, "/", self]
+            else:
+                coeff = value/self.coeff
+            return Variable(self.e, coeff = coeff, expo = -self.expo)
+        else:
+            raise NotImplemented
 
     def __neg__(self):
         return Variable(self.e,coeff= -self.coeff, expo = self.expo) if self.coeff is not 0 else 0
@@ -142,18 +166,33 @@ class Variable(object):
         res = deepcopy(self)
         res.expo = other
         return res 
-        
+    def list2str(self,expr):
+        try:
+            d = ''
+            for element in expr:
+                d += self.list2str(element)
+            return d
+        except:
+            return str(expr)
+
     def __repr__(self):
         if self.coeff == 0:
             return '0'
         
         elif isinstance(self.e, Empty):
+            if isinstance(self.coeff, list):
+                d = ''
+                for element in self.coeff:
+                    d += self.list2str(element)
+                return f'({d})^{self.expo}'
             return f'{self.coeff}' if self.expo == 1 else f'{self.coeff}^{self.expo}'
         
         elif isinstance(self.expo, list):
             return f'{self.coeff}*{self.e}^({self.expo})' if self.coeff != 1 else f'{self.e}^({self.expo})'
+        
         elif isinstance(self.expo, Variable):
             return f'{self.coeff}*{self.e}^{self.expo}' if self.coeff != 1 else f'{self.e}^{self.expo}'
+        
         elif self.coeff != 1:
             if self.expo == 0:
                 return f'{self.coeff}'
@@ -190,7 +229,7 @@ class Variable(object):
             return res
     
     def eval(self):
-
+        res = None
         if isinstance(self.e, float):
             return self.e
         else:
@@ -282,3 +321,4 @@ class Constant(object):
     
     def __repr__(self):
         return f'{self.value}' if isinstance(self.expo, Empty) else f'{self.value}^{self.expo}'
+

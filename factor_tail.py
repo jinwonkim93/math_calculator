@@ -14,8 +14,8 @@ class FactorTail(Node):
         eval_factor = self.expo.eval(self.f.eval())
         try:
             return pow(left,eval_factor)
-        except:
-            raise Exception("OverflowError: Numerical result out of range")
+        except Exception as e:
+            raise e
     def getCalc(self,left):
         eval_factor = self.expo.getCalc(self.f.getCalc())
         try:

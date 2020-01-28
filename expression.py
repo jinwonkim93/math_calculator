@@ -1,7 +1,5 @@
 from node import Node
 from empty import Empty
-
-
 class Expr(Node):
     def __init__(self, t, et):
         super(__class__,self)

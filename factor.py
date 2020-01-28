@@ -17,6 +17,7 @@ class Factor(Node):
             return self.expo.eval(self.e.eval()) if isinstance(self.e, (Expr, Variable, Factor)) else self.expo.eval(float(self.e))
     """
     def eval(self):
+        print('factor = ', self.expo.eval(self.e.eval()))
         return -self.expo.eval(self.e.eval()) if self.sign is '-' else self.expo.eval(self.e.eval())
 
     def __str__(self):

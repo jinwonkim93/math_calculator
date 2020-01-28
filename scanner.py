@@ -5,6 +5,7 @@ from mathematical_constant import greeks, E, PI
 class Scanner(object):
     def __init__(self, line):
         line = line.replace(' ', '')
+        print(line, 'asdff')
         self.tokens = re.findall(r'[-+]|[a-z|A-Z]+|[0-9]*\.?[0-9]+|[*+-/()^]', line) + ['EOL']
 
     def peak(self):
@@ -23,7 +24,7 @@ class Scanner(object):
         if tokenType is None or self.isType(tokenType):
             return self.shift()
         else:
-            raise Exception("Expected: %s, Actual: %s" % (tokenType.__name__, self.peak()))
+            raise Exception("Expected: %s, Actual: %s" % (tokenType, self.peak()))
         
     def isType(self, tokenType):
         if callable(tokenType):

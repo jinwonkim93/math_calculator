@@ -14,3 +14,9 @@ class Error(object):
         return self.error
     def getDerivative(self, symbol):
         return self.error
+
+class NonDerivableError(object):
+    def __init__(self,value):
+        self.value = value
+    def __str__(self):
+        return f'{self.value} is not derivable'

@@ -5,7 +5,7 @@ from term_tail import TermTail
 from factor_new import Factor, Variable, Constant, Symbol
 from math_function import Log,  Sin, Cos, Tan, Sec, Csc, Cot
 from factor_tail import FactorTail
-from error import Error
+from error import Error, NonDerivableError
 from empty import Empty
 from mathematical_constant import *
 
@@ -95,15 +95,14 @@ class Parser(object):
                         d = ''
                         for element in temp:
                             d += str(element)
-                        print(f'd({self.expr2str(semi_expression)})/d{name} = ', d)
                         derivatives.append([f'd({self.expr2str(semi_expression)})/d{name} = ',d])
                     else:
                         if isinstance(semi_expression, (int,float)):
-                            return NotImplemented
+                            return NonDerivableError(semi_expression)
                         else:
-                            print(f'd({semi_expression})/d{name} = ', semi_expression.getDerivative(symbol))
                             derivatives.append([f'd({semi_expression})/d{name} = ',semi_expression.getDerivative(symbol)])
-                except:
+                except Exception as e:
+                    raise e
                     return semi_expression
             return derivatives
     
@@ -113,13 +112,16 @@ class Parser(object):
         return self.variables
     
     def parse(self):
-        try:
+        """try:
             e = self.parseExpr()
             self.tokens.takeIt(['EOL'])    
             return e
         except Exception as e:
-            return Error(e)
-    
+            print(e)
+            return Error(e)"""
+        e = self.parseExpr()
+        self.tokens.takeIt(['EOL'])    
+        return e
     def parseExpr(self):
         t = self.parseTerm()
         et = self.parseExprTail()
@@ -236,6 +238,8 @@ class Parser(object):
         logarithm = E
         if self.tokens.isType(self.tokens.isDigit):
             logarithm = self.tokens.takeIt()
+        elif self.tokens.isType(['-']):
+            raise Exception("invalid_log_term")
         self.tokens.takeIt()
         e = self.parseExpr()
         self.tokens.takeIt()         

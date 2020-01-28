@@ -15,27 +15,31 @@ def pow(base,expo):
     if isinstance(base, Variable):
         if isinstance(expo, (list,Variable)):
             return Variable(base.e, coeff = base.coeff, expo = expo)
-        elif isinstance(base.e, Empty):
+        elif isinstance(base.e, Empty) and isinstance(base.coeff, (int,float)):
             return base.coeff**expo
         elif isinstance(base.e, float):
             return base.e**expo
         else:
             return Variable(base.e, coeff= base.coeff, expo= base.expo*expo)
+    
     elif isinstance(base,list):
         if isinstance(expo, (int,float)):
             right = deepcopy(base)
             left = deepcopy(base)
-            print(left)
+            if expo <1:
+                return Variable(Empty(), coeff = base, expo = expo)
+                    
             while (expo > 1):
                 expo -= 1
                 left = calcByTerm('*',left,right)
-                print(left)
-            return Variable(Empty(), coeff=left)
-    else:
-        if isinstance(expo, (list,Variable)):
+            return left
+        
+        elif isinstance(expo, (list,Variable)):
             return Variable(Empty(), coeff=base, expo = expo)
-        else:
-            return base**expo
+    else:
+        if isinstance(expo, Variable):
+            return Variable(Empty(),coeff = base, expo = expo)
+        return base**expo
         
 def isOperator(op):
     if op in ('+','-','/','*'):return True
@@ -48,6 +52,7 @@ def checkTerm(left,right):
         else:
             if isinstance(left.e, Symbol):
                 if left.e == right.e and left.expo == right.expo:
+                    if type(left.coeff) == type(right.coeff):
                         return True
             else:
                 if left.e == right.e:
@@ -57,11 +62,31 @@ def checkTerm(left,right):
     else:
         return False
 
+def checkTerm2(myExpr,other):
+    if isinstance(myExpr, Variable) and isinstance(other, Variable):
+        if myExpr.e == other.e and myExpr.expo == other.expo:
+            if isinstance(myExpr.coeff, (int,float)) and isinstance(other.coeff, (int,float)):
+                return True
+            elif isinstance(myExpr.coeff, Variable) and isinstance(other.coeff, Variable):
+                    return checkTerm2(myExpr.coeff, other.coeff)
+            else:
+                return False
+        return False
+    elif isinstance(myExpr, (int,float)) and isinstance(other, (int, float)):
+        return True
+    else:
+        return False
+    
+    
+
+
 def calcByTerm(op, left,right):
     temp = []
     no_same_term = True
-    #print('step 1 = ', left, op, right)
+    print('step 1 = ', left, op, right)
+    print('ste 2 = ', type(left), op, type(right))
     #if left == (x+1)
+    
     try:
         if isinstance(left, list):
             #if right == (x+10)
@@ -111,8 +136,12 @@ def calcByTerm(op, left,right):
                     return clearExpr(temp)
             else:
                 if op in ('+', '-'):
-                    temp = left[:]
-                    temp.extend([op,right])
+                    temp.extend(left)
+                    if op is '-':
+                        right = -right
+                        temp.extend(['+',right])
+                    else:
+                        temp.extend([op,right])
                     temp = clearExpr(temp)
                     return clearExpr(temp)
                 # * /
@@ -129,10 +158,55 @@ def calcByTerm(op, left,right):
                                 element = -element
                             res = calc(op,element,right)
                             res_list = ['+',res]
-                            temp.extend(res_list)                    
+                            temp.extend(res_list)
                     temp = clearExpr(temp)
                     return clearExpr(temp)
         else:
+            if isinstance(right, list):
+                right = clearExpr(right)
+                if op in ('+', '-'):
+                    print(left,right,'hahahah')
+                    temp.append(left)
+                    
+                    
+                    temp.append(op)
+                    for idx in range(0,len(right),2):    
+                        
+                        if idx == 0:
+                            right_element = right[idx]
+                            if op is '-':
+                                right_element = -right_element
+                            temp.append(right_element)
+                        else:
+                            right_op = right[idx-1]
+                            right_element = right[idx]
+
+                            if op is '-':
+                                if op == right_op:
+                                    right_op = '+'
+                                else:
+                                    right_op = '-'
+                            temp.extend([right_op,right_element])
+                    temp = clearExpr(temp)
+                    return clearExpr(temp)
+                # * /
+                else:
+                    for idx in range(0,len(right),2):
+                        left_op, element = None, None
+                        if idx == 0:
+                            element = right[idx]
+                            temp.append(calc(op,left,element))
+                        else:
+                            left_op = right[idx-1]
+                            element = right[idx]
+                            if left_op == '-':
+                                element = -element
+                            res = calc(op,left,element)
+                            res_list = ['+',res]
+                            temp.extend(res_list)
+                    temp = clearExpr(temp)
+                    return clearExpr(temp)
+
             return calc(op, left, right)
     except ZeroDivisionError:
         raise ZeroDivisionError
@@ -173,15 +247,13 @@ def clearExpr(left):
                     no_same_term = True
                     temp = []
                     for variable_idx in range(0,len(variable_list),2):
-                        
                         if variable_idx == 0:
                             right_op = "+"
                             right = variable_list[variable_idx]
                         else:
                             right_op = variable_list[variable_idx-1]
                             right =  variable_list[variable_idx]
-                        
-                        if checkTerm(element,right):
+                        if checkTerm2(element,right):
                             if op == '-':
                                 element = -element
                                 op = '+'
@@ -190,20 +262,25 @@ def clearExpr(left):
                                 right_op = '+'
                             variable_res = calc(op,element, right)
                             no_same_term = False
-                            if variable_res == 0: 
+                            if variable_res == 0:
+                                if variable_idx == 0:
+                                    variable_list.pop(0)
                                 temp.extend(variable_list[variable_idx+1:])
                                 break
                             else:
+                                if variable_idx == 0:
+                                    variable_list.pop(0)
                                 res_list = ['+',variable_res] if len(temp) > 0 else [variable_res]
                                 temp.extend(res_list)
                                 temp.extend(variable_list[variable_idx+1:])
                                 break
                         
                         temp.extend([right_op,right]) if variable_idx != 0 else temp.append(right)
-                    
+
                     if no_same_term: temp.extend([op,element])
                     
-                    variable_list = temp
+                    variable_list = deepcopy(temp)
+    
     if len(variable_list) != 0:
         if res != 0:
             variable_list.extend(['+',res])
