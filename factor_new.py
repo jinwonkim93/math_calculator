@@ -98,6 +98,10 @@ class Variable(object):
                 else:
                     coeff = other.coeff * self
                     return Variable(other.e, coeff = coeff, expo = other.expo)
+            else:
+                coeff = other.coeff * self
+                return Variable(other.e, coeff = coeff, expo = other.expo)
+
         else:
             coeff = self.coeff * other
             return Variable(self.e, coeff = coeff, expo = self.expo) if coeff is not 0 else 0
@@ -242,14 +246,18 @@ class Variable(object):
 
 
     def getDerivative(self, symbol):
-        if isinstance(self.e, (int,float)): return NotImplemented
+        if isinstance(self.e, (int,float)): return 0
         if isinstance(self.coeff, Variable):
             coeff = self.coeff.getDerivative(symbol)
             if coeff != 0:
                 coeff = coeff * Variable(self.e,expo = self.expo)
                 return coeff
         if isinstance(self.e, Empty):
-            return 0
+            if self.coeff == E:
+                expo = self.expo.getDerivative(symbol)
+                return Variable(Empty(),coeff = self.coeff, expo = expo)
+            else:
+                return 0
         elif isinstance(self.e, Symbol):
             if self.e == symbol:
                 if self.expo != 1:

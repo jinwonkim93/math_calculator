@@ -20,6 +20,7 @@ class Parser(object):
     def insertValue2(self, value, name):
         if self.tokens.isDigit(value):
             self.variables[name].insert(value)
+    
     def insertValue(self, value):
         for name, symbol in self.variables.items():
             #value = input(f'what is value of {name}: ')
@@ -58,16 +59,21 @@ class Parser(object):
         return False
     
     def expr2str(self,expr):
-        d = ''
-        for value in expr:
-            d += str(value)
-        return d
+        try:
+            d = ''
+            for value in expr:
+                d += str(value)
+            return d
+        except:
+            return str(expr)
 
     def getDerivative(self, semi_expression):
         if self.variables:
             semi_expression = semi_expression.eval()
             derivatives = []
+            print(self.getVariables())
             for name, symbol in self.variables.items():
+                print(name, symbol)
                 try:
                     temp = []
                     if isinstance(semi_expression, list):
@@ -98,7 +104,7 @@ class Parser(object):
                         derivatives.append([f'd({self.expr2str(semi_expression)})/d{name} = ',d])
                     else:
                         if isinstance(semi_expression, (int,float)):
-                            return NonDerivableError(semi_expression)
+                            derivatives.append([f'd({self.expr2str(semi_expression)})/d{name} = ', 0])
                         else:
                             derivatives.append([f'd({semi_expression})/d{name} = ',semi_expression.getDerivative(symbol)])
                 except Exception as e:

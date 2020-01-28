@@ -143,6 +143,7 @@ def calcByTerm(op, left,right):
                     else:
                         temp.extend([op,right])
                     temp = clearExpr(temp)
+                    print(temp)
                     return clearExpr(temp)
                 # * /
                 else:
@@ -162,6 +163,7 @@ def calcByTerm(op, left,right):
                     temp = clearExpr(temp)
                     return clearExpr(temp)
         else:
+            if isinstance(left, Variable): left = left.eval()
             if isinstance(right, list):
                 right = clearExpr(right)
                 if op in ('+', '-'):
@@ -206,8 +208,9 @@ def calcByTerm(op, left,right):
                             temp.extend(res_list)
                     temp = clearExpr(temp)
                     return clearExpr(temp)
-
-            return calc(op, left, right)
+            result = calc(op, left, right)
+            if isinstance(result, Variable): result = result.eval()
+            return result
     except ZeroDivisionError:
         raise ZeroDivisionError
 
@@ -268,8 +271,8 @@ def clearExpr(left):
                                 temp.extend(variable_list[variable_idx+1:])
                                 break
                             else:
-                                if variable_idx == 0:
-                                    variable_list.pop(0)
+                                #if variable_idx == 0:
+                                    #variable_list.pop(0)
                                 res_list = ['+',variable_res] if len(temp) > 0 else [variable_res]
                                 temp.extend(res_list)
                                 temp.extend(variable_list[variable_idx+1:])

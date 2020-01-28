@@ -38,7 +38,9 @@ class Log(object):
             coeff = variable.coeff * self.e.getDerivative(symbol)
             print(e_val, type(e_val))
             if isinstance(e_val, Variable):
-                return coeff / self.e.eval()
+                coeff = coeff/e_val
+                return Variable(self,coeff = coeff, expo = variable.expo)
+                # return coeff / e_val
             else:
                 return [coeff, '/', e_val]
         elif variable.expo > 1:
@@ -46,6 +48,12 @@ class Log(object):
             return Variable(self,coeff = coeff, expo=variable.expo-1) / self.e.eval()
     
     def convert(self):
+        e_val = self.e.eval()
+        if isinstance(e_val, Variable):
+            self.e = "집가서하자"
+            coeff = e_eval.expo
+
+            return Variable(,)
         return self
     
     def __str__(self):
@@ -260,6 +268,7 @@ class Cot(object):
             return 1/tan(self.e.getCalc())
         except ZeroDivisionError:
             return np.inf
+    
     def getDerivative(self, variable, symbol):
         if isinstance(self.e, (int,float)): return NotImplemented
         if variable.expo == 1:
@@ -270,6 +279,7 @@ class Cot(object):
             expo = variable.expo - 1
             variable_coeff = Variable(Cot(self.e), coeff = -coeff, expo = expo)
             return Variable(Csc(self.e), coeff = variable_coeff,expo = 2)
+    
     def convert(self):
         return Tan(self.e)
     def __eq__(self,other):

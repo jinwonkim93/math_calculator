@@ -12,16 +12,17 @@ mpl.use('Agg')
 
 def isContinuous(parser,tree, value):
     alpha = float(0.00000001)
-    tolerance = float(0.0000001)
+    tolerance = float(0.00005)
     parser.insertValue(value)
     mid = tree.getCalc() 
     parser.insertValue(value-alpha)
     left = tree.getCalc()
     parser.insertValue(value+alpha)
     right = tree.getCalc()
-    print('mid', mid, type(mid))
-    print('left', left, type(left))
-    print('right', right, type(right))
+    #print('mid', mid, type(mid))
+    #print('left', left, type(left))
+    #print('right', right, type(right))
+    #print( abs(left-mid)<tolerance and abs(mid-right)<tolerance)
     return abs(left-mid)<tolerance and abs(mid-right)<tolerance
 
 def isDerivative(parser, tree, value):
@@ -74,7 +75,7 @@ def plot3D(parser, tree, start, end):
         for value2 in x:
             parser.insertValue2(value2,'y')
             ans = tree.getCalc()
-            print(ans)
+            #print(ans)
             temp.append(ans)
         y.append(temp)
     y = np.asarray(y)
@@ -87,6 +88,7 @@ def draw2D(data, figure_num, title):
     ax.set_xlabel('x')
     ax.set_ylabel('y',rotation=0)
     vmin = np.nanmin(y); vmax = np.nanmax(y)
+    #print(y)
     plt.ylim(vmin, vmax)
     plt.title(title)
     plt.plot(x,y)
@@ -104,6 +106,7 @@ def drawMulti(data, figure_num, title):
     ax.set_zlabel('z')
     ax.contour3D(x, y, z, 50)
     vmin = np.nanmin(y); vmax = np.nanmax(y)
+    #print(y)
     plt.ylim(vmin, vmax)
     img = io.BytesIO()
     plt.savefig(img, format='png')
@@ -116,7 +119,9 @@ def list2str(expr):
     try:
         d = ''
         for element in expr:
+            print(element, type(element))
             d += str(element)
+        print(d)
         return d
     except Exception as e:
         return str(expr)
@@ -143,7 +148,10 @@ def test(case, start_end):
     tree = parser.parse()
     if isinstance(tree, Error):
         return [], tree, [], []
-    canonicalization = list2str(tree.eval())
+    canonicalization = tree.eval()
+    print(canonicalization)
+    canonicalization = list2str(canonicalization)
+    print(canonicalization)
     canonicalization = list2str(getParser(canonicalization).parse().eval())
     variable_num = len(parser.getVariables())
     domain = parser.getDomain()
@@ -160,22 +168,23 @@ def test(case, start_end):
         #print(isDerivative(parser,tree,-1))
 
     derivatives = parser.getDerivative(tree)
+    print(derivatives)
     domain = parser.getDomain()
-    if not isinstance(derivatives,NonDerivableError):
+    #if not isinstance(derivatives,NonDerivableError):
+    if derivatives is not None:
         for d in derivatives:
             print(d, type(d))
             d[1] = list2str(d[1])
             
             figure_num += 1
             semi_expr = list2str(d[1])
-            #print(d)
+            partial_derivatives.append(list2str(d))
             d_parser = getParser(semi_expr)
             d_tree = d_parser.parse()
-            d_title = list2str(d_tree.eval())
-            d[1] = d_title
-            partial_derivatives.append(list2str(d))
+            d_title = semi_expr
+            print(partial_derivatives)
+            if len(d_parser.getVariables()) == 0: continue
             d_data = plot2D(d_parser, d_tree, start, end)
-            if len(d_parser.getVariables()) == 0: break
             pics.append(draw2D(d_data, figure_num, d_title))
     
     return pics, canonicalization, partial_derivatives, domain
