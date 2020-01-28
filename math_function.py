@@ -48,12 +48,12 @@ class Log(object):
             return Variable(self,coeff = coeff, expo=variable.expo-1) / self.e.eval()
     
     def convert(self):
-        e_val = self.e.eval()
+        """ e_val = self.e.eval()
         if isinstance(e_val, Variable):
             self.e = "집가서하자"
             coeff = e_eval.expo
 
-            return Variable(,)
+            return Variable(,)"""
         return self
     
     def __str__(self):
