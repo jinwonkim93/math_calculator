@@ -1,11 +1,11 @@
 import re
 from collections.abc import Iterable
-from mathematical_constant import greeks, E, PI
+from mathematical_constant import greeks
 
 class Scanner(object):
     def __init__(self, line):
         line = line.replace(' ', '')
-        print(line, 'asdff')
+        print('scanner = ',line)
         self.tokens = re.findall(r'[-+]|[a-z|A-Z]+|[0-9]*\.?[0-9]+|[*+-/()^]', line) + ['EOL']
 
     def peak(self):
@@ -37,7 +37,7 @@ class Scanner(object):
             return False
     
     def isDigit(self, value):
-        if value in greeks: return True
+        if value in greeks: return False
         try:
             float(value)
             return True
@@ -45,10 +45,8 @@ class Scanner(object):
             return False
         
     def isAlpha(self, value):
-        if value in greeks: return False
+        if value in greeks: return True
         return value.isalpha()
 
     def isSpecialNum(self, value):
-        if value == 'e': return E
-        if value == 'pi': return PI
-        else: return value
+        if value in greeks: return True

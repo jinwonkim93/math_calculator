@@ -8,9 +8,6 @@ def logn(n, x = math.e):
     print(n/x)
     return 1 + logn(n/x, x) if n > (x-1) else 0
 
-def lognNew(n, x = E):
-    return math.log(n) / math.log(x)
-
 def pow(base,expo):
     if isinstance(base, Variable):
         if isinstance(expo, (list,Variable)):
@@ -91,7 +88,9 @@ def calcByTerm(op, left,right):
         if isinstance(left, list):
             #if right == (x+10)
             if isinstance(right, list):
+                print(op)
                 if op in ('+', '-'):
+                    print('list+list')
                     right_temp = []
                     for element in right:
                         if isOperator(element):
@@ -106,36 +105,44 @@ def calcByTerm(op, left,right):
                     temp = clearExpr(temp)
                     return clearExpr(temp)
                 else:
-
-                    for left_idx in range(0, len(left), 2):
-                        left_op, left_element = None, None
-                        if left_idx == 0:
-                            left_element = left[left_idx]
-                        
-                        else:
-                            left_op = left[left_idx-1]
-                            left_element = left[left_idx]
-                        
-                        if left_op == '-':
-                            left_element = -left_element
-                        
-                        for right_idx in range(0,len(right),2):
-                            right_op, right_element = None, None
-                            if right_idx == 0:
-                                right_element = right[right_idx]
-                            else:
-                                right_op = right[right_idx-1]
-                                right_element = right[right_idx]
+                    print('list/list')
+                    print(op)
+                    if op == '/':
+                        print('하하하하하하')
+                        temp.append(left)
+                        temp.append(op)
+                        temp.append(right)
+                    else:
+                        for left_idx in range(0, len(left), 2):
+                            left_op, left_element = None, None
+                            if left_idx == 0:
+                                left_element = left[left_idx]
                             
-                            if right_op == '-':
-                                right_element = -right_element
-                            res = calc(op,left_element,right_element)
-                            res_list = ['+',res] if len(temp) > 0 else [res]
-                            temp.extend(res_list)
-                    temp = clearExpr(temp)      
+                            else:
+                                left_op = left[left_idx-1]
+                                left_element = left[left_idx]
+                            
+                            if left_op == '-':
+                                left_element = -left_element
+                            
+                            for right_idx in range(0,len(right),2):
+                                right_op, right_element = None, None
+                                if right_idx == 0:
+                                    right_element = right[right_idx]
+                                else:
+                                    right_op = right[right_idx-1]
+                                    right_element = right[right_idx]
+                                
+                                if right_op == '-':
+                                    right_element = -right_element
+                                res = calc(op,left_element,right_element)
+                                res_list = ['+',res] if len(temp) > 0 else [res]
+                                temp.extend(res_list)
+                        temp = clearExpr(temp)      
                     return clearExpr(temp)
-            else:
+            elif isinstance(right, (float,Variable)):
                 if op in ('+', '-'):
+                    print('list+variable')
                     temp.extend(left)
                     if op is '-':
                         right = -right
@@ -143,15 +150,19 @@ def calcByTerm(op, left,right):
                     else:
                         temp.extend([op,right])
                     temp = clearExpr(temp)
-                    print(temp)
                     return clearExpr(temp)
                 # * /
                 else:
+                    print('list/variable')
                     for idx in range(0,len(left),2):
                         left_op, element = None, None
                         if idx == 0:
                             element = left[idx]
-                            temp.append(calc(op,element,right))
+                            if isinstance(element, list):
+                                res = calcByTerm(op,element,right)
+                            else:
+                                res = calc(op,element,right)
+                            temp.append(res)
                         else:
                             left_op = left[idx-1]
                             element = left[idx]
@@ -162,15 +173,14 @@ def calcByTerm(op, left,right):
                             temp.extend(res_list)
                     temp = clearExpr(temp)
                     return clearExpr(temp)
-        else:
-            if isinstance(left, Variable): left = left.eval()
+        elif(left, Variable):
+            #if isinstance(left, Variable): left = left.eval()
             if isinstance(right, list):
+                print('variable+list')
                 right = clearExpr(right)
                 if op in ('+', '-'):
                     print(left,right,'hahahah')
                     temp.append(left)
-                    
-                    
                     temp.append(op)
                     for idx in range(0,len(right),2):    
                         
@@ -193,6 +203,7 @@ def calcByTerm(op, left,right):
                     return clearExpr(temp)
                 # * /
                 else:
+                    print('variable/list')
                     for idx in range(0,len(right),2):
                         left_op, element = None, None
                         if idx == 0:
@@ -208,20 +219,32 @@ def calcByTerm(op, left,right):
                             temp.extend(res_list)
                     temp = clearExpr(temp)
                     return clearExpr(temp)
+            elif isinstance(right, (float,Variable)):
+                print('variable op variable')
+                result = calc(op, left, right)
+                return clearExpr(result)
+        else:
+            print('float*float')
             result = calc(op, left, right)
-            if isinstance(result, Variable): result = result.eval()
+            #if isinstance(result, Variable): result = result.eval()
             return result
+    
     except ZeroDivisionError:
         raise ZeroDivisionError
-
+    except Exception as e:
+        raise e
 def calc(op, left, right):
     if op is '+':
+        print(left, '+', right)
         return left + right
     elif op is '-':
+        print(left, '-', right)
         return left - right
     elif op is '*':
+        print(left, '*', right)
         return left * right
     elif op is '/':
+        print(left, '/', right)
         return left / right
 
 def clearExpr(left):

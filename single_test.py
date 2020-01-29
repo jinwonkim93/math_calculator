@@ -119,9 +119,10 @@ def list2str(expr):
     try:
         d = ''
         for element in expr:
-            print(element, type(element))
+            #print(element, type(element))
+            if isinstance(element, list):
+                element = list2str(element)
             d += str(element)
-        print(d)
         return d
     except Exception as e:
         return str(expr)
@@ -129,7 +130,7 @@ def list2str(expr):
 
 def getParser(case):
     scanner = Scanner(case)
-    print(scanner.tokens)  
+    print('tokenized = ', scanner.tokens)  
     parser = Parser(scanner)
     return parser
 
@@ -149,43 +150,39 @@ def test(case, start_end):
     if isinstance(tree, Error):
         return [], tree, [], []
     canonicalization = tree.eval()
-    print(canonicalization)
+    print(type(canonicalization))
     canonicalization = list2str(canonicalization)
-    print(canonicalization)
-    canonicalization = list2str(getParser(canonicalization).parse().eval())
+    print('tree = ',tree)
+    print('canonicalization = ',canonicalization)
     variable_num = len(parser.getVariables())
-    domain = parser.getDomain()
     start, end = start_end
     figure_num = 1
     
-    if not isinstance(canonicalization, (int,float)):
-        if variable_num > 1:
-            data = plot3D(parser, tree, start, end)
-            pics.append(drawMulti(data, figure_num, canonicalization))  
-        elif variable_num == 1:
-            data = plot2D(parser, tree, start, end)
-            pics.append(draw2D(data, figure_num, canonicalization))    
+    # if not isinstance(canonicalization, (int,float)):
+    #     if variable_num > 1:
+    #         data = plot3D(parser, tree, start, end)
+    #         pics.append(drawMulti(data, figure_num, canonicalization))  
+    #     elif variable_num == 1:
+    #         data = plot2D(parser, tree, start, end)
+    #         pics.append(draw2D(data, figure_num, canonicalization))    
         #print(isDerivative(parser,tree,-1))
-
     derivatives = parser.getDerivative(tree)
-    print(derivatives)
     domain = parser.getDomain()
-    #if not isinstance(derivatives,NonDerivableError):
-    if derivatives is not None:
-        for d in derivatives:
-            print(d, type(d))
-            d[1] = list2str(d[1])
-            
-            figure_num += 1
-            semi_expr = list2str(d[1])
-            partial_derivatives.append(list2str(d))
-            d_parser = getParser(semi_expr)
-            d_tree = d_parser.parse()
-            d_title = semi_expr
-            print(partial_derivatives)
-            if len(d_parser.getVariables()) == 0: continue
-            d_data = plot2D(d_parser, d_tree, start, end)
-            pics.append(draw2D(d_data, figure_num, d_title))
+    print('derivatives =', derivatives)
+    print('domain =', domain)
+    # if derivatives is not None:
+    #     for d in derivatives:
+    #         # print(d, type(d))
+    #         d[1] = list2str(d[1])
+    #         figure_num += 1
+    #         semi_expr = list2str(d[1])
+    #         partial_derivatives.append(list2str(d))
+    #         d_parser = getParser(semi_expr)
+    #         d_tree = d_parser.parse()
+    #         d_title = semi_expr
+    #         if len(d_parser.getVariables()) == 0: continue
+    #         d_data = plot2D(d_parser, d_tree, start, end)
+    #         pics.append(draw2D(d_data, figure_num, d_title))
     
     return pics, canonicalization, partial_derivatives, domain
 

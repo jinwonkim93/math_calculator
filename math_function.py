@@ -1,9 +1,9 @@
 from expression import Expr
 from empty import Empty
-from utils import lognNew, isExpr
-from factor_new import Variable, Constant
+# from utils import isExpr
+#from factor_new import Variable, Constant
 from math import sin, cos, tan
-from mathematical_constant import PI
+from mathematical_constant import PI, E
 import numpy as np
 
 class Log(object):
@@ -15,7 +15,7 @@ class Log(object):
     
     def eval(self):
         try:
-            return lognNew(self.e.eval(),self.symbol)
+            return self.lognNew(self.e.eval(),self.symbol)
         except ZeroDivisionError:
             return np.inf
         except ValueError:
@@ -25,11 +25,14 @@ class Log(object):
     
     def getCalc(self):
         try:
-            return lognNew(self.e.getCalc(),self.symbol)
+            return self.lognNew(self.e.getCalc(),self.symbol)
         except ZeroDivisionError:
             return np.inf
         except ValueError:
             return np.nan
+    
+    def lognNew(n, x = E):
+        return math.log(n) / math.log(x)
     
     def getDerivative(self, variable, symbol):
         if isinstance(self.e, (int,float)): return NotImplemented
@@ -287,3 +290,40 @@ class Cot(object):
         else: return False
     def __repr__(self):
         return f'cot({self.e})' if isinstance(self.e.eval(), (list, Variable)) else f'{self.e.eval()}'
+
+class ConstantE(object):
+    def __init__(self, name = 'e'):
+        self.e = E
+        self.name = name
+    def eval(self):
+        return self.e
+    
+    def getCalc(self):
+        return self.e
+
+    def getDerivative(self, Variable, symbol):
+        pass
+    
+    def convert(self):
+        return self
+
+    def __repr__(self):
+        return self.name
+class Pi(object):
+    def __init__(self, name = 'pi'):
+        self.e = PI
+        self.name = name
+    def eval(self):
+        return self.e
+    
+    def getCalc(self):
+        return self.e
+
+    def getDerivative(self, Variable, symbol):
+        pass
+    
+    def convert(self):
+        return self
+    
+    def __repr__(self):
+        return self.name

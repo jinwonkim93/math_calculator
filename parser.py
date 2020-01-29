@@ -2,8 +2,8 @@ from expression import Expr
 from expression_tail import ExprTail
 from term import Term
 from term_tail import TermTail
-from factor_new import Factor, Variable, Constant, Symbol
-from math_function import Log,  Sin, Cos, Tan, Sec, Csc, Cot
+from factor_new import Factor, Variable, Constant, Symbol, Log,  Sin, Cos, Tan, Sec, Csc, Cot, ConstantE, Pi
+# from math_function import Log,  Sin, Cos, Tan, Sec, Csc, Cot, ConstantE, Pi
 from factor_tail import FactorTail
 from error import Error, NonDerivableError
 from empty import Empty
@@ -60,20 +60,25 @@ class Parser(object):
     
     def expr2str(self,expr):
         try:
+            print('expr2str = ', expr, type(expr))
             d = ''
             for value in expr:
+                if isinstance(value, list):
+                    value = self.expr2str(value)
                 d += str(value)
+            
             return d
         except:
+            print('expr2str = ', expr, type(expr))
             return str(expr)
 
     def getDerivative(self, semi_expression):
         if self.variables:
             semi_expression = semi_expression.eval()
             derivatives = []
-            print(self.getVariables())
+            # print(self.getVariables())
             for name, symbol in self.variables.items():
-                print(name, symbol)
+                # print(name, symbol)
                 try:
                     temp = []
                     if isinstance(semi_expression, list):
@@ -98,19 +103,20 @@ class Parser(object):
                                     if len(temp) == 1: temp.pop()
                                     temp.append(derivation)
 
-                        d = ''
-                        for element in temp:
-                            d += str(element)
-                        derivatives.append([f'd({self.expr2str(semi_expression)})/d{name} = ',d])
+
+                        derivatives.append([f'd({self.expr2str(semi_expression)})/d{name} = ',self.expr2str(temp)])
                     else:
                         if isinstance(semi_expression, (int,float)):
                             derivatives.append([f'd({self.expr2str(semi_expression)})/d{name} = ', 0])
                         else:
-                            derivatives.append([f'd({semi_expression})/d{name} = ',semi_expression.getDerivative(symbol)])
+                            derivatives.append([f'd({semi_expression})/d{name} = ',self.expr2str(semi_expression.getDerivative(symbol))])
+                
                 except Exception as e:
                     raise e
-                    return semi_expression
+                    #return semi_expression
+            
             return derivatives
+            #return None
     
     def getDomain(self):
         return self.domain
@@ -174,7 +180,7 @@ class Parser(object):
             expo = self.parseFactorTail()
             return Factor(var, expo = expo)
         elif self.tokens.isType(self.tokens.isDigit):
-            num = Constant(self.tokens.isSpecialNum(self.tokens.takeIt()))
+            num = Constant(self.tokens.takeIt())
             expo = self.parseFactorTail()
             return Factor(num, expo = expo)
         else:
@@ -197,6 +203,9 @@ class Parser(object):
             v = log.e.eval()
             self.getInvalidDomain(v,'> 0')
             return Variable(log)
+        elif self.tokens.isType(self.tokens.isSpecialNum):
+            specialNum = self.parseSpecialNum()
+            return Variable(specialNum)
         else:
             alpha = self.tokens.takeIt(self.tokens.isAlpha)
             if alpha == 'EOL': raise Exception("Invalid Variable")
@@ -250,3 +259,11 @@ class Parser(object):
         e = self.parseExpr()
         self.tokens.takeIt()         
         return Log(logarithm, e)
+
+    def parseSpecialNum(self):
+        num = self.tokens.takeIt()
+        if num == 'e':
+            return ConstantE()
+        elif num == 'pi':
+            return Pi()
+        raise NotImplementedError
