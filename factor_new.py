@@ -318,7 +318,7 @@ class Constant(object):
         self.expo = expo
     
     def eval(self):
-        return self.value
+        return self.expo.eval(self.value)
     
     def getCalc(self):
         return self.value
@@ -335,10 +335,6 @@ class Constant(object):
         return -self.value
 
     def __str__(self):
-        if self.value == PI:
-            return 'pi'
-        elif self.value == E:
-            return 'e'
         return str(self.value)
     
     def __repr__(self):
@@ -411,12 +407,12 @@ class Log(object):
         if self.__class__ == other.__class__ and repr(self.e) == repr(other.e):return True
         else: return False
     def __str__(self):
-        e_eval = self.e.eval()
-        print(e_eval)
-        if isinstance(e_eval, list):
-            e_eval = list2str(e_eval)    
-            print(e_eval)
-        return f'log{str(self.symbol):.4}({e_eval})'
+        #e_eval = self.e.eval()
+        #print(e_eval)
+        #if isinstance(e_eval, list):
+            #e_eval = list2str(e_eval)    
+            #print(e_eval)
+        return f'log{str(self.symbol):.4}({self.e})'
     def __repr__(self):
         e_eval = self.e.eval()
         print(e_eval)

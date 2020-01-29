@@ -24,8 +24,8 @@ def pow(base,expo):
             right = deepcopy(base)
             left = deepcopy(base)
             if expo <1:
-                return Variable(Empty(), coeff = base, expo = expo)
-                    
+                #방법을 찾아야함
+                return Variable(Empty(), coeff = base, expo = expo)      
             while (expo > 1):
                 expo -= 1
                 left = calcByTerm('*',left,right)
@@ -233,6 +233,7 @@ def calcByTerm(op, left,right):
         raise ZeroDivisionError
     except Exception as e:
         raise e
+
 def calc(op, left, right):
     if op is '+':
         print(left, '+', right)
