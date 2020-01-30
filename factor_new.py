@@ -56,9 +56,8 @@ class Variable(object):
 
             
     def __add__(self, other):
+        if other == 0:return self
         if isinstance(other, Variable):
-            print(self, '+', other)
-            print(self.e == other.e)
             if self.checkVariable(self,other):
                 coeff = self.coeff + other.coeff
                 return Variable(self.e, coeff = coeff, expo = self.expo) if coeff != 0 else 0
@@ -73,6 +72,7 @@ class Variable(object):
         return [self,"+", other]
     
     def __radd__(self, other):
+        if other == 0: return self
         if isinstance(other, Variable):
             if self.checkVariable(self,other):
                 coeff = other.coeff + self.coeff
@@ -82,6 +82,7 @@ class Variable(object):
         return [other, "+", self]
     
     def __sub__(self,other):
+        if other == 0: return self
         if isinstance(other, Variable):
             if self.checkVariable(self,other):
                 coeff = self.coeff - other.coeff
@@ -91,6 +92,7 @@ class Variable(object):
         return [self, '-', other]
 
     def __rsub__(self,other):
+        if other == 0: return -self
         if isinstance(other, Variable):
             if self.checkVariable(self,other):
                 coeff = other.coeff - self.coeff
@@ -102,6 +104,8 @@ class Variable(object):
         return [other, '-', self]
     
     def __mul__(self, other):
+        if other == 0: 
+            return 0
         if isinstance(other, Variable):
             if self.e == other.e:
                 coeff = self.coeff * other.coeff
@@ -123,6 +127,7 @@ class Variable(object):
             return Variable(self.e, coeff = coeff, expo = self.expo) if coeff is not 0 else 0
     
     def __rmul__(self, other):
+        if other == 0: return 0
         if isinstance(other, Variable):
             if self.e == other.e:
                 coeff = self.coeff * other.coeff
@@ -154,6 +159,8 @@ class Variable(object):
             return Variable(self.e, coeff = coeff, expo = self.expo) if coeff is not 0 else 0
     
     def __rtruediv__(self, other):
+        if other == 0: 
+            raise ZeroDivisionError
         value =  None
         if isinstance(other, Variable):
             if isinstance(self.e, Empty) and isinstance(other.e, Empty): return [other, "/", self]
@@ -279,8 +286,27 @@ class Variable(object):
                 if coeff != 0:
                     coeff = coeff * Variable(self.e,expo = self.expo)
                     return coeff
+                return 0
             else:
                 return 0
+        
+        elif isinstance(self.e, (Sin,Cos,Tan,Sec,Cot,Csc)):
+            derivative, inner_derivative = self.e.getDerivative(symbol)
+            if derivative == 0: return 0
+            temp_variable1 = derivative
+            temp_variable2 = Variable(self.e, expo = self.expo-1) if self.expo > 1 else 1
+            res_variable = 0
+            if isinstance(inner_derivative, list):
+                for idx in range(0,len(inner_derivative), 2):
+                    element = inner_derivative[idx]
+                    temp_variable = temp_variable1 * element * self.coeff * temp_variable2 *self.expo
+                    res_variable += temp_variable
+
+            else:
+                res_variable = temp_variable1*inner_derivative*temp_variable2*self.expo*self.coeff
+            return res_variable
+            # return self.e.getDerivative(self,symbol)
+        
         else:
             return self.e.getDerivative(self,symbol)
 
@@ -359,7 +385,6 @@ class Log(object):
         try:
             # return self.lognNew(self.e.eval(),self.symbol)
             e_val = self.e.eval()
-            print(e_val, type(e_val))
             return self.lognNew(e_val,self.symbol)
         except ZeroDivisionError:
             return np.inf
@@ -383,6 +408,8 @@ class Log(object):
         if isinstance(self.e, (int,float)): return NotImplemented
         if variable.expo == 1:
             e_val = self.e.eval()
+            print(variable.coeff, 'asdfsdf')
+            print(self.e.getDerivative(symbol), 'sdfsafsd')
             coeff = variable.coeff * self.e.getDerivative(symbol)
             if isinstance(e_val, Variable):
                 coeff = coeff/e_val
@@ -393,7 +420,11 @@ class Log(object):
             e_val = self.e.eval()
             if isinstance(e_val, Variable):
                 coeff = Variable(self, coeff = variable.coeff*variable.expo, expo = variable.expo-1)/e_val
-                return coeff 
+                return coeff
+        
+        elif Variable.expo < 0:
+            coeff = ''
+
 
     def convert(self):
         """ e_val = self.e.eval()
@@ -406,6 +437,10 @@ class Log(object):
     def __eq__(self,other):
         if self.__class__ == other.__class__ and repr(self.e) == repr(other.e):return True
         else: return False
+    def __lt__(self, other):
+        return repr(self.e) < repr(other.e)
+    def __gt__(self, other):
+        return repr(self.e) > repr(other.e)
     def __str__(self):
         #e_eval = self.e.eval()
         #print(e_eval)
@@ -415,10 +450,8 @@ class Log(object):
         return f'log{str(self.symbol):.4}({self.e})'
     def __repr__(self):
         e_eval = self.e.eval()
-        print(e_eval)
         if isinstance(e_eval, list):
             e_eval = list2str(e_eval)   
-            print(e_eval)
         return f'Log({repr(self.symbol)},{e_eval})'
 
 class Sin(object):
@@ -440,20 +473,44 @@ class Sin(object):
         except ZeroDivisionError:
             return np.inf
     
-    def getDerivative(self, variable, symbol):
-        if isinstance(self.e, (int,float)): return NotImplemented
-        if variable.expo == 1:
-            coeff = variable.coeff * self.e.getDerivative(symbol)
-            return Variable(Cos(self.e), coeff = coeff)
-        elif variable.expo > 1:
-            try:
-                coeff1 = self.e.getDerivative(symbol)
-                coeff = variable.expo * coeff1 * variable.coeff
-                expo = variable.expo - 1
-                new_e = variable.e
-                return Variable(Cos(self.e), coeff = Variable(new_e, coeff = coeff, expo = expo))
-            except Exception as e:
-                print(e)
+    # def getDerivative(self, variable, symbol):
+    #     if isinstance(self.e, (int,float)): return 0
+    #     if variable.expo == 1:
+    #         df = self.e.getDerivative(symbol)
+    #         res_variable = 0
+    #         if isinstance(df, list):
+    #             for idx in range(0,len(df), 2):
+    #                 element = df[idx]
+    #                 temp_variable = Variable(Cos(self.e), expo = variable.expo)
+    #                 temp_variable *= element * variable.coeff
+    #                 res_variable += temp_variable
+    #         else:
+    #             temp_variable = Variable(Cos(self.e))
+    #             res_variable = temp_variable*df
+    #         return res_variable
+    #     elif variable.expo > 1:
+    #         try:
+    #             df = self.e.getDerivative(symbol)
+    #             res_variable = 0
+    #             temp_variable1 = Variable(Cos(self.e))
+    #             temp_variable2 = Variable(Sin(self.e), coeff = variable.coeff, expo = variable.expo-1)
+    #             if isinstance(df, list):
+    #                 for idx in range(0,len(df), 2):
+    #                     element = df[idx]
+    #                     temp_variable = temp_variable1*element*temp_variable2*variable.expo
+    #                     res_variable += temp_variable
+    #             else:
+    #                 res_variable = temp_variable1*df*temp_variable2*variable.expo
+    #             return res_variable
+    #         except Exception as e:
+    #             print(e)
+    
+    def getDerivative(self, symbol):
+        df = self.e.getDerivative(symbol)
+        if df == 0:
+            return 0, 0
+        else:
+            return Variable(Cos(self.e)), df
     
     def convert(self):
         return Csc(self.e)
@@ -461,6 +518,11 @@ class Sin(object):
     def __eq__(self,other):
         if self.__class__ == other.__class__ and repr(self.e) == repr(other.e):return True
         else: return False
+    def __lt__(self, other):
+        return repr(self.e) < repr(other.e)
+    def __gt__(self, other):
+        return repr(self.e) > repr(other.e)
+
     def __repr__(self):
         return f'sin({self.e})' if isinstance(self.e.eval(), (list, Variable)) else f'{self.e.eval()}'
 
@@ -483,16 +545,23 @@ class Cos(object):
         except ZeroDivisionError:
             return np.inf
     
-    def getDerivative(self, variable, symbol):
-        if isinstance(self.e, (int,float)): return NotImplemented
-        if variable.expo == 1:
-            coeff = variable.coeff * self.e.getDerivative(symbol)
-            return Variable(Sin(self.e), coeff = -coeff)
-        elif variable.expo > 1:
-            coeff = variable.coeff * variable.expo * self.e.getDerivative(symbol)
-            expo = variable.expo - 1
-            new_e = variable.e
-            return Variable(Sin(self.e), coeff = Variable(new_e, coeff = -coeff, expo = expo))
+    def getDerivative(self, symbol):
+        # def getDerivative(self, variable, symbol):
+        # if isinstance(self.e, (int,float)): return NotImplemented
+        # if variable.expo == 1:
+        #     coeff = variable.coeff * self.e.getDerivative(symbol)
+        #     return Variable(Sin(self.e), coeff = -coeff)
+        # elif variable.expo > 1:
+        #     coeff = variable.coeff * variable.expo * self.e.getDerivative(symbol)
+        #     expo = variable.expo - 1
+        #     new_e = variable.e
+        #     return Variable(Sin(self.e), coeff = Variable(new_e, coeff = -coeff, expo = expo))
+        df = self.e.getDerivative(symbol)
+        if df == 0:
+            return 0, 0
+        else:
+            return -Variable(Sin(self.e)), df
+
     
     def convert(self):
         return Sec(self.e)
@@ -500,6 +569,10 @@ class Cos(object):
     def __eq__(self,other):
         if self.__class__ == other.__class__ and repr(self.e) == repr(other.e):return True
         else: return False
+    def __lt__(self, other):
+        return repr(self.e) < repr(other.e)
+    def __gt__(self, other):
+        return repr(self.e) > repr(other.e)
     def __repr__(self):
         return f'cos({self.e})' if isinstance(self.e.eval(), (list, Variable)) else f'{self.e.eval()}'
 
@@ -522,21 +595,23 @@ class Tan(object):
         except ZeroDivisionError:
             return np.inf
     
-    def getDerivative(self, variable, symbol):
-        if isinstance(self.e, (int,float)): return NotImplemented
-        if variable.expo == 1:
-            coeff = variable.coeff * self.e.getDerivative(symbol)
-            return Variable(Sec(self.e), coeff = coeff, expo = 2)
-        elif variable.expo > 1:
-            coeff = variable.coeff * variable.expo * self.e.getDerivative(symbol)
-            expo = variable.expo - 1
-            new_e = variable.e
-            return Variable(Sec(self.e), coeff = Variable(new_e, coeff = coeff, expo = expo),expo = 2)
+    def getDerivative(self, symbol):
+
+        df = self.e.getDerivative(symbol)
+        if df == 0:
+            return 0, 0
+        else:
+            return Variable(Sec(self.e), expo = 2), df
+    
     def convert(self):
         return Cot(self.e)
     def __eq__(self,other):
         if self.__class__ == other.__class__ and repr(self.e) == repr(other.e):return True
         else: return False
+    def __lt__(self, other):
+        return repr(self.e) < repr(other.e)
+    def __gt__(self, other):
+        return repr(self.e) > repr(other.e)
     def __repr__(self):
         return f'tan({self.e})' if isinstance(self.e.eval(), (list, Variable)) else f'{self.e.eval()}'
 
@@ -558,21 +633,22 @@ class Csc(object):
         except ZeroDivisionError:
             return np.inf
 
-    def getDerivative(self, variable, symbol):
-        if isinstance(self.e, (int,float)): return NotImplemented
-        if variable.expo == 1:
-            coeff = variable.coeff * self.e.getDerivative(symbol)
-            variable_coeff = Variable(Cot(self.e), coeff = -coeff)
-            return Variable(Csc(self.e), coeff = variable_coeff)
-        elif variable.expo > 1:
-            coeff = variable.coeff * variable.expo * self.e.getDerivative(symbol)
-            variable_coeff = Variable(Cot(self.e), coeff = -coeff)
-            return Variable(Csc(self.e), coeff = variable_coeff, expo = variable.expo)
+
+    def getDerivative(self, symbol):
+        df = self.e.getDerivative(symbol)
+        if df == 0:
+            return 0, 0
+        else:
+            return -Variable(Cot(self.e))*Variable(Csc(self.e)), df
     def convert(self):
         return Sin(self.e)    
     def __eq__(self,other):
         if self.__class__ == other.__class__ and repr(self.e) == repr(other.e):return True
         else: return False
+    def __lt__(self, other):
+        return repr(self.e) < repr(other.e)
+    def __gt__(self, other):
+        return repr(self.e) > repr(other.e)
     def __repr__(self):
         return f'csc({self.e})' if isinstance(self.e.eval(), (list, Variable)) else f'{self.e.eval()}'
 
@@ -609,6 +685,10 @@ class Sec(object):
     def __eq__(self,other):
         if self.__class__ == other.__class__ and repr(self.e) == repr(other.e):return True
         else: return False
+    def __lt__(self, other):
+        return repr(self.e) < repr(other.e)
+    def __gt__(self, other):
+        return repr(self.e) > repr(other.e)
     def __repr__(self):
         return f'sec({self.e})' if isinstance(self.e.eval(), (list, Variable)) else f'{self.e.eval()}'
 
@@ -645,6 +725,10 @@ class Cot(object):
     def __eq__(self,other):
         if self.__class__ == other.__class__ and repr(self.e) == repr(other.e):return True
         else: return False
+    def __lt__(self, other):
+        return repr(self.e) < repr(other.e)
+    def __gt__(self, other):
+        return repr(self.e) > repr(other.e)
     def __repr__(self):
         return f'cot({self.e})' if isinstance(self.e.eval(), (list, Variable)) else f'{self.e.eval()}'
 
@@ -684,3 +768,14 @@ class Pi(object):
     
     def __repr__(self):
         return self.name
+
+class Parenthesis(object):
+    def __init__(self, e, name = 'Parenthesis'):
+        self.e = e
+        self.name = name
+    
+    def getDerivative(self, symbol):
+        return 0
+
+    def __repr__(self):
+        return self.e
