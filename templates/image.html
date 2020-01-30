@@ -15,23 +15,33 @@
     </fieldset>
 </form>
 <body>
-    <p>Input </p>
-    {{input}}
-    <p>Output </p>
-    {{canonicalization}}
-    <p>Partial Derivatives</p>
+    <font size="6">Input</font> 
+    <p>{{input}}</p>
+    <hr size="5" color="black">
+    <font size="6">Canonicalization Form </font> 
+    <p>{{canonicalization}}</p>
+    <hr size="5" color="black">
+    <font size="6">Partial Derivatives </font> 
+    <p>
     {% for d in partial_derivatives %}  
     {{d}}<br>
     {% endfor %}
-    <p>Domain</p>
+    </p>
+    <hr size="5" color="black">
+    <font size="6">Domain</font> 
+    <p>
     {% for d in domain %}  
     {{d}}<br>
-    {% endfor %}
+    {% endfor %}    
+    </p>
+    <hr size="5" color="black">
+    <font size="6">Graph</font> 
     <br>
      {% for pic in pics %} 
      <div>
      {{ pic|safe }}
     </div>
     {% endfor %}
+    <hr size="5" color="black">
 </body>
 </html>

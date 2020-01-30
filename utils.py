@@ -9,6 +9,7 @@ def logn(n, x = math.e):
     return 1 + logn(n/x, x) if n > (x-1) else 0
 
 def pow(base,expo):
+    print(base, expo, 'powpopw', type(base))
     if isinstance(base, Variable):
         if isinstance(expo, (list,Variable)):
             return Variable(base.e, coeff = base.coeff, expo = expo)
@@ -88,8 +89,8 @@ def list2str(expr):
 def calcByTerm(op, left,right):
     temp = []
     no_same_term = True
-    # print('step 1 = ', left, op, right)
-    # print('ste 2 = ', type(left), op, type(right))
+    print('step 1 = ', left, op, right , 'end')
+    print('ste 2 = ', type(left), op, type(right))
     #if left == (x+1)
     
     try:
@@ -116,12 +117,13 @@ def calcByTerm(op, left,right):
                     print('list/list')
                     # print(op)
                     if op == '/':
-                        left = Parenthesis('(' + list2str(left) + ')')
-                        right = Parenthesis('(' + list2str(right) + ')')
-
-                        temp.append(left)
-                        temp.append(op)
-                        temp.append(right)
+                        # print(left , op, right, 'soijfsiofdjio')
+                        left = Variable(Parenthesis(left))
+                        right = Variable(Parenthesis(right))
+                        temp.append(calc(op,left,right))
+                        # temp.append(left)
+                        # temp.append(op)
+                        # temp.append(right)
                     else:
                         for left_idx in range(0, len(left), 2):
                             left_op, left_element = None, None
@@ -230,10 +232,12 @@ def calcByTerm(op, left,right):
                                 temp.extend(res_list)
                         temp = clearExpr(temp)
                     else:
-                        temp.append(left)
-                        temp.append(op)
-                        right = Parenthesis('(' + list2str(right) + ')')
-                        temp.append(right)
+                        # temp.append(left)
+                        # temp.append(op)
+                        right = Variable(Parenthesis(right))
+                        print(left, op, right)
+                        # temp.append(right)
+                        temp.append(calc(op,left,right))
                     return clearExpr(temp)
             elif isinstance(right, (float,Variable)):
                 print('variable op variable')

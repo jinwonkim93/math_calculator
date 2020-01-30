@@ -49,6 +49,7 @@ def plot2D(parser, tree, start, end):
     x = []
     y = []
 
+    domain = parser.getDomain()
     
     for value in values:
         if isContinuous(parser,tree, value):
@@ -71,6 +72,7 @@ def plot3D(parser, tree, start, end):
     y = []
     for value1 in x:
         parser.insertValue2(value1,'x')
+
         temp = []
         for value2 in x:
             parser.insertValue2(value2,'y')
@@ -157,7 +159,8 @@ def test(case, start_end):
     variable_num = len(parser.getVariables())
     start, end = start_end
     figure_num = 1
-    
+    domain = parser.getDomain()
+
     # if not isinstance(canonicalization, (int,float)):
     #     if variable_num > 1:
     #         data = plot3D(parser, tree, start, end)
@@ -166,10 +169,10 @@ def test(case, start_end):
     #         data = plot2D(parser, tree, start, end)
     #         pics.append(draw2D(data, figure_num, canonicalization))    
         #print(isDerivative(parser,tree,-1))
-    derivatives = parser.getDerivative(tree)
-    domain = parser.getDomain()
-    print('derivatives =', derivatives)
-    print('domain =', domain)
+    # derivatives = parser.getDerivative(tree)
+    # domain = parser.getDomain()
+    # print('derivatives =', derivatives)
+    # print('domain =', domain)
     # if derivatives is not None:
     #     for d in derivatives:
     #         # print(d, type(d))
