@@ -309,8 +309,8 @@ def clearExpr(left):
     variable_list = []
     #!!!!!!!!!!!!!!!!! 여기서 심각한 문제를 이르킴
     # 만약에 coeff에 variable 이 있으면 없어지고 expo도 사라짐 고쳐야함
-    if isinstance(left, Variable) and isinstance(left.e, Parenthesis):
-        left = left.e.getList()
+    # if isinstance(left, Variable) and isinstance(left.e, Parenthesis):
+    #     left = left.e.getList()
 
     if isinstance(left, (int, float, Variable)): return left
     
