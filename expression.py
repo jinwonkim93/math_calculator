@@ -45,7 +45,7 @@ class Expr(Node):
             if isinstance(semi_expression, list):
                 for value in semi_expression:
                     if isinstance(value, (int,float)):
-                        # if len(temp) > 0: temp.pop()
+                        if len(temp) > 0: temp.pop()
                         temp.append(0)
 
                     elif value in ('+', '-', '*', '/'):

@@ -11,7 +11,6 @@ class FactorTail(Node):
         self.expo = expo
     
     def eval(self, left):
-        print('factortail = ', left)
         eval_factor = self.expo.eval(self.f.eval())
         try:
             return pow(left,eval_factor)

@@ -2,7 +2,7 @@ from expression import Expr
 from expression_tail import ExprTail
 from term import Term
 from term_tail import TermTail
-from factor_new import Factor, Variable, Constant, Symbol, Log,  Sin, Cos, Tan, Sec, Csc, Cot, ConstantE, Pi
+from factor_new import Factor, Variable, Constant, Symbol, Log,  Sin, Cos, Tan, Sec, Csc, Cot, ConstantE, Pi, Parenthesis
 # from math_function import Log,  Sin, Cos, Tan, Sec, Csc, Cot, ConstantE, Pi
 from factor_tail import FactorTail
 from error import Error, NonDerivableError
@@ -40,7 +40,7 @@ class Parser(object):
                 return True
             else:
                 for key in self.domain.keys():
-                    if not key == v.e:
+                    if not key.e == v.e:
                         self.domain[v] = invalid
                         return True
         
@@ -77,6 +77,8 @@ class Parser(object):
             semi_expression = semi_expression.eval()
             derivatives = []
             # print(self.getVariables())
+            if isinstance(semi_expression, Variable) and isinstance(semi_expression.e, Parenthesis):
+                semi_expression = semi_expression.e.getList()
             for name, symbol in self.variables.items():
                 # print(name, symbol)
                 try:
@@ -119,7 +121,10 @@ class Parser(object):
             #return None
     
     def getDomain(self):
-        return self.domain
+        res = []
+        for key in self.domain:
+            res.append([key,self.domain[key]])
+        return res
     def getVariables(self):
         return self.variables
     
