@@ -5,7 +5,7 @@ from empty import Empty
 from copy import deepcopy
 
 def logn(n, x = math.e):
-    print(n/x)
+    # print(n/x)
     return 1 + logn(n/x, x) if n > (x-1) else 0
 
 def pow(base,expo):
@@ -129,8 +129,8 @@ def calcByTerm(op, left,right):
             right = right.e.getList()
             
     
-    print('step 1 = ', left, op, right , 'end')
-    print('step 2 = ', type(left), op, type(right))
+    # print('step 1 = ', left, op, right , 'end')
+    # print('step 2 = ', type(left), op, type(right))
     
     #if left == (x+1)
     try:
@@ -159,7 +159,7 @@ def calcByTerm(op, left,right):
                         left = Variable(Parenthesis(left))
                         right = Variable(Parenthesis(right))
                         res = calc(op,left,right)
-                        print('step 3 = ', res, type(res))    
+                        # print('step 3 = ', res, type(res))    
                         return res
                     else:
                         # print('list*list')
@@ -190,7 +190,7 @@ def calcByTerm(op, left,right):
                                 temp.extend(res_list)
                         temp = clearExpr(temp)
                         res = Variable(Parenthesis(temp))  
-                        print('step 3 = ', res, type(res))    
+                        # print('step 3 = ', res, type(res))    
                         return res
             elif isinstance(right, (float,Variable)):
                 if op in ('+', '-'):
@@ -207,7 +207,7 @@ def calcByTerm(op, left,right):
                     return res
                 # * /
                 else:
-                    print('list/variable')
+                    # print('list/variable')
                     for idx in range(0,len(left),2):
                         left_op, element = None, None
                         if idx == 0:
@@ -285,13 +285,13 @@ def calcByTerm(op, left,right):
                         return res
             
             elif isinstance(right, (float,Variable)):
-                print('variable', op, 'variable')
+                # print('variable', op, 'variable')
                 # print(left, right)
                 result = calc(op, left, right)
-                print('step 3 = ', result, type(result))
+                # print('step 3 = ', result, type(result))
                 return clearExpr(result)
         else:
-            print('float*float')
+            # print('float*float')
             # print(left, right)
             result = calc(op, left, right)
             # print('step 3 = ', result, type(result))

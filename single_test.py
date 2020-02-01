@@ -74,7 +74,7 @@ def plot2D(parser, tree, start, end):
     for value in values:
         if isContinuous(parser,tree, value):
             parser.insertValue(value)
-            mid = tree.getCalc()     
+            mid = tree.getCalc()
             x.append(value)
             y.append(mid)
         else:
@@ -121,7 +121,7 @@ def drawMulti(data, figure_num, title):
     mpl.rcParams['legend.fontsize'] = 10
     x,y,z = data
     fig = plt.figure(figure_num)
-    ax = plt.axes(projection='3d')
+    ax = plt.gca(projection='3d')
     plt.title(title)
     ax.set_xlabel('x')
     ax.set_ylabel('y')
@@ -129,6 +129,8 @@ def drawMulti(data, figure_num, title):
     ax.contour3D(x, y, z, 50)
     vmin = np.nanmin(y); vmax = np.nanmax(y)
     #print(y)
+    print(x)
+    print(y)
     plt.ylim(vmin, vmax)
     img = io.BytesIO()
     plt.savefig(img, format='png')
@@ -219,7 +221,6 @@ def test(case, start_end):
     variable_num = len(parser.getVariables())
     start, end = start_end
     figure_num = 1
-    # domain = parser.getDomain()
 
     if not isinstance(canonicalization, (int,float)):
         if variable_num > 1:
@@ -237,7 +238,6 @@ def test(case, start_end):
     print('domain =', domain)
     if derivatives is not None:
         for d in derivatives:
-            # print(d, type(d))
             d[1] = list2str(d[1])
             figure_num += 1
             semi_expr = list2str(d[1])
@@ -257,5 +257,4 @@ def test(case, start_end):
 
 
 
-#test2(input(),[-1,1])
 

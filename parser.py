@@ -126,16 +126,16 @@ class Parser(object):
         return self.variables
     
     def parse(self):
-        """try:
+        try:
             e = self.parseExpr()
             self.tokens.takeIt(['EOL'])    
             return e
         except Exception as e:
             print(e)
-            return Error(e)"""
-        e = self.parseExpr()
-        self.tokens.takeIt(['EOL'])    
-        return e
+            return Error(e)
+        # e = self.parseExpr()
+        # self.tokens.takeIt(['EOL'])    
+        # return e
     def parseExpr(self):
         t = self.parseTerm()
         et = self.parseExprTail()
@@ -231,22 +231,22 @@ class Parser(object):
         elif angleF == 'tan':
             tan = Tan(e)
             v = tan.e.eval()
-            self.getInvalidDomain(v,'n*pi + pi/2 (n is real_number)')
+            self.getInvalidDomain(v,' != n*pi + pi/2 (n is real_number)')
             return tan
         elif angleF == 'csc':
             csc = Csc(e)
             v = csc.e.eval()
-            self.getInvalidDomain(v,'n*pi (n is real_number)')
+            self.getInvalidDomain(v,' != n*pi (n is real_number)')
             return csc
         elif angleF == 'sec':
             sec = Sec(e)
             v = sec.e.eval()
-            self.getInvalidDomain(v,'n*pi + pi/2(n is real_number)')
+            self.getInvalidDomain(v,' != n*pi + pi/2(n is real_number)')
             return sec
         elif angleF == 'cot':
             cot = Cot(e)
             v = cot.e.eval()
-            self.getInvalidDomain(v,'n*pi (n is real_number)')
+            self.getInvalidDomain(v,' != n*pi (n is real_number)')
             return cot
          
     
