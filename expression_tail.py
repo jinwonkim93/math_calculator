@@ -1,5 +1,5 @@
 from node import Node
-from utils import calcByTerm
+from utils import calcByTerm, calc
 
 class ExprTail(Node):
     def __init__(self, op, t, et):
@@ -16,7 +16,8 @@ class ExprTail(Node):
         return self.et.eval(left)
     def getCalc(self, left):
         eval_term = self.t.getCalc()
-        left = calcByTerm(self.op, left, eval_term)
+        # left = calcByTerm(self.op, left, eval_term)
+        left = calc(self.op, left, eval_term)
         return self.et.getCalc(left)
     def __str__(self):
         return f'{str(self.op)}{str(self.t)}{str(self.et)}'

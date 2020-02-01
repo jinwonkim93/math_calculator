@@ -1,4 +1,4 @@
-from utils import calcByTerm
+from utils import calcByTerm, calc
 import numpy as np
 class TermTail(object):
     def __init__(self, op, f,  tt):
@@ -17,7 +17,8 @@ class TermTail(object):
     def getCalc(self, left):
         try:
             eval_factor = self.f.getCalc()
-            left = calcByTerm(self.op, left,eval_factor)
+            # left = calcByTerm(self.op, left,eval_factor)
+            left = calc(self.op, left,eval_factor)
             return self.tt.getCalc(left)
         except ZeroDivisionError:
             return np.inf

@@ -10,11 +10,34 @@ from error import NonDerivableError, Error
 from utils import clearExpr
 mpl.use('Agg')
 
-def isContinuous(parser,tree, value):
-    alpha = float(0.00000001)
-    tolerance = float(0.00005)
+domainRule = {
+    "!=":lambda x,y: x != y
+}
+#사용안함
+def checkDomain(parser,tree, value):
+    domain = parser.getDomain()
     parser.insertValue(value)
-    mid = tree.getCalc() 
+    validity = True
+    print(domain)
+    for symbol, rule in domain:
+        rule_op, invalid_value = rule.split(',')
+        try:
+            test_value = symbol.getCalc()
+        except:
+            return False
+        validity &= domainRule[rule_op](test_value, float(invalid_value))
+    return validity
+
+def isContinuous(parser,tree, value):
+    # if checkDomain(parser,tree, value) == False:
+        # return False
+    alpha = 10**-5
+    tolerance = alpha * 10000
+    try:
+        parser.insertValue(value)
+        mid = tree.getCalc()
+    except:
+        return False 
     parser.insertValue(value-alpha)
     left = tree.getCalc()
     parser.insertValue(value+alpha)
@@ -26,21 +49,20 @@ def isContinuous(parser,tree, value):
     return abs(left-mid)<tolerance and abs(mid-right)<tolerance
 
 def isDerivative(parser, tree, value):
-    if isContinuous(parser, tree, value) != True: return False
-    result = True
-    derivatives = parser.getDerivative(tree)
-    if derivatives is not None:
-        for d in derivatives:
-            semi_expr = str(d[1])
-            d_parser = getParser(semi_expr)
-            d_tree = d_parser.parse()
-            d_parser.insertValue(value)
-            try:
-                val = d_tree.getCalc()
-                #print(val)
-                result = True
-            except:
-                result = False
+    result = False
+    if isContinuous(parser, tree, value):
+        derivatives = parser.getDerivative(tree)
+        if derivatives is not None:
+            for d in derivatives:
+                semi_expr = str(d[1])
+                d_parser = getParser(semi_expr)
+                d_tree = d_parser.parse()
+                d_parser.insertValue(value)
+                try:
+                    val = d_tree.getCalc()
+                    result = True
+                except:
+                    result = False
     return result
 
 
@@ -49,8 +71,6 @@ def plot2D(parser, tree, start, end):
     x = []
     y = []
 
-    domain = parser.getDomain()
-    
     for value in values:
         if isContinuous(parser,tree, value):
             parser.insertValue(value)
@@ -68,7 +88,7 @@ def plot2D(parser, tree, start, end):
 
 def plot3D(parser, tree, start, end):
     #x = np.arange(start,end, 0.1)
-    x = np.linspace(start, end, 300)
+    x = np.linspace(start, end, 200)
     y = []
     for value1 in x:
         parser.insertValue2(value1,'x')
@@ -153,33 +173,33 @@ def test2(case, start_end):
     figure_num = 1
     domain = parser.getDomain()
 
-    # if not isinstance(canonicalization, (int,float)):
-    #     if variable_num > 1:
-    #         data = plot3D(parser, tree, start, end)
-    #         pics.append(drawMulti(data, figure_num, canonicalization))  
-    #     elif variable_num == 1:
-    #         data = plot2D(parser, tree, start, end)
-    #         pics.append(draw2D(data, figure_num, canonicalization))    
-        #print(isDerivative(parser,tree,-1))
+    if not isinstance(canonicalization, (int,float)):
+        if variable_num > 1:
+            data = plot3D(parser, tree, start, end)
+            pics.append(drawMulti(data, figure_num, canonicalization))  
+        elif variable_num == 1:
+            data = plot2D(parser, tree, start, end)
+            pics.append(draw2D(data, figure_num, canonicalization))    
+        print(isDerivative(parser,tree,-1))
     derivatives = parser.getDerivative(tree)
     domain = list(parser.getDomain())
     print('derivatives =', derivatives)
     if derivatives is None:
         derivatives = []
     print('domain =', domain)
-    # if derivatives is not None:
-    #     for d in derivatives:
-    #         # print(d, type(d))
-    #         d[1] = list2str(d[1])
-    #         figure_num += 1
-    #         semi_expr = list2str(d[1])
-    #         partial_derivatives.append(list2str(d))
-    #         d_parser = getParser(semi_expr)
-    #         d_tree = d_parser.parse()
-    #         d_title = semi_expr
-    #         if len(d_parser.getVariables()) == 0: continue
-    #         d_data = plot2D(d_parser, d_tree, start, end)
-    #         pics.append(draw2D(d_data, figure_num, d_title))
+    if derivatives is not None:
+        for d in derivatives:
+            # print(d, type(d))
+            d[1] = list2str(d[1])
+            figure_num += 1
+            semi_expr = list2str(d[1])
+            partial_derivatives.append(list2str(d))
+            d_parser = getParser(semi_expr)
+            d_tree = d_parser.parse()
+            d_title = semi_expr
+            if len(d_parser.getVariables()) == 0: continue
+            d_data = plot2D(d_parser, d_tree, start, end)
+            pics.append(draw2D(d_data, figure_num, d_title))
     
     return pics, canonicalization, derivatives, domain
     # return pics, canonicalization, partial_derivatives, domain
@@ -199,38 +219,41 @@ def test(case, start_end):
     variable_num = len(parser.getVariables())
     start, end = start_end
     figure_num = 1
-    domain = parser.getDomain()
+    # domain = parser.getDomain()
 
-    # if not isinstance(canonicalization, (int,float)):
-    #     if variable_num > 1:
-    #         data = plot3D(parser, tree, start, end)
-    #         pics.append(drawMulti(data, figure_num, canonicalization))  
-    #     elif variable_num == 1:
-    #         data = plot2D(parser, tree, start, end)
-    #         pics.append(draw2D(data, figure_num, canonicalization))    
-        #print(isDerivative(parser,tree,-1))
+    if not isinstance(canonicalization, (int,float)):
+        if variable_num > 1:
+            data = plot3D(parser, tree, start, end)
+            pics.append(drawMulti(data, figure_num, canonicalization))  
+        elif variable_num == 1:
+            data = plot2D(parser, tree, start, end)
+            pics.append(draw2D(data, figure_num, canonicalization))    
+        print(isDerivative(parser,tree,-1))
     derivatives = parser.getDerivative(tree)
     domain = list(parser.getDomain())
     print('derivatives =', derivatives)
     if derivatives is None:
         derivatives = []
     print('domain =', domain)
-    # if derivatives is not None:
-    #     for d in derivatives:
-    #         # print(d, type(d))
-    #         d[1] = list2str(d[1])
-    #         figure_num += 1
-    #         semi_expr = list2str(d[1])
-    #         partial_derivatives.append(list2str(d))
-    #         d_parser = getParser(semi_expr)
-    #         d_tree = d_parser.parse()
-    #         d_title = semi_expr
-    #         if len(d_parser.getVariables()) == 0: continue
-    #         d_data = plot2D(d_parser, d_tree, start, end)
-    #         pics.append(draw2D(d_data, figure_num, d_title))
-    
-    return pics, canonicalization, derivatives, domain
-    # return pics, canonicalization, partial_derivatives, domain
+    if derivatives is not None:
+        for d in derivatives:
+            # print(d, type(d))
+            d[1] = list2str(d[1])
+            figure_num += 1
+            semi_expr = list2str(d[1])
+            partial_derivatives.append(list2str(d))
+            d_parser = getParser(semi_expr)
+            d_tree = d_parser.parse()
+            d_title = semi_expr
+            if len(d_parser.getVariables()) == 0: continue
+            d_data = plot2D(d_parser, d_tree, start, end)
+            pics.append(draw2D(d_data, figure_num, d_title))
+    clean_domain = []
+    for d in domain:
+        clean_domain.append(list2str(d))
+
+    # return pics, canonicalization, derivatives, domain
+    return pics, canonicalization, partial_derivatives, clean_domain
 
 
 

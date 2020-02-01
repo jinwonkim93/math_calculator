@@ -9,7 +9,9 @@ def logn(n, x = math.e):
     return 1 + logn(n/x, x) if n > (x-1) else 0
 
 def pow(base,expo):
-    print(base, expo, 'powpopw', type(base))
+    # print(base, expo, 'powpopw', type(base))
+    if isinstance(base, Variable) and isinstance(base.e, Parenthesis):
+        base = base.e.getList()
     if isinstance(base, Variable):
         if isinstance(expo, (list,Variable)):
             return Variable(base.e, coeff = base.coeff, expo = expo)
@@ -25,12 +27,22 @@ def pow(base,expo):
             right = deepcopy(base)
             left = deepcopy(base)
             if expo <1:
-                #방법을 찾아야함
-                # return Variable(Empty(), coeff = base, expo = expo)      
-                return Variable(Parenthesis(base), expo = expo)      
+            #     #방법을 찾아야함
+            #     # return Variable(Empty(), coeff = base, expo = expo)      
+                print(base, type(base))
+                return Variable(Parenthesis(base), expo = expo)
+            #     # expo -= 1
+            #     # left = calcByTerm('*',left,right)
+                # expo = -expo
+                # while (expo > 1):
+                #     expo -= 1
+                #     left = calcByTerm('*',left,right)
+                # left.expo = -left.expo
+                # return left   
             while (expo > 1):
                 expo -= 1
                 left = calcByTerm('*',left,right)
+            left.expo = -left.expo
             return left
         
         elif isinstance(expo, (list,Variable)):
@@ -114,7 +126,7 @@ def calcByTerm(op, left,right):
             temp_right = right.e.getList()
             temp_right = pow(temp_right, right.expo)
             right = calcByTerm('*',temp_right,right.coeff)
-            right = right.e.getList(0)
+            right = right.e.getList()
             
     
     print('step 1 = ', left, op, right , 'end')

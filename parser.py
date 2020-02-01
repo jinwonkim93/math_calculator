@@ -3,7 +3,6 @@ from expression_tail import ExprTail
 from term import Term
 from term_tail import TermTail
 from factor_new import Factor, Variable, Constant, Symbol, Log,  Sin, Cos, Tan, Sec, Csc, Cot, ConstantE, Pi, Parenthesis
-# from math_function import Log,  Sin, Cos, Tan, Sec, Csc, Cot, ConstantE, Pi
 from factor_tail import FactorTail
 from error import Error, NonDerivableError
 from empty import Empty
@@ -40,7 +39,7 @@ class Parser(object):
                 return True
             else:
                 for key in self.domain.keys():
-                    if not key.e == v.e:
+                    if not key == v:
                         self.domain[v] = invalid
                         return True
         
@@ -60,7 +59,6 @@ class Parser(object):
     
     def expr2str(self,expr):
         try:
-            print('expr2str = ', expr, type(expr))
             d = ''
             for value in expr:
                 if isinstance(value, list):
@@ -69,7 +67,6 @@ class Parser(object):
             
             return d
         except:
-            print('expr2str = ', expr, type(expr))
             return str(expr)
 
     def getDerivative(self, semi_expression):
@@ -77,7 +74,7 @@ class Parser(object):
             semi_expression = semi_expression.eval()
             derivatives = []
             # print(self.getVariables())
-            if isinstance(semi_expression, Variable) and isinstance(semi_expression.e, Parenthesis):
+            if isinstance(semi_expression, Variable) and isinstance(semi_expression.e, Parenthesis) and semi_expression.expo == 1:
                 semi_expression = semi_expression.e.getList()
             for name, symbol in self.variables.items():
                 # print(name, symbol)
@@ -161,9 +158,9 @@ class Parser(object):
         if self.tokens.isType(['*', '/']):
             op = self.tokens.takeIt()
             f = self.parseFactor()
-            if op == '/': 
-                v = f.eval()
-                self.getInvalidDomain(v,'!=0')
+            # if op == '/': 
+            v = f.eval()
+            self.getInvalidDomain(v,'!= 0')
             tt = self.parseTermTail()
             return TermTail(op, f, tt)
         return Empty()

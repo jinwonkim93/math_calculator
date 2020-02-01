@@ -79,7 +79,6 @@ class Expr(Node):
             
     def expr2str(self,expr):
         try:
-            print('expr2str = ', expr, type(expr))
             d = ''
             for value in expr:
                 if isinstance(value, list):
@@ -88,7 +87,6 @@ class Expr(Node):
             
             return d
         except:
-            print('expr2str = ', expr, type(expr))
             return str(expr)
 
     def __str__(self):

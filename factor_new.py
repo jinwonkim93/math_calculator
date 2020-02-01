@@ -3,6 +3,7 @@ from empty import Empty
 from expression import Expr
 import math
 from mathematical_constant import PI, E
+# from utils import clearExpr
 # import math_function
 
 def list2str(expr):
@@ -110,7 +111,6 @@ class Variable(object):
                 coeff = self.coeff * other.coeff
                 expo = self.expo + other.expo
                 
-                print([coeff, self.e, expo])
                 if coeff == 0:
                     return 0
                 elif expo == 0:
@@ -139,14 +139,12 @@ class Variable(object):
             return Variable(self.e, coeff = coeff, expo = self.expo) if coeff is not 0 else 0
     
     def __rmul__(self, other):
-        print(self, other)
         if other == 0:return 0
         if isinstance(other, Variable):
             if self.e == other.e:
                 coeff = self.coeff * other.coeff
                 expo = self.expo + other.expo
                 
-                print([coeff, self.e, expo])
                 if coeff == 0:
                     return 0
                 elif expo == 0:
@@ -243,6 +241,7 @@ class Variable(object):
         return res 
     
     def __repr__(self):
+        from fractions import Fraction
         if self.coeff == 0:
             return '0'
         
@@ -262,22 +261,25 @@ class Variable(object):
         if isinstance(self.e, Parenthesis):
             e = f'({e})'
         
+        coeff = self.coeff
+        if isinstance(coeff, (int,float)):
+            coeff = Fraction(coeff).limit_denominator()
         if self.coeff != 1:
             if self.expo == 0:
-                return f'{self.coeff}'
+                return f'{coeff}'
             
             elif self.expo < 0:
-                return f'{self.coeff}*{e}^{self.expo}'
+                return f'{coeff}*{e}^{self.expo}'
             elif self. expo == 1:
-                return f'{self.coeff}*{e}'
+                return f'{coeff}*{e}'
             else:
-                return f'{self.coeff}*{e}^{self.expo}'
+                return f'{coeff}*{e}^{self.expo}'
         else:
             if self.expo == 0:
-                return f'{self.coeff}'
+                return f'{coeff}'
             
             elif self.expo < 0:
-                return f'{self.coeff}*{e}^{self.expo}'
+                return f'{coeff}*{e}^{self.expo}'
             elif self. expo == 1:
                 return f'{e}'
             else:
@@ -330,24 +332,6 @@ class Variable(object):
             else:
                 return 0
         
-        # elif isinstance(self.e, Symbol):
-        #     if self.e == symbol:
-        #         if self.expo != 1:
-        #             coeff = self.coeff * self.expo
-        #             return Variable(self.e,coeff = coeff, expo = self.expo-1)
-        #         elif self.expo == 1:
-        #             return self.coeff*self.expo
-                
-        #     elif isinstance(self.coeff, Variable):
-        
-        #         coeff = self.coeff.getDerivative(symbol)
-        #         if coeff != 0:
-        #             coeff = coeff * Variable(self.e,expo = self.expo)
-        #             return coeff
-        #         return 0
-        #     else:
-        #         return 0
-        
         elif isinstance(self.e, (Sin,Cos,Tan,Sec,Cot,Csc, Log, Symbol)):
             derivative, inner_derivative = self.e.getDerivative(symbol)
             coeff = self.coeff
@@ -364,28 +348,30 @@ class Variable(object):
             
             
             if isinstance(inner_derivative, list):
-                print(inner_derivative)
                 for idx in range(0,len(inner_derivative), 2):
                     element = inner_derivative[idx]
-                    print('self.e', self.e)
-                    print('element = ', element)
-                    print('self.coeff = ', self.coeff)
-                    print('self.expo = ', self.expo)
-                    print('temp_variable1 = ', temp_variable1)
-                    print('temp_variable2 = ', temp_variable2)
+                    # print('self.e', self.e)
+                    # print('element = ', element)
+                    # print('self.coeff = ', self.coeff)
+                    # print('self.expo = ', self.expo)
+                    # print('temp_variable1 = ', temp_variable1)
+                    # print('temp_variable2 = ', temp_variable2)
                     temp_variable = element * self.coeff * self.expo * temp_variable1 * temp_variable2 
                     res_variable += temp_variable
 
             else:
-                print('self.e', self.e)
-                print('inner_derivative = ', inner_derivative)
-                print('self.coeff = ', self.coeff)
-                print('self.expo = ', self.expo)
-                print('temp_variable1 = ', temp_variable1)
-                print('temp_variable2 = ', temp_variable2)
+                # print('self.e', self.e)
+                # print('inner_derivative = ', inner_derivative)
+                # print('self.coeff = ', self.coeff)
+                # print('self.expo = ', self.expo)
+                # print('temp_variable1 = ', temp_variable1)
+                # print('temp_variable2 = ', temp_variable2)
                 res_variable += temp_variable1*inner_derivative*temp_variable2*self.expo*self.coeff
             
             return res_variable
+
+        elif isinstance(self.e, Parenthesis) and self.expo < 0:
+            return Variable(self.e, coeff = self.coeff*self.expo , expo = self.expo-1)
 
         else:
             return self.e.getDerivative(symbol)
@@ -816,8 +802,23 @@ class Parenthesis(object):
         self.e = e
         self.expo = expo
         self.name = name
+    
     def getList(self):
         return self.e
+    
+    def getCalc(self):
+        temp = []
+        res = 0
+        op = '+'
+        for idx in range(0,len(self.e),2):
+            element = self.e[idx]
+            if idx > 0:
+                op = self.e[idx-1]
+            if isinstance(element, Variable):
+                element = element.getCalc()
+            res = calc(op,res,element)                
+        return res
+        
     def getDerivative(self, symbol):
         temp = []
         semi_expression = self.getList()
@@ -843,7 +844,6 @@ class Parenthesis(object):
                         else:
                             if len(temp) == 1: temp.pop()
                             temp.append(derivation)
-            print(temp, 'parentheisisisisisi')
             return temp
     def __eq__(self, other):
         if self.__class__ != other.__class__: return False
@@ -857,3 +857,17 @@ class Parenthesis(object):
     def __repr__(self):
         return f'{list2str(self.e)}' if self.expo == 1 else f'({list2str(self.e)})^{self.expo}'
         #return f'({self.e})'
+
+def calc(op, left, right):
+    if op is '+':
+        # print(left, '+', right)
+        return left + right
+    elif op is '-':
+        # print(left, '-', right)
+        return left - right
+    elif op is '*':
+        # print(left, '*', right)
+        return left * right
+    elif op is '/':
+        # print(left, '/', right)
+        return left / right
