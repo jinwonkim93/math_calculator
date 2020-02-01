@@ -1,10 +1,7 @@
-#from node import Node
 from empty import Empty
 from expression import Expr
 import math
 from mathematical_constant import PI, E
-# from utils import clearExpr
-# import math_function
 
 def list2str(expr):
     try:
@@ -172,22 +169,6 @@ class Variable(object):
             
             coeff = self.coeff * other
             return Variable(self.e, coeff = coeff, expo = self.expo) if coeff is not 0 else 0
-    
-    # def __rmul__(self, other):
-    #     if other == 0: return 0
-    #     if isinstance(other, Variable):
-    #         if self.e == other.e:
-    #             coeff = self.coeff * other.coeff
-    #             expo = self.expo + other.expo
-    #             return Variable(self.e, coeff = coeff, expo = expo) if coeff is not 0 else 0
-    #         else:
-    #             return [self, "*", other]
-    #     elif isinstance(other, Constant):
-    #         coeff = other.eval() * self.coeff
-    #         return Variable(self.e, coeff = coeff, expo = self.expo) if coeff is not 0 else 0
-    #     else:
-    #         coeff = other * self.coeff
-    #         return Variable(self.e, coeff = coeff, expo = self.expo) if coeff is not 0 else 0
               
     def __truediv__(self, other):
         if isinstance(other, Variable):
@@ -439,12 +420,7 @@ class Constant(object):
     def __repr__(self):
         return f'{self.value}' if isinstance(self.expo, Empty) else f'{self.value}^{self.expo}'
 
-# from expression import Expr
-# from empty import Empty
-# from utils import isExpr
-#from factor_new import Variable, Constant
 from math import sin, cos, tan
-# from mathematical_constant import PI, E
 import numpy as np
 
 class Log(object):
@@ -455,7 +431,6 @@ class Log(object):
     
     def eval(self):
         try:
-            # return self.lognNew(self.e.eval(),self.symbol)
             e_val = self.e.eval() if isinstance(self.e, Variable) else self.e
             if isinstance(self.e, ConstantE): e_val = self.e.getCalc() 
             return self.lognNew(e_val,self.symbol)
@@ -492,12 +467,6 @@ class Log(object):
 
 
     def convert(self):
-        """ e_val = self.e.eval()
-        if isinstance(e_val, Variable):
-            self.e = "집가서하자"
-            coeff = e_eval.expo
-
-            return Variable(,)"""
         return self
     def __eq__(self,other):
         if self.__class__ == other.__class__ and repr(self.e) == repr(other.e):return True
@@ -798,9 +767,8 @@ class Pi(object):
         return self.name
 
 class Parenthesis(object):
-    def __init__(self, e, expo = 1, name = 'Parenthesis'):
+    def __init__(self, e, name = 'Parenthesis'):
         self.e = e
-        self.expo = expo
         self.name = name
     
     def getList(self):
@@ -855,19 +823,14 @@ class Parenthesis(object):
         if isinstance(other, Symbol): return True
         return repr(self.e) > repr(other.e)
     def __repr__(self):
-        return f'{list2str(self.e)}' if self.expo == 1 else f'({list2str(self.e)})^{self.expo}'
-        #return f'({self.e})'
+        return f'{list2str(self.e)}'
 
 def calc(op, left, right):
     if op is '+':
-        # print(left, '+', right)
         return left + right
     elif op is '-':
-        # print(left, '-', right)
         return left - right
     elif op is '*':
-        # print(left, '*', right)
         return left * right
     elif op is '/':
-        # print(left, '/', right)
         return left / right

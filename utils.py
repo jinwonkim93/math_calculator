@@ -1,5 +1,5 @@
 import math
-from factor_new import Variable, Constant, Symbol, Parenthesis
+from factor import Variable, Constant, Symbol, Parenthesis
 from mathematical_constant import *
 from empty import Empty
 from copy import deepcopy

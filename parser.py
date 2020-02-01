@@ -2,7 +2,7 @@ from expression import Expr
 from expression_tail import ExprTail
 from term import Term
 from term_tail import TermTail
-from factor_new import Factor, Variable, Constant, Symbol, Log,  Sin, Cos, Tan, Sec, Csc, Cot, ConstantE, Pi, Parenthesis
+from factor import Factor, Variable, Constant, Symbol, Log,  Sin, Cos, Tan, Sec, Csc, Cot, ConstantE, Pi, Parenthesis
 from factor_tail import FactorTail
 from error import Error, NonDerivableError
 from empty import Empty

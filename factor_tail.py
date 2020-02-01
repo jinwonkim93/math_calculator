@@ -1,7 +1,7 @@
 from node import Node
 from empty import Empty
 from expression import Expr
-from factor_new import Symbol, Constant
+from factor import Symbol, Constant
 from utils import pow
 
 class FactorTail(Node):
