@@ -76,11 +76,11 @@ class Variable(object):
             
             if isinstance(self.expo, Variable):
                 return Variable(Parenthesis([other, "+", self]))
-            if other.expo > self.expo:
-                return Variable(Parenthesis([other, "+", self]))
-            elif other.e < self.e:
-                return Variable(Parenthesis([other, '+', self]))
-            
+            if other.expo.__class__ == self.expo.__class__ :
+                if other.expo > self.expo:
+                    return Variable(Parenthesis([other, "+", self]))
+                elif other.e < self.e:
+                    return Variable(Parenthesis([other, '+', self]))
         return Variable(Parenthesis([self, "+", other]))
     
     def __radd__(self, other):
@@ -331,12 +331,18 @@ class Variable(object):
         if isinstance(self.e, (int,float)): return 0
         
         elif isinstance(self.expo, Variable):
+            res_variable = 0
+            if isinstance(self.coeff, Variable):
+                coeff = self.coeff.getDerivative(symbol)
+                coeff = coeff*Variable(self.e, expo = self.expo)
+                res_variable += coeff
             fx = deepcopy(self)
             #log_val = Log(E,self.coeff).eval()
-            log_val = Log(E,self.e).eval()
+            log_val = Log(E,self.e).eval() if isinstance(self.e, ConstantE) else Log(E,self.coeff)
             temp_variable = Variable(log_val) if isinstance(log_val, Log) else log_val 
             expo_derivative = self.expo.getDerivative(symbol)
-            return fx  * temp_variable * expo_derivative
+            res_variable += fx  * temp_variable * expo_derivative
+            return res_variable
                 
         elif isinstance(self.e, Empty):
             if self.coeff == E:
@@ -363,28 +369,15 @@ class Variable(object):
             if isinstance(inner_derivative, list):
                 for idx in range(0,len(inner_derivative), 2):
                     element = inner_derivative[idx]
-                    # print('self.e', self.e)
-                    # print('element = ', element)
-                    # print('self.coeff = ', self.coeff)
-                    # print('self.expo = ', self.expo)
-                    # print('temp_variable1 = ', temp_variable1)
-                    # print('temp_variable2 = ', temp_variable2)
                     temp_variable = element * self.coeff * self.expo * temp_variable1 * temp_variable2 
                     res_variable += temp_variable
 
             else:
-                # print('self.e', self.e)
-                # print('inner_derivative = ', inner_derivative)
-                # print('self.coeff = ', self.coeff)
-                # print('self.expo = ', self.expo)
-                # print('temp_variable1 = ', temp_variable1)
-                # print('temp_variable2 = ', temp_variable2)
-                res_variable += temp_variable1*inner_derivative*temp_variable2*self.expo*self.coeff
+                res_variable += temp_variable1*inner_derivative*temp_variable2*self.expo*self.coeff 
             
             return res_variable
         elif isinstance(self.e, Parenthesis) and self.expo < 0:
             return Variable(self.e, coeff = self.coeff*self.expo , expo = self.expo-1)
-        # elif isinstance(self.e, Variable):
         elif isinstance(self.e, Parenthesis) and self.expo > 0 and self.expo < 1:
             coeff = self.expo
             expo = self.expo - 1
@@ -396,12 +389,9 @@ class Variable(object):
             elif len(inner_derivative) == 0: return 0
             else:
                 inner_derivative = Variable(Parenthesis(inner_derivative))    
-            # inner_derivative = Variable(Parenthesis(inner_derivative))    
             return inner_derivative * fx
         else:
             return self.e.getDerivative(symbol)
-            # return 0
-            # return self.e.getDerivative(self,symbol)
 
 
 
