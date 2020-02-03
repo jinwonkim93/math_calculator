@@ -28,6 +28,20 @@ def checkDomain(parser,tree, value):
         validity &= domainRule[rule_op](test_value, float(invalid_value))
     return validity
 
+def derivativeAtPoint(parser,tree,value, derivatives):
+    symbol, point = value[0].split('=')
+    point = float(point)
+    result = False
+    if isContinuous(parser,tree, point):
+        if len(derivatives) == 0: return True
+        for d in derivatives:
+            d[1] = list2str(d[1])
+            semi_expr = list2str(d[1])
+            d_parser = getParser(semi_expr)
+            d_tree = d_parser.parse()
+            result = isContinuous(d_parser, d_tree, point)
+    return result
+
 def isContinuous(parser,tree, value):
     alpha = 10**-5
     tolerance = alpha * 10000
@@ -140,7 +154,6 @@ def list2str(expr):
 
 def getParser(case):
     scanner = Scanner(case)
-    print('tokenized = ', scanner.tokens)  
     parser = Parser(scanner)
     return parser
 
@@ -219,30 +232,34 @@ def test(case, start_end, derivative_points):
             data = plot2D(parser, tree, start, end)
             pics.append(draw2D(data, figure_num, canonicalization))    
     
-
-
-    
     derivatives = parser.getDerivative(tree)
-    domain = list(parser.getDomain())
-    if derivatives is None:
-        derivatives = []
-    if derivatives is not None:
-        for d in derivatives:
-            d[1] = list2str(d[1])
-            figure_num += 1
-            semi_expr = list2str(d[1])
-            partial_derivatives.append(list2str(d))
-            d_parser = getParser(semi_expr)
-            d_tree = d_parser.parse()
-            d_title = semi_expr
-            if len(d_parser.getVariables()) == 0: continue
-            d_data = plot2D(d_parser, d_tree, start, end)
-            pics.append(draw2D(d_data, figure_num, d_title))
-    clean_domain = []
-    for d in domain:
-        clean_domain.append(list2str(d))
+    if derivativeAtPoint(parser,tree,derivative_points,derivatives):
+        derivative_points = derivative_points[0] + ' is Valid'
+    else:
+        derivative_points = derivative_points[0] + ' is invalid'
+    
 
-    return pics, canonicalization, partial_derivatives, clean_domain
+    domain = list(parser.getDomain())
+    # if derivatives is None:
+    #     derivatives = []
+    # if derivatives is not None:
+    #     for d in derivatives:
+    #         d[1] = list2str(d[1])
+    #         figure_num += 1
+    #         semi_expr = list2str(d[1])
+    #         partial_derivatives.append(list2str(d))
+    #         d_parser = getParser(semi_expr)
+    #         d_tree = d_parser.parse()
+    #         d_title = semi_expr
+    #         if len(d_parser.getVariables()) == 0: continue
+    #         d_data = plot2D(d_parser, d_tree, start, end)
+    #         pics.append(draw2D(d_data, figure_num, d_title))
+    # clean_domain = []
+    # for d in domain:
+    #     clean_domain.append(list2str(d))
+
+    # return pics, canonicalization, partial_derivatives, clean_domain
+    return pics, canonicalization, partial_derivatives, domain, derivative_points
 
 
 

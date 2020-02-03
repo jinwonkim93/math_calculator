@@ -19,14 +19,14 @@ def calcExpr():
       if derivative_points == '': derivative_points = 'x = 1'
       expr_range = list(map(float,expr_range.split(',')))
       derivative_points = derivative_points.split(',')
-      print(derivative_points)
-      pics, canonicalization, partial_derivatives, domain = test(expr,expr_range,derivative_points)
+      pics, canonicalization, partial_derivatives, domain, derivative_point = test(expr,expr_range,derivative_points)
       return render_template('image.html',
                              pics = pics,
                              canonicalization = canonicalization,
                              input = expr,
                              partial_derivatives = partial_derivatives,
-                             domain = domain)
+                             domain = domain,
+                             derivative_point = derivative_point)
 
 
 @app.route("/")
