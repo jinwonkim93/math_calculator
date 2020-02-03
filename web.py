@@ -14,9 +14,13 @@ def calcExpr():
    if request.method == 'POST':
       expr = request.form['Expression']
       expr_range = request.form['Range']
+      derivative_points = request.form['Point']
       if expr_range == '': expr_range = '-1,1'
+      if derivative_points == '': derivative_points = 'x = 1'
       expr_range = list(map(float,expr_range.split(',')))
-      pics, canonicalization, partial_derivatives, domain = test(expr,expr_range)
+      derivative_points = derivative_points.split(',')
+      print(derivative_points)
+      pics, canonicalization, partial_derivatives, domain = test(expr,expr_range,derivative_points)
       return render_template('image.html',
                              pics = pics,
                              canonicalization = canonicalization,

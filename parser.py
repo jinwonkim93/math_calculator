@@ -98,6 +98,7 @@ class Parser(object):
                                 
                                 elif derivation == 0:
                                     if len(temp) > 0: temp.pop()
+                                    if len(temp) == 0: temp.append(derivation)
                                 else:
                                     if len(temp) == 1: temp.pop()
                                     temp.append(derivation)

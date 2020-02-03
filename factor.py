@@ -52,7 +52,21 @@ class Variable(object):
                 return False
         return False
 
-            
+    def convertWhole(self):
+        coeff = self.coeff
+        expo = abs(self.expo)
+        temp = Variable(self.e, expo = expo)
+        molecular = coeff * temp
+        parenthesis = self.e.getList()
+        if len(parenthesis) == 1:
+            parenthesis = parenthesis[0]
+            parenthesis.expo = -parenthesis.expo
+            return molecular * parenthesis
+        else:
+            parenthesis = self.e
+            denominator = Variable(parenthesis, coeff = molecular, expo = -1)
+            return denominator
+
     def __add__(self, other):
         if other == 0:return self
         if isinstance(other, Variable):
@@ -103,6 +117,7 @@ class Variable(object):
     
     def __mul__(self, other):
         if other == 0:return 0
+        if self.expo == -0.5: self = self.convertWhole()
         if isinstance(other, Variable):
             if self.e == other.e:
                 coeff = self.coeff * other.coeff
@@ -137,7 +152,15 @@ class Variable(object):
     
     def __rmul__(self, other):
         if other == 0:return 0
+        if self.expo == -0.5: self = self.convertWhole()
+        # if self.expo < 0 and abs(self.expo) > 0 and abs(self.expo) < 1:
+        #     right_value = deepcopy(self)
+        #     right_value.expo = abs(right_value.expo)
+        #     left_value = right_value * other
+        #     right_value.expo = self.expo + self.expo
+        #     return left_value * right_value
         if isinstance(other, Variable):
+
             if self.e == other.e:
                 coeff = self.coeff * other.coeff
                 expo = self.expo + other.expo
@@ -240,7 +263,11 @@ class Variable(object):
         
         e = self.e
         if isinstance(self.e, Parenthesis):
-            e = f'({e})'
+            temp = self.e.getList()
+            if len(temp) == 1 and self.expo == 1:
+                e = f'{e}'
+            else:
+                e = f'({e})'
         
         coeff = self.coeff
         if isinstance(coeff, (int,float)):
@@ -282,6 +309,11 @@ class Variable(object):
     
     def eval(self):
         res = None
+        if isinstance(self.e, Parenthesis):
+            temp = self.e.getList()
+            if len(temp) == 1:
+                return temp[0]
+        
         if isinstance(self.e, float):
             return self.e
         else:
@@ -313,7 +345,7 @@ class Variable(object):
             else:
                 return 0
         
-        elif isinstance(self.e, (Sin,Cos,Tan,Sec,Cot,Csc, Log, Symbol)):
+        elif isinstance(self.e, (Sin,Cos,Tan,Sec,Cot,Csc, Log, Symbol, Variable)):
             derivative, inner_derivative = self.e.getDerivative(symbol)
             coeff = self.coeff
             res_variable = 0
@@ -350,10 +382,22 @@ class Variable(object):
                 res_variable += temp_variable1*inner_derivative*temp_variable2*self.expo*self.coeff
             
             return res_variable
-
         elif isinstance(self.e, Parenthesis) and self.expo < 0:
             return Variable(self.e, coeff = self.coeff*self.expo , expo = self.expo-1)
-
+        # elif isinstance(self.e, Variable):
+        elif isinstance(self.e, Parenthesis) and self.expo > 0 and self.expo < 1:
+            coeff = self.expo
+            expo = self.expo - 1
+            fx = Variable(self.e, expo = expo)
+            inner_derivative = self.e.getDerivative(symbol)
+            inner_derivative = [coeff*x for x in inner_derivative]
+            if len(inner_derivative) == 1:
+                inner_derivative = inner_derivative[0]
+            elif len(inner_derivative) == 0: return 0
+            else:
+                inner_derivative = Variable(Parenthesis(inner_derivative))    
+            # inner_derivative = Variable(Parenthesis(inner_derivative))    
+            return inner_derivative * fx
         else:
             return self.e.getDerivative(symbol)
             # return 0
@@ -575,7 +619,10 @@ class Tan(object):
     
     def eval(self):
         try:
-            return tan(self.e.eval())
+            res = tan(self.e.eval())
+            if res > 10E15: res = np.inf
+            if res < -10E15: res = -np.inf
+            return res
         except ZeroDivisionError:
             return np.inf
         except TypeError:
@@ -583,7 +630,10 @@ class Tan(object):
     
     def getCalc(self):
         try:
-            return tan(self.e.getCalc())
+            res = tan(self.e.getCalc())
+            if res > 10E15: res = np.inf
+            if res < -10E15: res = -np.inf
+            return res
         except ZeroDivisionError:
             return np.inf
     

@@ -109,7 +109,7 @@ def draw2D(data, figure_num, title):
     ax = plt.axes()
     ax.set_xlabel('x')
     ax.set_ylabel('y',rotation=0)
-    vmin = np.nanmin(y); vmax = np.nanmax(y)
+    vmin = np.nanmin(y)-0.1; vmax = np.nanmax(y)
     #print(y)
     plt.ylim(vmin, vmax)
     plt.title(title)
@@ -127,10 +127,7 @@ def drawMulti(data, figure_num, title):
     ax.set_ylabel('y')
     ax.set_zlabel('z')
     ax.contour3D(x, y, z, 50)
-    vmin = np.nanmin(y); vmax = np.nanmax(y)
-    #print(y)
-    print(x)
-    print(y)
+    vmin = np.nanmin(y)-0.1; vmax = np.nanmax(y)
     plt.ylim(vmin, vmax)
     img = io.BytesIO()
     plt.savefig(img, format='png')
@@ -206,7 +203,15 @@ def test2(case, start_end):
     return pics, canonicalization, derivatives, domain
     # return pics, canonicalization, partial_derivatives, domain
 
-def test(case, start_end):
+def checkDerivativeAtPoint(parser,tree,derivative_points):
+    point_derivative_result = []
+    for element in derivative_points:
+        element = element.replace(' ', '')
+        symbol, point = element.split('=')
+        point = float(point)
+
+
+def test(case, start_end, derivative_points):
     pics = []
     partial_derivatives = []
     parser = getParser(case)
@@ -221,7 +226,6 @@ def test(case, start_end):
     variable_num = len(parser.getVariables())
     start, end = start_end
     figure_num = 1
-
     if not isinstance(canonicalization, (int,float)):
         if variable_num > 1:
             data = plot3D(parser, tree, start, end)
@@ -230,6 +234,10 @@ def test(case, start_end):
             data = plot2D(parser, tree, start, end)
             pics.append(draw2D(data, figure_num, canonicalization))    
         print(isDerivative(parser,tree,-1))
+    
+
+
+    
     derivatives = parser.getDerivative(tree)
     domain = list(parser.getDomain())
     print('derivatives =', derivatives)

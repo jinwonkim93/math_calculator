@@ -19,6 +19,18 @@ def pow(base,expo):
             return base.coeff**expo
         elif isinstance(base.e, float):
             return base.e**expo
+        elif abs(expo) < 1 and abs(expo) > 0:
+            
+            # if expo < 0:
+            #     b_coeff = base.coeff
+            #     b_expo = base.expo
+            #     base_e = base.e
+            #     temp = Parenthesis([Variable(base.e, coeff= base.coeff, expo= base.expo)])
+            #     a = Variable(temp,expo = expo)
+                
+            # else:
+            temp = Parenthesis([Variable(base.e, coeff= base.coeff, expo= base.expo)])
+            return Variable(temp,expo = expo)
         else:
             return Variable(base.e, coeff= base.coeff, expo= base.expo*expo)
     
@@ -42,7 +54,6 @@ def pow(base,expo):
             while (expo > 1):
                 expo -= 1
                 left = calcByTerm('*',left,right)
-            left.expo = -left.expo
             return left
         
         elif isinstance(expo, (list,Variable)):
