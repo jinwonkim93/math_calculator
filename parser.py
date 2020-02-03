@@ -73,11 +73,9 @@ class Parser(object):
         if self.variables:
             semi_expression = semi_expression.eval()
             derivatives = []
-            # print(self.getVariables())
             if isinstance(semi_expression, Variable) and isinstance(semi_expression.e, Parenthesis) and semi_expression.expo == 1:
                 semi_expression = semi_expression.e.getList()
             for name, symbol in self.variables.items():
-                # print(name, symbol)
                 try:
                     temp = []
                     if isinstance(semi_expression, list):
@@ -132,7 +130,6 @@ class Parser(object):
             self.tokens.takeIt(['EOL'])    
             return e
         except Exception as e:
-            print(e)
             return Error(e)
         # e = self.parseExpr()
         # self.tokens.takeIt(['EOL'])    

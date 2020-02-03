@@ -201,7 +201,6 @@ class Variable(object):
                 return Variable(self.e, coeff = coeff, expo = expo) if expo != 0 else coeff
             else:
                 return self*Variable(other.e, coeff = other.coeff, expo = -other.expo)
-                #return [self, "/", other]
         elif isinstance(other, Constant):
             coeff = self.coeff / other.eval()
             return Variable(self.e, coeff = coeff, expo = self.expo) if coeff is not 0 else 0
@@ -337,7 +336,6 @@ class Variable(object):
                 coeff = coeff*Variable(self.e, expo = self.expo)
                 res_variable += coeff
             fx = deepcopy(self)
-            #log_val = Log(E,self.coeff).eval()
             log_val = Log(E,self.e).eval() if isinstance(self.e, ConstantE) else Log(E,self.coeff)
             temp_variable = Variable(log_val) if isinstance(log_val, Log) else log_val 
             expo_derivative = self.expo.getDerivative(symbol)

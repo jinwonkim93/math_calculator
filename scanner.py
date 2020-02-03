@@ -5,7 +5,6 @@ from mathematical_constant import greeks
 class Scanner(object):
     def __init__(self, line):
         line = line.replace(' ', '').lower()
-        print('scanner = ',line)
         self.tokens = re.findall(r'[-+]|[a-z|A-Z]+|[0-9]*\.?[0-9]+|[*+-/()^]', line) + ['EOL']
 
     def peak(self):

@@ -29,8 +29,6 @@ def checkDomain(parser,tree, value):
     return validity
 
 def isContinuous(parser,tree, value):
-    # if checkDomain(parser,tree, value) == False:
-        # return False
     alpha = 10**-5
     tolerance = alpha * 10000
     try:
@@ -42,10 +40,6 @@ def isContinuous(parser,tree, value):
     left = tree.getCalc()
     parser.insertValue(value+alpha)
     right = tree.getCalc()
-    #print('mid', mid, type(mid))
-    #print('left', left, type(left))
-    #print('right', right, type(right))
-    #print( abs(left-mid)<tolerance and abs(mid-right)<tolerance)
     return abs(left-mid)<tolerance and abs(mid-right)<tolerance
 
 def isDerivative(parser, tree, value):
@@ -87,7 +81,6 @@ def plot2D(parser, tree, start, end):
     return [x,y]
 
 def plot3D(parser, tree, start, end):
-    #x = np.arange(start,end, 0.1)
     x = np.linspace(start, end, 200)
     y = []
     for value1 in x:
@@ -97,7 +90,6 @@ def plot3D(parser, tree, start, end):
         for value2 in x:
             parser.insertValue2(value2,'y')
             ans = tree.getCalc()
-            #print(ans)
             temp.append(ans)
         y.append(temp)
     y = np.asarray(y)
@@ -110,7 +102,6 @@ def draw2D(data, figure_num, title):
     ax.set_xlabel('x')
     ax.set_ylabel('y',rotation=0)
     vmin = np.nanmin(y)-0.1; vmax = np.nanmax(y)
-    #print(y)
     plt.ylim(vmin, vmax)
     plt.title(title)
     plt.plot(x,y)
@@ -140,14 +131,12 @@ def list2str(expr):
     try:
         d = ''
         for element in expr:
-            #print(element, type(element))
             if isinstance(element, list):
                 element = list2str(element)
             d += str(element)
         return d
     except Exception as e:
         return str(expr)
-        #return expr
 
 def getParser(case):
     scanner = Scanner(case)
@@ -163,7 +152,6 @@ def test2(case, start_end):
     if isinstance(tree, Error):
         return [], tree, [], []
     canonicalization = tree.eval()
-    print(type(canonicalization))
     canonicalization = list2str(canonicalization)
     print('tree = ',tree)
     print('canonicalization = ',canonicalization)
@@ -219,10 +207,7 @@ def test(case, start_end, derivative_points):
     if isinstance(tree, Error):
         return [], tree, [], []
     canonicalization = tree.eval()
-    print(type(canonicalization))
     canonicalization = list2str(canonicalization)
-    print('tree = ',tree)
-    print('canonicalization = ',canonicalization)
     variable_num = len(parser.getVariables())
     start, end = start_end
     figure_num = 1
@@ -233,17 +218,14 @@ def test(case, start_end, derivative_points):
         elif variable_num == 1:
             data = plot2D(parser, tree, start, end)
             pics.append(draw2D(data, figure_num, canonicalization))    
-        print(isDerivative(parser,tree,-1))
     
 
 
     
     derivatives = parser.getDerivative(tree)
     domain = list(parser.getDomain())
-    print('derivatives =', derivatives)
     if derivatives is None:
         derivatives = []
-    print('domain =', domain)
     if derivatives is not None:
         for d in derivatives:
             d[1] = list2str(d[1])
@@ -260,7 +242,6 @@ def test(case, start_end, derivative_points):
     for d in domain:
         clean_domain.append(list2str(d))
 
-    # return pics, canonicalization, derivatives, domain
     return pics, canonicalization, partial_derivatives, clean_domain
 
 
