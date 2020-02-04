@@ -1,8 +1,6 @@
-from node import Node
 from empty import Empty
-class Expr(Node):
+class Expr(object):
     def __init__(self, t, et):
-        super(__class__,self)
         self.t = t
         self.et = et
     

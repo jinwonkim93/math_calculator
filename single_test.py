@@ -7,7 +7,7 @@ import numpy as np
 import io
 import base64
 from error import NonDerivableError, Error
-from utils import clearExpr
+from calculator import clearExpr
 mpl.use('Agg')
 
 domainRule = {
@@ -29,8 +29,9 @@ def checkDomain(parser,tree, value):
     return validity
 
 def derivativeAtPoint(parser,tree,value, derivatives):
-    symbol, point = value[0].split('=')
-    point = float(point)
+    for element in value:
+        symbol, point = element.split('=')
+        point = float(point)
     result = False
     if isContinuous(parser,tree, point):
         if len(derivatives) == 0: return True
@@ -240,23 +241,28 @@ def test(case, start_end, derivative_points):
     
 
     domain = list(parser.getDomain())
-    # if derivatives is None:
-    #     derivatives = []
-    # if derivatives is not None:
-    #     for d in derivatives:
-    #         d[1] = list2str(d[1])
-    #         figure_num += 1
-    #         semi_expr = list2str(d[1])
-    #         partial_derivatives.append(list2str(d))
-    #         d_parser = getParser(semi_expr)
-    #         d_tree = d_parser.parse()
-    #         d_title = semi_expr
-    #         if len(d_parser.getVariables()) == 0: continue
-    #         d_data = plot2D(d_parser, d_tree, start, end)
-    #         pics.append(draw2D(d_data, figure_num, d_title))
-    # clean_domain = []
-    # for d in domain:
-    #     clean_domain.append(list2str(d))
+    if derivatives is None:
+        derivatives = []
+    if derivatives is not None:
+        for d in derivatives:
+            d[1] = list2str(d[1])
+            figure_num += 1
+            semi_expr = list2str(d[1])
+            partial_derivatives.append(list2str(d))
+            d_parser = getParser(semi_expr)
+            d_tree = d_parser.parse()
+            d_title = semi_expr
+            d_variable_num = len(d_parser.getVariables())
+
+            if d_variable_num > 1:
+                d_data = plot3D(d_parser, d_tree, start, end)
+                pics.append(drawMulti(d_data, figure_num, d_title))
+            elif d_variable_num == 1:
+                d_data = plot2D(d_parser, d_tree, start, end)
+                pics.append(draw2D(d_data, figure_num, d_title))
+    clean_domain = []
+    for d in domain:
+        clean_domain.append(list2str(d))
 
     # return pics, canonicalization, partial_derivatives, clean_domain
     return pics, canonicalization, partial_derivatives, domain, derivative_points

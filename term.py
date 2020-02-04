@@ -1,7 +1,5 @@
-from node import Node
-class Term(Node):
+class Term(object):
     def __init__(self, f, tt):
-        super(__class__,self)
         self.f = f
         self.tt = tt
     

@@ -2,17 +2,9 @@ from empty import Empty
 from expression import Expr
 import math
 from mathematical_constant import PI, E
+from utils import list2str
+from copy import deepcopy
 
-def list2str(expr):
-    try:
-        d = ''
-        for element in expr:
-            if isinstance(element, list):
-                element = list2str(element)
-            d += str(element)
-        return d
-    except:
-        return str(expr)
 
 class Factor(object):
     def __init__(self, e, sign = Empty(), expo = Empty()):
@@ -35,7 +27,6 @@ class Factor(object):
         return f'Factor({repr(self.sign)},{repr(self.e)},{repr(self.expo)})'
 
 
-from copy import deepcopy
 class Variable(object):
     def __init__(self, e, coeff = 1.0, expo = 1.0):
         self.coeff = coeff
@@ -77,8 +68,9 @@ class Variable(object):
             if isinstance(self.expo, Variable):
                 return Variable(Parenthesis([other, "+", self]))
             if other.expo.__class__ == self.expo.__class__ :
-                if other.expo > self.expo:
-                    return Variable(Parenthesis([other, "+", self]))
+                if other.e == self.e:
+                    if other.expo > self.expo:
+                        return Variable(Parenthesis([other, "+", self]))
                 elif other.e < self.e:
                     return Variable(Parenthesis([other, '+', self]))
         return Variable(Parenthesis([self, "+", other]))
@@ -153,12 +145,6 @@ class Variable(object):
     def __rmul__(self, other):
         if other == 0:return 0
         if self.expo == -0.5: self = self.convertWhole()
-        # if self.expo < 0 and abs(self.expo) > 0 and abs(self.expo) < 1:
-        #     right_value = deepcopy(self)
-        #     right_value.expo = abs(right_value.expo)
-        #     left_value = right_value * other
-        #     right_value.expo = self.expo + self.expo
-        #     return left_value * right_value
         if isinstance(other, Variable):
 
             if self.e == other.e:
@@ -350,18 +336,20 @@ class Variable(object):
                 return 0
         
         elif isinstance(self.e, (Sin,Cos,Tan,Sec,Cot,Csc, Log, Symbol, Variable)):
-            derivative, inner_derivative = self.e.getDerivative(symbol)
             coeff = self.coeff
             res_variable = 0
+
             
             if isinstance(self.coeff, Variable):
                 coeff = coeff.getDerivative(symbol)
                 coeff = coeff*Variable(self.e, expo = self.expo)
                 res_variable += coeff
             
-            if derivative == 0: return 0
+            derivative, inner_derivative = self.e.getDerivative(symbol)
+            if derivative == 0 and not isinstance(coeff, Variable): return 0
+            
             temp_variable1 = derivative
-            temp_variable2 = Variable(self.e, expo = self.expo-1)
+            temp_variable2 = Variable(self.e, expo = self.expo-1) if self.expo-1 != 0 else 1
             
             
             if isinstance(inner_derivative, list):
@@ -414,8 +402,8 @@ class Symbol(object):
     
     def __lt__(self, other):
         return self.__class__ == other.__class__ and self.symbol < other.symbol
-    def __gt__(self, other):
-        return self.__class__ == other.__class__ and self.symbol > other.symbol
+    # def __gt__(self, other):
+    #     return self.__class__ == other.__class__ and self.symbol > other.symbol
     def __eq__(self, other):
         if other.__class__ != self.__class__: return False
         elif self.symbol == other.symbol: return True
@@ -855,10 +843,10 @@ class Parenthesis(object):
         if self.__class__ != other.__class__: return False
         return list2str(self.e) == list2str(other.e)
     def __lt__(self, other):
-        if isinstance(other, Symbol): return True
+        if self.__class__ != other.__class__: return False
         return repr(self.e) < repr(other.e)
     def __gt__(self, other):
-        if isinstance(other, Symbol): return True
+        if self.__class__ != other.__class__: return False
         return repr(self.e) > repr(other.e)
     def __repr__(self):
         return f'{list2str(self.e)}'

@@ -7,6 +7,8 @@ from factor_tail import FactorTail
 from error import Error, NonDerivableError
 from empty import Empty
 from mathematical_constant import *
+from calculator import  clearExpr
+from utils import sortVariable, list2str
 
 
 
@@ -56,18 +58,6 @@ class Parser(object):
                         self.domain[d] = invalid
                         return True
         return False
-    
-    def expr2str(self,expr):
-        try:
-            d = ''
-            for value in expr:
-                if isinstance(value, list):
-                    value = self.expr2str(value)
-                d += str(value)
-            
-            return d
-        except:
-            return str(expr)
 
     def getDerivative(self, semi_expression):
         if self.variables:
@@ -100,14 +90,15 @@ class Parser(object):
                                 else:
                                     if len(temp) == 1: temp.pop()
                                     temp.append(derivation)
-
-
-                        derivatives.append([f'd({self.expr2str(semi_expression)})/d{name} = ',self.expr2str(temp)])
+                        temp = clearExpr(temp)
+                        temp = sortVariable(temp)
+                        # if len(temp) == 0: temp.append(0)
+                        derivatives.append([f'd({list2str(semi_expression)})/d{name} = ',list2str(temp)])
                     else:
                         if isinstance(semi_expression, (int,float)):
-                            derivatives.append([f'd({self.expr2str(semi_expression)})/d{name} = ', 0])
+                            derivatives.append([f'd({list2str(semi_expression)})/d{name} = ', 0])
                         else:
-                            derivatives.append([f'd({semi_expression})/d{name} = ',self.expr2str(semi_expression.getDerivative(symbol))])
+                            derivatives.append([f'd({semi_expression})/d{name} = ',list2str(semi_expression.getDerivative(symbol))])
                 
                 except Exception as e:
                     raise e

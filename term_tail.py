@@ -1,8 +1,7 @@
-from utils import calcByTerm, calc
+from calculator import calcByTerm, calc
 import numpy as np
 class TermTail(object):
     def __init__(self, op, f,  tt):
-        super(__class__,self)
         self.op = op
         self.f = f
         self.tt = tt

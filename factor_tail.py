@@ -1,12 +1,10 @@
-from node import Node
 from empty import Empty
 from expression import Expr
 from factor import Symbol, Constant
-from utils import pow
+from calculator import pow
 
-class FactorTail(Node):
+class FactorTail(object):
     def __init__(self, f, expo):
-        super(__class__,self)
         self. f = f
         self.expo = expo
     
