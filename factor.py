@@ -2,7 +2,7 @@ from empty import Empty
 from expression import Expr
 import math
 from mathematical_constant import PI, E
-from utils import list2str
+from utils import list2str, sortVariable
 from copy import deepcopy
 
 
@@ -13,16 +13,15 @@ class Factor(object):
         self.sign = sign
         self.expo = expo
 
+    def canonicalize(self):
+        return -self.expo.canonicalize(self.e.canonicalize()) if self.sign is '-' else self.expo.canonicalize(self.e.canonicalize())
+
+
     def eval(self):
         return -self.expo.eval(self.e.eval()) if self.sign is '-' else self.expo.eval(self.e.eval())
 
-
-    def getCalc(self):
-        return -self.expo.getCalc(self.e.getCalc()) if self.sign is '-' else self.expo.getCalc(self.e.getCalc())
-
     def __str__(self):
         return f'({self.sign}{self.e}{self.expo})' if isinstance(self.e, Expr) else f'{self.sign}{self.e}{self.expo}'
-        #return f'{self.sign}{self.e}{self.expo}'
     def __repr__(self):
         return f'Factor({repr(self.sign)},{repr(self.e)},{repr(self.expo)})'
 
@@ -65,15 +64,17 @@ class Variable(object):
                 coeff = self.coeff + other.coeff
                 return Variable(self.e, coeff = coeff, expo = self.expo) if coeff != 0 else 0
             
-            if isinstance(self.expo, Variable):
-                return Variable(Parenthesis([other, "+", self]))
-            if other.expo.__class__ == self.expo.__class__ :
-                if other.e == self.e:
-                    if other.expo > self.expo:
-                        return Variable(Parenthesis([other, "+", self]))
-                elif other.e < self.e:
-                    return Variable(Parenthesis([other, '+', self]))
-        return Variable(Parenthesis([self, "+", other]))
+            # if isinstance(self.expo, Variable):
+            #     return Variable(Parenthesis([other, "+", self]))
+            # if other.expo.__class__ == self.expo.__class__ :
+            #     if other.e == self.e:
+            #         if other.expo > self.expo:
+            #             return Variable(Parenthesis([other, "+", self]))
+            #     elif other.e < self.e:
+            #         return Variable(Parenthesis([other, '+', self]))
+        result = [self, "+", other]
+        result = sortVariable(result)
+        return Variable(Parenthesis(result))
     
     def __radd__(self, other):
         if other == 0: return self
@@ -81,9 +82,9 @@ class Variable(object):
             if self.checkVariable(self,other):
                 coeff = other.coeff + self.coeff
                 return Variable(self.e, coeff = coeff, expo = self.expo) if coeff != 0 else 0
-            if other.expo > self.expo:
-                return [other, "+", self]
-        return Variable(Parenthesis([other, "+", self]))
+        result = [self, "+", other]
+        result = sortVariable(result)
+        return Variable(Parenthesis(result))
     
     def __sub__(self,other):
         if other == 0: return self
@@ -91,9 +92,12 @@ class Variable(object):
             if self.checkVariable(self,other):
                 coeff = self.coeff - other.coeff
                 return Variable(self.e, coeff = coeff, expo = self.expo) if coeff != 0 else 0
-            if other.expo > self.expo:
-                return [-other, "+", self]
-        return Variable(Parenthesis([self, "-", other]))
+            # if other.expo > self.expo:
+            #     return [-other, "+", self]
+        result = [self, "-", other]
+        result = sortVariable(result)
+        return Variable(Parenthesis(result))    
+        # return Variable(Parenthesis([self, "-", other]))
 
     def __rsub__(self,other):
         if other == 0: return -self
@@ -101,10 +105,10 @@ class Variable(object):
             if self.checkVariable(self,other):
                 coeff = other.coeff - self.coeff
                 return Variable(self.e, coeff = coeff, expo = self.expo) if coeff != 0 else 0
-            if other.expo > self.expo:
-                return [other, "-", self]
-            else:
-                return [-self, '+', other]
+            # if other.expo > self.expo:
+            #     return [other, "-", self]
+            # else:
+            #     return [-self, '+', other]
         return Variable(Parenthesis([other, "-", self]))
     
     def __mul__(self, other):
@@ -188,7 +192,7 @@ class Variable(object):
             else:
                 return self*Variable(other.e, coeff = other.coeff, expo = -other.expo)
         elif isinstance(other, Constant):
-            coeff = self.coeff / other.eval()
+            coeff = self.coeff / other.canonicalize()
             return Variable(self.e, coeff = coeff, expo = self.expo) if coeff is not 0 else 0
         else:
             coeff = self.coeff / other
@@ -208,9 +212,9 @@ class Variable(object):
                 return other*Variable(self.e, coeff = self.coeff, expo = -self.expo)
 
         elif isinstance(other, Constant):
-            value = other.eval()
+            value = other.canonicalize()
             coeff = value/self.coeff
-            return Variable(self.e, coeff = coeff, expo = -self.expo).eval()
+            return Variable(self.e, coeff = coeff, expo = -self.expo).canonicalize()
         elif isinstance(other, (int,float)):
             value = other
             if isinstance(self.e, Empty):
@@ -278,7 +282,7 @@ class Variable(object):
             else:
                 return f'{e}^{self.expo}'
     
-    def getCalc(self):
+    def eval(self):
         if isinstance(self.e, Empty):
             res = self.coeff**self.expo
             res = self.coeff * res
@@ -288,11 +292,11 @@ class Variable(object):
             res = self.coeff * res
             return res
         else:
-            res = self.e.getCalc()**self.expo
+            res = self.e.eval()**self.expo
             res = self.coeff * res
             return res
     
-    def eval(self):
+    def canonicalize(self):
         res = None
         if isinstance(self.e, Parenthesis):
             temp = self.e.getList()
@@ -303,7 +307,7 @@ class Variable(object):
             return self.e
         else:
             if not isinstance(self.e, (int,float,Symbol,Empty)):
-                self.e = self.e.eval()
+                self.e = self.e.canonicalize()
                 if isinstance(self.expo, Variable):
                     return self
                 elif self.expo < 0:
@@ -322,7 +326,7 @@ class Variable(object):
                 coeff = coeff*Variable(self.e, expo = self.expo)
                 res_variable += coeff
             fx = deepcopy(self)
-            log_val = Log(E,self.e).eval() if isinstance(self.e, ConstantE) else Log(E,self.coeff)
+            log_val = Log(E,self.e).canonicalize() if isinstance(self.e, ConstantE) else Log(E,self.coeff)
             temp_variable = Variable(log_val) if isinstance(log_val, Log) else log_val 
             expo_derivative = self.expo.getDerivative(symbol)
             res_variable += fx  * temp_variable * expo_derivative
@@ -390,10 +394,10 @@ class Symbol(object):
     def insert(self, value):
         self.value = float(value)
     
-    def eval(self):
+    def canonicalize(self):
         return self
     
-    def getCalc(self):
+    def eval(self):
         return self.value
     
     def getDerivative(self, symbol):
@@ -417,10 +421,10 @@ class Constant(object):
         self.value = float(value)
         self.expo = expo
     
-    def eval(self):
-        return self.expo.eval(self.value)
+    def canonicalize(self):
+        return self.expo.canonicalize(self.value)
     
-    def getCalc(self):
+    def eval(self):
         return self.value
     
     def __eq__(self,other):
@@ -449,10 +453,10 @@ class Log(object):
         self.e = e
         self.name = name
     
-    def eval(self):
+    def canonicalize(self):
         try:
-            e_val = self.e.eval() if isinstance(self.e, Variable) else self.e
-            if isinstance(self.e, ConstantE): e_val = self.e.getCalc() 
+            e_val = self.e.canonicalize() if isinstance(self.e, Variable) else self.e
+            if isinstance(self.e, ConstantE): e_val = self.e.eval() 
             return self.lognNew(e_val,self.symbol)
         except ZeroDivisionError:
             return np.inf
@@ -461,9 +465,9 @@ class Log(object):
         except TypeError:
             return self
     
-    def getCalc(self):
+    def eval(self):
         try:
-            return self.lognNew(self.e.getCalc(),self.symbol)
+            return self.lognNew(self.e.eval(),self.symbol)
         except ZeroDivisionError:
             return np.inf
         except ValueError:
@@ -474,7 +478,7 @@ class Log(object):
     
     def getDerivative(self,symbol):
         df = self.e.getDerivative(symbol)
-        numerator = self.e.eval()
+        numerator = self.e.canonicalize()
         if df == 0:
             return 0, 0
         else:
@@ -509,17 +513,17 @@ class Sin(object):
         self.e = e
         self.name = name
     
-    def eval(self):
+    def canonicalize(self):
         try:
-            return sin(self.e.eval())
+            return sin(self.e.canonicalize())
         except ZeroDivisionError:
             return np.inf
         except TypeError:
             return self
     
-    def getCalc(self):
+    def eval(self):
         try:
-            return sin(self.e.getCalc())
+            return sin(self.e.eval())
         except ZeroDivisionError:
             return np.inf
     
@@ -544,24 +548,24 @@ class Sin(object):
         return repr(self.e) > repr(other.e)
 
     def __repr__(self):
-        return f'sin({list2str(self.e.eval())})'
+        return f'sin({list2str(self.e.canonicalize())})'
 
 class Cos(object):
     def __init__(self, e, name = 'cos'):
         self.e = e
         self.name = name
 
-    def eval(self):
+    def canonicalize(self):
         try:
-            return cos(self.e.eval())
+            return cos(self.e.canonicalize())
         except ZeroDivisionError:
             return np.inf
         except TypeError:
             return self
     
-    def getCalc(self):
+    def eval(self):
         try:
-            return cos(self.e.getCalc())
+            return cos(self.e.eval())
         except ZeroDivisionError:
             return np.inf
     
@@ -586,16 +590,16 @@ class Cos(object):
         if isinstance(other, Symbol): return True
         return repr(self.e) > repr(other.e)
     def __repr__(self):
-        return f'cos({self.e})' if isinstance(self.e.eval(), (list, Variable)) else f'{self.e.eval()}'
+        return f'cos({self.e})' if isinstance(self.e.canonicalize(), (list, Variable)) else f'{self.e.canonicalize()}'
 
 class Tan(object):
     def __init__(self, e, name = 'tan'):
         self.e = e
         self.name = name
     
-    def eval(self):
+    def canonicalize(self):
         try:
-            res = tan(self.e.eval())
+            res = tan(self.e.canonicalize())
             if res > 10E15: res = np.inf
             if res < -10E15: res = -np.inf
             return res
@@ -604,9 +608,9 @@ class Tan(object):
         except TypeError:
             return self
     
-    def getCalc(self):
+    def eval(self):
         try:
-            res = tan(self.e.getCalc())
+            res = tan(self.e.eval())
             if res > 10E15: res = np.inf
             if res < -10E15: res = -np.inf
             return res
@@ -633,23 +637,23 @@ class Tan(object):
         if isinstance(other, Symbol): return True
         return repr(self.e) > repr(other.e)
     def __repr__(self):
-        return f'tan({self.e})' if isinstance(self.e.eval(), (list, Variable)) else f'{self.e.eval()}'
+        return f'tan({self.e})' if isinstance(self.e.canonicalize(), (list, Variable)) else f'{self.e.canonicalize()}'
 
 class Csc(object):
     def __init__(self, e, name = 'csc'):
         self.e = e
         self.name = name
-    def eval(self):
+    def canonicalize(self):
         try:
-            return 1/sin(self.e.eval())
+            return 1/sin(self.e.canonicalize())
         except ZeroDivisionError:
             return np.inf
         except TypeError:
             return self
     
-    def getCalc(self):
+    def eval(self):
         try:
-            return 1/sin(self.e.getCalc())
+            return 1/sin(self.e.eval())
         except ZeroDivisionError:
             return np.inf
 
@@ -672,23 +676,23 @@ class Csc(object):
         if isinstance(other, Symbol): return True
         return repr(self.e) > repr(other.e)
     def __repr__(self):
-        return f'csc({self.e})' if isinstance(self.e.eval(), (list, Variable)) else f'{self.e.eval()}'
+        return f'csc({self.e})' if isinstance(self.e.canonicalize(), (list, Variable)) else f'{self.e.canonicalize()}'
 
 class Sec(object):
     def __init__(self, e, name = 'sec'):
         self.e = e
         self.name = name
 
-    def eval(self):
+    def canonicalize(self):
         try:
-            return 1/cos(self.e.eval())
+            return 1/cos(self.e.canonicalize())
         except ZeroDivisionError:
             return np.inf
         except TypeError:
             return self
-    def getCalc(self):
+    def eval(self):
         try:
-            return 1/cos(self.e.getCalc())
+            return 1/cos(self.e.eval())
         except ZeroDivisionError:
             return np.inf
 
@@ -710,22 +714,22 @@ class Sec(object):
     def __gt__(self, other):
         return repr(self.e) > repr(other.e)
     def __repr__(self):
-        return f'sec({self.e})' if isinstance(self.e.eval(), (list, Variable)) else f'{self.e.eval()}'
+        return f'sec({self.e})' if isinstance(self.e.canonicalize(), (list, Variable)) else f'{self.e.canonicalize()}'
 
 class Cot(object):
     def __init__(self, e, name = 'cot'):
         self.e = e
         self.name = name
-    def eval(self):
+    def canonicalize(self):
         try:
-            return 1/tan(self.e.eval())
+            return 1/tan(self.e.canonicalize())
         except ZeroDivisionError:
             return np.inf
         except TypeError:
             return self
-    def getCalc(self):
+    def eval(self):
         try:
-            return 1/tan(self.e.getCalc())
+            return 1/tan(self.e.eval())
         except ZeroDivisionError:
             return np.inf
     
@@ -748,17 +752,17 @@ class Cot(object):
         if isinstance(other, Symbol): return True
         return repr(self.e) > repr(other.e)
     def __repr__(self):
-        return f'cot({self.e})' if isinstance(self.e.eval(), (list, Variable)) else f'{self.e.eval()}'
+        return f'cot({self.e})' if isinstance(self.e.canonicalize(), (list, Variable)) else f'{self.e.canonicalize()}'
 
 class ConstantE(object):
     def __init__(self, name = 'e'):
         self.e = E
         self.name = name
     
-    def eval(self):
+    def canonicalize(self):
         return self
     
-    def getCalc(self):
+    def eval(self):
         return self.e
 
     def getDerivative(self, Variable, symbol):
@@ -777,10 +781,10 @@ class Pi(object):
     def __init__(self, name = 'pi'):
         self.e = PI
         self.name = name
-    def eval(self):
+    def canonicalize(self):
         return self.e
     
-    def getCalc(self):
+    def eval(self):
         return self.e
 
     def getDerivative(self, Variable, symbol):
@@ -800,7 +804,7 @@ class Parenthesis(object):
     def getList(self):
         return self.e
     
-    def getCalc(self):
+    def eval(self):
         temp = []
         res = 0
         op = '+'
@@ -809,7 +813,7 @@ class Parenthesis(object):
             if idx > 0:
                 op = self.e[idx-1]
             if isinstance(element, Variable):
-                element = element.getCalc()
+                element = element.eval()
             res = calc(op,res,element)                
         return res
         

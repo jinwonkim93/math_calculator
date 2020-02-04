@@ -3,10 +3,10 @@ class Term(object):
         self.f = f
         self.tt = tt
     
+    def canonicalize(self):
+        return self.tt.canonicalize(self.f.canonicalize())
     def eval(self):
         return self.tt.eval(self.f.eval())
-    def getCalc(self):
-        return self.tt.getCalc(self.f.getCalc())
 
     def getDerivative(self):
         pass

@@ -7,14 +7,14 @@ class ExprTail(object):
         self.et = et
     
 
+    def canonicalize(self, left):
+        canonicalize_term = self.t.canonicalize()
+        left = calcByTerm(self.op, left, canonicalize_term)
+        return self.et.canonicalize(left)
     def eval(self, left):
-        eval_term = self.t.eval()
-        left = calcByTerm(self.op, left, eval_term)
+        canonicalize_term = self.t.eval()
+        left = calc(self.op, left, canonicalize_term)
         return self.et.eval(left)
-    def getCalc(self, left):
-        eval_term = self.t.getCalc()
-        left = calc(self.op, left, eval_term)
-        return self.et.getCalc(left)
     def __str__(self):
         return f'{str(self.op)}{str(self.t)}{str(self.et)}'
     def __repr__(self):

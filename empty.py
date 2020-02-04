@@ -4,9 +4,9 @@ class Empty(object):
     def __repr__(self):
         return 'Empty'
     
-    def eval(self, left):
+    def canonicalize(self, left):
         return left
-    def getCalc(self, left):
+    def eval(self, left):
         return left
     def canonicalize(self, left):
         return left

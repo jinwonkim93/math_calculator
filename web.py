@@ -16,7 +16,8 @@ def calcExpr():
       expr_range = request.form['Range']
       derivative_points = request.form['Point']
       if expr_range == '': expr_range = '-1,1'
-      if derivative_points == '': derivative_points = 'x = 1'
+      if derivative_points == '': derivative_points = 'x=1,y=1'
+      derivative_points = derivative_points.replace(' ', '')
       expr_range = list(map(float,expr_range.split(',')))
       derivative_points = derivative_points.split(',')
       pics, canonicalization, partial_derivatives, domain, derivative_point = test(expr,expr_range,derivative_points)

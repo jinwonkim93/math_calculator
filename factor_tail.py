@@ -8,16 +8,16 @@ class FactorTail(object):
         self. f = f
         self.expo = expo
     
-    def eval(self, left):
-        eval_factor = self.expo.eval(self.f.eval())
+    def canonicalize(self, left):
+        canonicalize_factor = self.expo.canonicalize(self.f.canonicalize())
         try:
-            return pow(left,eval_factor)
+            return pow(left,canonicalize_factor)
         except Exception as e:
             raise e
-    def getCalc(self,left):
-        eval_factor = self.expo.getCalc(self.f.getCalc())
+    def eval(self,left):
+        canonicalize_factor = self.expo.eval(self.f.eval())
         try:
-            return pow(left,eval_factor)
+            return pow(left,canonicalize_factor)
         except:
             raise Exception("OverflowError: Numerical result out of range")
     def __str__(self):

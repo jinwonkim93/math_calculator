@@ -8,6 +8,7 @@ def list2str(expr):
             d += str(element)
         return d
     except:
+        print(type(expr), expr)
         return str(expr)
 
 def sortVariable(expr):

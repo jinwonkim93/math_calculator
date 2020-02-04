@@ -4,15 +4,15 @@ class Expr(object):
         self.t = t
         self.et = et
     
+    def canonicalize(self):
+        result = self.et.canonicalize(self.t.canonicalize())
+        return result
     def eval(self):
         result = self.et.eval(self.t.eval())
         return result
-    def getCalc(self):
-        result = self.et.getCalc(self.t.getCalc())
-        return result
     
     def getDerivative(self, symbol):
-        semi_expression = self.eval()
+        semi_expression = self.canonicalize()
         try:
             temp = []
             if isinstance(semi_expression, list):

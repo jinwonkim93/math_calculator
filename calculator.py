@@ -100,12 +100,13 @@ def calcByTerm(op, left,right):
             temp_left = clearExpr(left.e.getList())
             temp_left = clearExpr(temp_left)
             left = calcByTerm('*', temp_left, left.coeff)
-            left = left.e.getList()
+            left = left.e.getList() if isinstance(left, Variable) else left
         elif left.expo > 1:
             temp_left = left.e.getList()
             temp_left = pow(temp_left, left.expo)
             left = calcByTerm('*',temp_left,left.coeff)
-            left = left.e.getList()
+            left = left.e.getList() if isinstance(left, Variable) else left
+            # left = left.e.getList()
     
     if isinstance(right, Variable) and isinstance(right.e, Parenthesis):
         if right.expo == 1:
@@ -345,7 +346,7 @@ def clearExpr(left):
         
         return variable_list
     else:
-        return res
+        return [res]
 
 def sortVariable(expr):
     if not isinstance(expr, list): return expr

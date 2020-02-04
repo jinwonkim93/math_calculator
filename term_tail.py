@@ -6,19 +6,19 @@ class TermTail(object):
         self.f = f
         self.tt = tt
     
-    def eval(self, left):
+    def canonicalize(self, left):
         try:
-            eval_factor = self.f.eval()
-            left = calcByTerm(self.op, left,eval_factor)
-            return self.tt.eval(left)
+            canonicalize_factor = self.f.canonicalize()
+            left = calcByTerm(self.op, left,canonicalize_factor)
+            return self.tt.canonicalize(left)
         except ZeroDivisionError:
             return np.inf
-    def getCalc(self, left):
+    def eval(self, left):
         try:
-            eval_factor = self.f.getCalc()
-            # left = calcByTerm(self.op, left,eval_factor)
-            left = calc(self.op, left,eval_factor)
-            return self.tt.getCalc(left)
+            canonicalize_factor = self.f.eval()
+            # left = calcByTerm(self.op, left,canonicalize_factor)
+            left = calc(self.op, left,canonicalize_factor)
+            return self.tt.eval(left)
         except ZeroDivisionError:
             return np.inf
 

@@ -25,14 +25,14 @@ class Parser(object):
     def insertValue(self, value):
         for name, symbol in self.variables.items():
             #value = input(f'what is value of {name}: ')
-            if self.tokens.isDigit(value):
-                symbol.insert(value)
+            if self.tokens.isDigit(value[name]):
+                symbol.insert(value[name])
             else:
                 tok = Scanner(value)
                 sub_parser = Parser(tok)
                 sub_expr = sub_parser.parse()
                 sub_parser.insertValue()
-                symbol.insert(sub_expr.eval())
+                symbol.insert(sub_expr.canonicalize())
     
     def getInvalidDomain(self,v,invalid):
         if isinstance(v, Variable):
@@ -61,7 +61,7 @@ class Parser(object):
 
     def getDerivative(self, semi_expression):
         if self.variables:
-            semi_expression = semi_expression.eval()
+            semi_expression = semi_expression.canonicalize()
             derivatives = []
             if isinstance(semi_expression, Variable) and isinstance(semi_expression.e, Parenthesis) and semi_expression.expo == 1:
                 semi_expression = semi_expression.e.getList()
@@ -148,7 +148,7 @@ class Parser(object):
             op = self.tokens.takeIt()
             f = self.parseFactor()
             # if op == '/': 
-            v = f.eval()
+            v = f.canonicalize()
             self.getInvalidDomain(v,'!= 0')
             tt = self.parseTermTail()
             return TermTail(op, f, tt)
@@ -191,7 +191,7 @@ class Parser(object):
             return Variable(angleF)
         elif self.tokens.isType(['log','ln']):
             log = self.parseLog()
-            v = log.e.eval()
+            v = log.e.canonicalize()
             self.getInvalidDomain(v,'> 0')
             return Variable(log)
         elif self.tokens.isType(self.tokens.isSpecialNum):
@@ -219,22 +219,22 @@ class Parser(object):
             return Cos(e)
         elif angleF == 'tan':
             tan = Tan(e)
-            v = tan.e.eval()
+            v = tan.e.canonicalize()
             self.getInvalidDomain(v,' != n*pi + pi/2 (n is real_number)')
             return tan
         elif angleF == 'csc':
             csc = Csc(e)
-            v = csc.e.eval()
+            v = csc.e.canonicalize()
             self.getInvalidDomain(v,' != n*pi (n is real_number)')
             return csc
         elif angleF == 'sec':
             sec = Sec(e)
-            v = sec.e.eval()
+            v = sec.e.canonicalize()
             self.getInvalidDomain(v,' != n*pi + pi/2(n is real_number)')
             return sec
         elif angleF == 'cot':
             cot = Cot(e)
-            v = cot.e.eval()
+            v = cot.e.canonicalize()
             self.getInvalidDomain(v,' != n*pi (n is real_number)')
             return cot
          

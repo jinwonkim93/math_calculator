@@ -8,9 +8,9 @@ class Error(object):
     def __repr__(self):
         return "Error(Expr)"
     
-    def eval(self):
+    def canonicalize(self):
         return self.error
-    def getCalc(self):
+    def eval(self):
         return self.error
     def getDerivative(self, symbol):
         return self.error
