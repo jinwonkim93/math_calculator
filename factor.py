@@ -63,15 +63,6 @@ class Variable(object):
             if self.checkVariable(self,other):
                 coeff = self.coeff + other.coeff
                 return Variable(self.e, coeff = coeff, expo = self.expo) if coeff != 0 else 0
-            
-            # if isinstance(self.expo, Variable):
-            #     return Variable(Parenthesis([other, "+", self]))
-            # if other.expo.__class__ == self.expo.__class__ :
-            #     if other.e == self.e:
-            #         if other.expo > self.expo:
-            #             return Variable(Parenthesis([other, "+", self]))
-            #     elif other.e < self.e:
-            #         return Variable(Parenthesis([other, '+', self]))
         result = [self, "+", other]
         result = sortVariable(result)
         return Variable(Parenthesis(result))
@@ -92,12 +83,10 @@ class Variable(object):
             if self.checkVariable(self,other):
                 coeff = self.coeff - other.coeff
                 return Variable(self.e, coeff = coeff, expo = self.expo) if coeff != 0 else 0
-            # if other.expo > self.expo:
-            #     return [-other, "+", self]
         result = [self, "-", other]
         result = sortVariable(result)
         return Variable(Parenthesis(result))    
-        # return Variable(Parenthesis([self, "-", other]))
+
 
     def __rsub__(self,other):
         if other == 0: return -self
@@ -105,10 +94,6 @@ class Variable(object):
             if self.checkVariable(self,other):
                 coeff = other.coeff - self.coeff
                 return Variable(self.e, coeff = coeff, expo = self.expo) if coeff != 0 else 0
-            # if other.expo > self.expo:
-            #     return [other, "-", self]
-            # else:
-            #     return [-self, '+', other]
         return Variable(Parenthesis([other, "-", self]))
     
     def __mul__(self, other):

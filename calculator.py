@@ -98,7 +98,6 @@ def calcByTerm(op, left,right):
     if isinstance(left, Variable) and isinstance(left.e, Parenthesis):
         if left.expo == 1:
             temp_left = clearExpr(left.e.getList())
-            temp_left = clearExpr(temp_left)
             left = calcByTerm('*', temp_left, left.coeff)
             left = left.e.getList() if isinstance(left, Variable) else left
         elif left.expo > 1:
@@ -111,7 +110,6 @@ def calcByTerm(op, left,right):
     if isinstance(right, Variable) and isinstance(right.e, Parenthesis):
         if right.expo == 1:
             temp_right = clearExpr(right.e.getList())
-            temp_right = clearExpr(temp_right)
             right = calcByTerm('*', temp_right,right.coeff) 
             right = right.e.getList()
         elif right.expo > 1:

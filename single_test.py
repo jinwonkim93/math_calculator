@@ -187,13 +187,16 @@ def getParser(case):
     parser = Parser(scanner)
     return parser
 
-def test3(case,value):
+def caculate(case,value):
+    value_dict = {}
+    for element in value:
+        symbol, point = element.split('=')
+        value_dict[symbol] = float(point)
+    
     parser = getParser(case)
     tree = parser.parse()
-    print(tree.canonicalize())
-    parser.insertValue(value)
-    print(tree.eval())
-
+    parser.insertValue(value_dict)
+    return tree.eval()
 def test2(case, start_end):
     pics = []
     partial_derivatives = []

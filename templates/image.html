@@ -5,15 +5,15 @@
 </head>
 <form action ="http://localhost:5000/input" method = "post">
     <fieldset style = "width: 150">
-            <p>Enter Expression: e.g. x^2 + y</p>
-            <p><input type ="text" name = "Expression"/></p>
-            <p>Enter Range: e.g. -1,1</p>
-            <p><input type ="text" name = "Range"/></p>
-            <p>Derivative at a point: e.g. x = 1, y = 2</p>
-            <p><input type ="text" name = "Point"/></p>
-            <p>
-                <input type ="submit" name = "action" value = "Compute" />
-            </p>
+        <p>Enter Expression: </p>
+        <p><input type ="text" name = "Expression"/></p>
+        <p>Enter Range: (default: -1,1)</p>
+        <p><input type ="text" name = "Range"/></p>
+        <p>Derivative at a point: (default: x = 1, y = 1)</p>
+        <p><input type ="text" name = "Point"/></p>
+        <p>Calculate value: (default:  x = 1, y = 1)</p>
+        <p><input type ="text" name = "Calculation"/></p>
+        <p><input type ="submit" name = "action" value = "Compute" /> </p>
     </fieldset>
 </form>
 <body>
@@ -22,6 +22,9 @@
     <hr size="5" color="black">
     <font size="6">Canonicalization Form </font> 
     <p>{{canonicalization}}</p>
+    <hr size="5" color="black">
+    <font size="6">Result </font> 
+    <p>{{result}}</p>
     <hr size="5" color="black">
     <font size="6">Partial Derivatives </font> 
     <p>

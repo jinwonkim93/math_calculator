@@ -1,6 +1,6 @@
 
 from flask import Flask, redirect, url_for, request, render_template,make_response
-from single_test import test
+from single_test import test, caculate
 import os
 import subprocess
 from functools import wraps, update_wrapper
@@ -15,16 +15,23 @@ def calcExpr():
       expr = request.form['Expression']
       expr_range = request.form['Range']
       derivative_points = request.form['Point']
+      calculation = request.form['Calculation']
+      
       if expr_range == '': expr_range = '-1,1'
       if derivative_points == '': derivative_points = 'x=1,y=1'
+      if calculation =='': calculation = 'x=1,y=1'
+      
       derivative_points = derivative_points.replace(' ', '')
       expr_range = list(map(float,expr_range.split(',')))
       derivative_points = derivative_points.split(',')
+      calculation = calculation.split(',')
+      calculation_result = caculate(expr,calculation)
       pics, canonicalization, partial_derivatives, domain, derivative_point = test(expr,expr_range,derivative_points)
       return render_template('image.html',
                              pics = pics,
                              canonicalization = canonicalization,
                              input = expr,
+                             result = calculation_result,
                              partial_derivatives = partial_derivatives,
                              domain = domain,
                              derivative_point = derivative_point)
