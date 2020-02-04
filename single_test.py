@@ -197,6 +197,15 @@ def caculate(case,value):
     tree = parser.parse()
     parser.insertValue(value_dict)
     return tree.eval()
+def test3(case,value):
+    parser = getParser(case)
+    tree = parser.parse()
+    canonicalization = tree.canonicalize()
+    print(canonicalization)
+    parser.insertValue(value)
+    print(tree.eval())
+    derivatives = parser.getDerivative(tree)
+    print(derivatives)
 def test2(case, start_end):
     pics = []
     partial_derivatives = []
@@ -248,53 +257,67 @@ def test(case, start_end, derivative_points):
     partial_derivatives = []
     parser = getParser(case)
     tree = parser.parse()
+    
     if isinstance(tree, Error):
         return [], tree, [], [], []
+    
+    
     canonicalization = tree.canonicalize()
     canonicalization = list2str(canonicalization)
     if canonicalization[0] == '(' and canonicalization[-1] == ')': canonicalization = canonicalization[1:-1]
-    variable_num = len(parser.getVariables())
-    start, end = start_end
-    figure_num = 1
-    if not isinstance(canonicalization, (int,float)):
-        if variable_num > 1:
-            data = plot3D(parser, tree, start, end)
-            pics.append(draw3D(data, figure_num, canonicalization))  
-        elif variable_num == 1:
-            data = plot2D(parser, tree, start, end)
-            pics.append(draw2D(data, figure_num, canonicalization))    
     
-    derivatives = parser.getDerivative(tree)
-    if derivativeAtPoint(parser,tree,derivative_points,derivatives):
-        derivative_points = derivative_points + [' is Valid']
-    else:
-        derivative_points = derivative_points + [' is invalid']
+    try:
+        variable_num = len(parser.getVariables())
+        start, end = start_end
+        figure_num = 1
+        if not isinstance(canonicalization, (int,float)):
+            if variable_num > 1:
+                data = plot3D(parser, tree, start, end)
+                pics.append(draw3D(data, figure_num, canonicalization))  
+            elif variable_num == 1:
+                data = plot2D(parser, tree, start, end)
+                pics.append(draw2D(data, figure_num, canonicalization))    
+    except Exception as e:
+        return [e], tree, [], [], []
     
-    derivative_points = list2str(derivative_points)
+    try:
+        derivatives = parser.getDerivative(tree)
+        if derivativeAtPoint(parser,tree,derivative_points,derivatives):
+            derivative_points = derivative_points + [' is Valid']
+        else:
+            derivative_points = derivative_points + [' is invalid']
+        
+        derivative_points = list2str(derivative_points)
+    except Exception as e:
+        return  pics. canonicalization, [],[], e
+    
+    try:
+        domain = list(parser.getDomain())
+        if derivatives is None:
+            derivatives = []
+        if derivatives is not None:
+            for d in derivatives:
+                d[1] = list2str(d[1])
+                figure_num += 1
+                semi_expr = list2str(d[1])
+                partial_derivatives.append(list2str(d))
+                d_parser = getParser(semi_expr)
+                d_tree = d_parser.parse()
+                d_title = semi_expr
+                d_variable_num = len(d_parser.getVariables())
+                if d_variable_num > 1:
+                    d_data = plot3D(d_parser, d_tree, start, end)
+                    pics.append(draw3D(d_data, figure_num, d_title))
+                else:
+                    d_data = plot2D(d_parser, d_tree, start, end)
+                    pics.append(draw2D(d_data, figure_num, d_title))
+        clean_domain = []
+        for d in domain:
+            clean_domain.append(list2str(d))
+        if len(clean_domain) == 0: clean_domain.append('R')
+    except Exception as e:
+        return pics, canonicalization, [e], [e], derivative_points 
 
-    domain = list(parser.getDomain())
-    if derivatives is None:
-        derivatives = []
-    if derivatives is not None:
-        for d in derivatives:
-            d[1] = list2str(d[1])
-            figure_num += 1
-            semi_expr = list2str(d[1])
-            partial_derivatives.append(list2str(d))
-            d_parser = getParser(semi_expr)
-            d_tree = d_parser.parse()
-            d_title = semi_expr
-            d_variable_num = len(d_parser.getVariables())
-            if d_variable_num > 1:
-                d_data = plot3D(d_parser, d_tree, start, end)
-                pics.append(draw3D(d_data, figure_num, d_title))
-            else:
-                d_data = plot2D(d_parser, d_tree, start, end)
-                pics.append(draw2D(d_data, figure_num, d_title))
-    clean_domain = []
-    for d in domain:
-        clean_domain.append(list2str(d))
-    if len(clean_domain) == 0: clean_domain.append('R')
     return pics, canonicalization, partial_derivatives, clean_domain, derivative_points
 
 

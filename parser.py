@@ -24,7 +24,6 @@ class Parser(object):
     
     def insertValue(self, value):
         for name, symbol in self.variables.items():
-            #value = input(f'what is value of {name}: ')
             if self.tokens.isDigit(value[name]):
                 symbol.insert(value[name])
             else:

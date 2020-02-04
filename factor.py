@@ -697,6 +697,7 @@ class Sec(object):
         if isinstance(other, Symbol): return True
         return repr(self.e) < repr(other.e)
     def __gt__(self, other):
+        if isinstance(other, Symbol): return True
         return repr(self.e) > repr(other.e)
     def __repr__(self):
         return f'sec({self.e})' if isinstance(self.e.canonicalize(), (list, Variable)) else f'{self.e.canonicalize()}'
