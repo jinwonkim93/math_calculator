@@ -7,7 +7,7 @@ import numpy as np
 import io
 import base64
 from error import NonDerivableError, Error
-from calculator import clearExpr
+from calculator import clearExpr, getDerivative
 from utils import list2str
 mpl.use('Agg')
 from copy import deepcopy
@@ -281,7 +281,8 @@ def test(case, start_end, derivative_points):
         return [e], tree, [], [], []
     
     try:
-        derivatives = parser.getDerivative(tree)
+        # derivatives = parser.getDerivative(tree)
+        derivatives = getDerivative(parser, tree)
         if derivativeAtPoint(parser,tree,derivative_points,derivatives):
             derivative_points = derivative_points + [' is Valid']
         else:
