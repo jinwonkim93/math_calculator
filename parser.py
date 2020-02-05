@@ -34,7 +34,7 @@ class Parser(object):
                 symbol.insert(sub_expr.canonicalize())
     
     def getInvalidDomain(self,v,invalid):
-        if isinstance(v, Variable):
+        if isinstance(v, (Variable,str)):
             if len(self.domain) == 0: 
                 self.domain[v] = invalid
                 return True
@@ -56,6 +56,7 @@ class Parser(object):
                     if not key == d:
                         self.domain[d] = invalid
                         return True
+
         return False
     
     def getDomain(self):
@@ -132,6 +133,9 @@ class Parser(object):
         if self.tokens.isType(['^']):
             self.tokens.takeIt()
             f = self.parseFactor()
+            f_eval = f.eval()
+            if abs(f_eval) > 0 and abs(f_eval) < 1:
+                self.getInvalidDomain('x','> 0')
             expo = self.parseFactorTail()
             return FactorTail(f, expo)
         return Empty()

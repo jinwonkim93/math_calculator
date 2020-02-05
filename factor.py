@@ -843,7 +843,7 @@ class Parenthesis(object):
                         else:
                             if len(temp) == 1: temp.pop()
                             temp.append(derivation)
-            return temp if len(temp) > 0 else 0
+            return temp if len(temp) > 0 else [0]
     def __eq__(self, other):
         if self.__class__ != other.__class__: return False
         return list2str(self.e) == list2str(other.e)

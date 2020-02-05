@@ -31,10 +31,11 @@ def checkDomain(parser,tree, value):
     return validity
 
 def derivativeAtPoint(parser,tree,value, derivatives):
-    value_dict = {}
-    for element in value:
-        symbol, point = element.split('=')
-        value_dict[symbol] = float(point)
+    # value_dict = {}
+    # for element in value:
+    #     symbol, point = element.split('=')
+    #     value_dict[symbol] = float(point)
+    value_dict = value
     result = False
     if isContinuous(parser,tree, value_dict):
         if derivatives == None or len(derivatives) == 0: return True
@@ -188,70 +189,15 @@ def getParser(case):
     return parser
 
 def caculate(case,value):
-    value_dict = {}
-    for element in value:
-        symbol, point = element.split('=')
-        value_dict[symbol] = float(point)
-    
+    # value_dict = {}
+    # for element in value:
+    #     symbol, point = element.split('=')
+    #     value_dict[symbol] = float(point)
+    value_dict = value
     parser = getParser(case)
     tree = parser.parse()
     parser.insertValue(value_dict)
     return tree.eval()
-
-# def test3(case,value):
-#     parser = getParser(case)
-#     tree = parser.parse()
-#     canonicalization = tree.canonicalize()
-#     print(canonicalization)
-#     parser.insertValue(value)
-#     print(tree.eval())
-#     derivatives = parser.getDerivative(tree)
-#     print(derivatives)
-
-# def test2(case, start_end):
-#     pics = []
-#     partial_derivatives = []
-#     parser = getParser(case)
-#     tree = parser.parse()
-#     if isinstance(tree, Error):
-#         return [], tree, [], []
-#     canonicalization = tree.canonicalize()
-#     canonicalization = list2str(canonicalization)
-#     print('tree = ',tree)
-#     print('canonicalization = ',canonicalization)
-#     variable_num = len(parser.getVariables())
-#     start, end = start_end
-#     figure_num = 1
-#     domain = parser.getDomain()
-
-#     if not isinstance(canonicalization, (int,float)):
-#         if variable_num > 1:
-#             data = plot3D(parser, tree, start, end)
-#             pics.append(draw3D(data, figure_num, canonicalization))  
-#         elif variable_num == 1:
-#             data = plot2D(parser, tree, start, end)
-#             pics.append(draw2D(data, figure_num, canonicalization))    
-#         print(isDerivative(parser,tree,-1))
-#     derivatives = parser.getDerivative(tree)
-#     domain = list(parser.getDomain())
-#     print('derivatives =', derivatives)
-#     if derivatives is None:
-#         derivatives = []
-#     print('domain =', domain)
-#     if derivatives is not None:
-#         for d in derivatives:
-#             d[1] = list2str(d[1])
-#             figure_num += 1
-#             semi_expr = list2str(d[1])
-#             partial_derivatives.append(list2str(d))
-#             d_parser = getParser(semi_expr)
-#             d_tree = d_parser.parse()
-#             d_title = semi_expr
-#             if len(d_parser.getVariables()) == 0: continue
-#             d_data = plot2D(d_parser, d_tree, start, end)
-#             pics.append(draw2D(d_data, figure_num, d_title))
-    
-#     return pics, canonicalization, derivatives, domain
 
 
 def test(case, start_end, derivative_points):
@@ -280,18 +226,29 @@ def test(case, start_end, derivative_points):
                 data = plot2D(parser, tree, start, end)
                 pics.append(draw2D(data, figure_num, canonicalization))    
     except Exception as e:
+        # raise e
         return [e], canonicalization, [], [], []
     
     try:
+        expression_variables = parser.getVariables()
         derivatives = getDerivative(parser, tree)
+        derivative_points_result = []
         if derivativeAtPoint(parser,tree,derivative_points,derivatives):
-            derivative_points = derivative_points + [' is Valid']
+            for vari in expression_variables.keys():
+                for deri in derivative_points.keys():
+                    if vari == deri:
+                        derivative_points_result.append(deri+ '='+ str(derivative_points[deri])+' is Valid')
+            # derivative_points = derivative_points + [' is Valid']
         else:
-            derivative_points = derivative_points + [' is invalid']
+            for vari in expression_variables.keys():
+                for deri in derivative_points.keys():
+                    if vari == deri:
+                        derivative_points_result.append(deri+ '='+ str(derivative_points[deri])+' is invalid')
+            # derivative_points = derivative_points + [' is invalid']
         
-        derivative_points = list2str(derivative_points)
+        # derivative_points = list2str(derivative_points)
     except Exception as e:
-        raise e
+        # raise e
         return  pics, canonicalization, [],[], [e]
     
     try:
@@ -319,9 +276,10 @@ def test(case, start_end, derivative_points):
             clean_domain.append(list2str(d))
         if len(clean_domain) == 0: clean_domain.append('R')
     except Exception as e:
-        return pics, canonicalization, [e], [e], derivative_points 
+        return pics, canonicalization, [e], [e], derivative_points_result 
 
-    return pics, canonicalization, partial_derivatives, clean_domain, derivative_points
+    return pics, canonicalization, partial_derivatives, clean_domain, derivative_points_result
+    # return pics, canonicalization, partial_derivatives, clean_domain, derivative_points
 
 
 

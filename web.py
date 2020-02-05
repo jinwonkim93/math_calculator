@@ -10,9 +10,13 @@ app = Flask(__name__)
 app.config["CACHE_TYPE"] = "null"
 
 def cleanLine(line):
+    result_dict = {}
     result = line.replace(' ', '')
     result = result.split(',')
-    return result
+    for element in result:
+        symbol, value = element.split('=')
+        result_dict[symbol] = float(value)
+    return result_dict
 @app.route('/input', methods = ['POST', 'GET'])
 def calcExpr():
    if request.method == 'POST':

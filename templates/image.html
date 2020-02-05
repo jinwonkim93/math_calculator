@@ -41,7 +41,11 @@
     </p>
     <hr size="5" color="black">
     <font size="6">Derivative at Point</font> 
-    <p>{{derivative_point}}</p>
+    <p>
+    {% for d in derivative_point %}
+        {{d}}<br>
+    {% endfor %}    
+    </p>
     <hr size="5" color="black">
     <font size="6">Graph</font> 
     <br>
