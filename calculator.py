@@ -3,9 +3,10 @@ from factor import Variable, Constant, Symbol, Parenthesis
 from mathematical_constant import *
 from empty import Empty
 from copy import deepcopy
-
-def logn(n, x = math.e):
-    return 1 + logn(n/x, x) if n > (x-1) else 0
+from utils import sortVariable, calc, list2str
+import numpy as np
+# def logn(n, x = math.e):
+#     return 1 + logn(n/x, x) if n > (x-1) else 0
 
 def pow(base,expo):
     if isinstance(base, Variable) and isinstance(base.e, Parenthesis):
@@ -47,22 +48,22 @@ def isOperator(op):
     if op in ('+','-','/','*'):return True
     else: False
 
-def checkTerm(left,right):
-    if isinstance(left,right.__class__):
-        if isinstance(left, float):
-            return True
-        else:
-            if isinstance(left.e, Symbol):
-                if left.e == right.e and left.expo == right.expo:
-                    if type(left.coeff) == type(right.coeff):
-                        return True
-            else:
-                if left.e == right.e:
-                    if left.expo == right.expo:
-                        return True
+# def checkTerm(left,right):
+#     if isinstance(left,right.__class__):
+#         if isinstance(left, float):
+#             return True
+#         else:
+#             if isinstance(left.e, Symbol):
+#                 if left.e == right.e and left.expo == right.expo:
+#                     if type(left.coeff) == type(right.coeff):
+#                         return True
+#             else:
+#                 if left.e == right.e:
+#                     if left.expo == right.expo:
+#                         return True
 
-    else:
-        return False
+#     else:
+#         return False
 
 def checkTerm2(myExpr,other):
     if isinstance(myExpr, Variable) and isinstance(other, Variable):
@@ -79,16 +80,16 @@ def checkTerm2(myExpr,other):
     else:
         return False
     
-def list2str(expr):
-    try:
-        d = ''
-        for element in expr:
-            if isinstance(element, list):
-                element = list2str(element)
-            d += str(element)
-        return d
-    except:
-        return str(expr)
+# def list2str(expr):
+#     try:
+#         d = ''
+#         for element in expr:
+#             if isinstance(element, list):
+#                 element = list2str(element)
+#             d += str(element)
+#         return d
+#     except:
+#         return str(expr)
 
 def calcByTerm(op, left,right):
     temp = []
@@ -346,24 +347,6 @@ def clearExpr(left):
     else:
         return [res]
 
-def sortVariable(expr):
-    if not isinstance(expr, list): return expr
-    if expr[0] != '-':
-        expr.insert(0,'+')
-    for idx in range(1,len(expr),2):
-        for jdx in range(1, len(expr)-idx, 2):
-            if isinstance(expr[jdx], Variable) and isinstance(expr[jdx+2], Variable):
-                if expr[jdx].e > expr[jdx+2].e:
-                    expr[jdx-1], expr[jdx], expr[jdx+1], expr[jdx+2] =  expr[jdx+1], expr[jdx+2], expr[jdx-1], expr[jdx]
-                elif expr[jdx].e == expr[jdx+2].e:
-                    if expr[jdx].expo < expr[jdx+2].expo:
-                        expr[jdx-1], expr[jdx], expr[jdx+1], expr[jdx+2] =  expr[jdx+1], expr[jdx+2], expr[jdx-1], expr[jdx]
-
-    if expr[0] != '-':
-        expr.pop(0)
-    return expr        
-
-
 def getDerivative(parser, tree):
     variables = parser.getVariables()
 
@@ -398,18 +381,17 @@ def getDerivative(parser, tree):
                                 if len(temp) == 1: temp.pop()
                                 temp.append(derivation)
                     temp = clearExpr(temp)
-                    temp = sortVariable(temp)
-                    # if len(temp) == 0: temp.append(0)
-                    derivatives.append([f'd({list2str(semi_expression)})/d{name} = ',list2str(temp)])
+                    temp = list2str(sortVariable(temp))
+                    if temp[0] == '(' and temp[-1] == ')': temp = temp[1:-1]
+                    derivatives.append([f'd({list2str(semi_expression)})/d{name} = ',temp])
                 else:
                     if isinstance(semi_expression, (int,float)):
                         derivatives.append([f'd({list2str(semi_expression)})/d{name} = ', 0])
                     else:
-                        derivatives.append([f'd({semi_expression})/d{name} = ',list2str(semi_expression.getDerivative(symbol))])
+                        result = list2str(semi_expression.getDerivative(symbol))
+                        if result[0] == '(' and result[-1] == ')': result = result[1:-1]
+                        derivatives.append([f'd({semi_expression})/d{name} = ',result])
             
             except Exception as e:
                 raise e
-                #return semi_expression
-        
         return derivatives
-        #return None

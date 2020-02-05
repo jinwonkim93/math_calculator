@@ -2,7 +2,7 @@ from empty import Empty
 from expression import Expr
 import math
 from mathematical_constant import PI, E
-from utils import list2str, sortVariable
+from utils import list2str, sortVariable, calc
 from copy import deepcopy
 
 
@@ -219,7 +219,7 @@ class Variable(object):
         return res 
     
     def __repr__(self):
-        from fractions import Fraction
+        # from fractions import Fraction
         if self.coeff == 0:
             return '0'
         
@@ -244,8 +244,8 @@ class Variable(object):
                 e = f'({e})'
         
         coeff = self.coeff
-        if isinstance(coeff, (int,float)):
-            coeff = Fraction(coeff).limit_denominator()
+        # if isinstance(coeff, (int,float)):
+        #     coeff = Fraction(coeff).limit_denominator()
         if self.coeff != 1:
             if self.expo == 0:
                 return f'{coeff}'
@@ -351,14 +351,18 @@ class Variable(object):
                 res_variable += temp_variable1*inner_derivative*temp_variable2*self.expo*self.coeff 
             
             return res_variable
+
         elif isinstance(self.e, Parenthesis) and self.expo < 0:
             return Variable(self.e, coeff = self.coeff*self.expo , expo = self.expo-1)
+
         elif isinstance(self.e, Parenthesis) and self.expo > 0 and self.expo < 1:
             coeff = self.expo
             expo = self.expo - 1
             fx = Variable(self.e, expo = expo)
             inner_derivative = self.e.getDerivative(symbol)
-            inner_derivative = [coeff*x for x in inner_derivative]
+            print(inner_derivative)
+            print(coeff)
+            inner_derivative = [coeff*x if isinstance(x,Variable) else x for x in inner_derivative]
             if len(inner_derivative) == 1:
                 inner_derivative = inner_derivative[0]
             elif len(inner_derivative) == 0: return 0
@@ -757,6 +761,16 @@ class ConstantE(object):
     def convert(self):
         return self
 
+    def __eq__(self,other):
+        if self.__class__ == other.__class__ :return True
+        else: return False
+    def __lt__(self, other):
+        if isinstance(other, Symbol): return True
+        return repr(self.e) < repr(other.e)
+    def __gt__(self, other):
+        if isinstance(other, Symbol): return True
+        return repr(self.e) > repr(other.e)
+
     def __repr__(self):
         return self.name
 
@@ -810,12 +824,13 @@ class Parenthesis(object):
             for value in semi_expression:
                 if isinstance(value, (int,float)):
                     if len(temp) > 0: temp.pop()
-                    temp.append(0)
+                    # temp.append(0)
 
                 elif value in ('+', '-', '*', '/'):
                     temp.append(value)                            
                 else:
                     derivation = value.getDerivative(symbol)
+                    print(derivation)
                     if isinstance(derivation, (int,float)):
                         if derivation == 0:
                             if len(temp) > 0: temp.pop()
@@ -828,7 +843,7 @@ class Parenthesis(object):
                         else:
                             if len(temp) == 1: temp.pop()
                             temp.append(derivation)
-            return temp
+            return temp if len(temp) > 0 else 0
     def __eq__(self, other):
         if self.__class__ != other.__class__: return False
         return list2str(self.e) == list2str(other.e)
@@ -841,12 +856,3 @@ class Parenthesis(object):
     def __repr__(self):
         return f'{list2str(self.e)}'
 
-def calc(op, left, right):
-    if op is '+':
-        return left + right
-    elif op is '-':
-        return left - right
-    elif op is '*':
-        return left * right
-    elif op is '/':
-        return left / right

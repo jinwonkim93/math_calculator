@@ -57,54 +57,6 @@ class Parser(object):
                         self.domain[d] = invalid
                         return True
         return False
-
-    def getDerivative(self, semi_expression):
-        if self.variables:
-            semi_expression = semi_expression.canonicalize()
-            derivatives = []
-            if isinstance(semi_expression, Variable) and isinstance(semi_expression.e, Parenthesis) and semi_expression.expo == 1:
-                semi_expression = semi_expression.e.getList()
-            for name, symbol in self.variables.items():
-                try:
-                    temp = []
-                    if isinstance(semi_expression, list):
-                        for value in semi_expression:
-                            if isinstance(value, (int,float)):
-                                if len(temp) > 0: temp.pop()
-
-                            elif value in ('+', '-', '*', '/'):
-                                temp.append(value)                            
-                            else:
-                                derivation = value.getDerivative(symbol)
-                                if isinstance(derivation, Variable):
-                                    if derivation.coeff == 0:
-                                        if len(temp) >0:temp.pop()
-                                    else:
-                                        if len(temp) == 1: temp.pop()
-                                        temp.append(derivation)
-                                
-                                elif derivation == 0:
-                                    if len(temp) > 0: temp.pop()
-                                    if len(temp) == 0: temp.append(derivation)
-                                else:
-                                    if len(temp) == 1: temp.pop()
-                                    temp.append(derivation)
-                        temp = clearExpr(temp)
-                        temp = sortVariable(temp)
-                        # if len(temp) == 0: temp.append(0)
-                        derivatives.append([f'd({list2str(semi_expression)})/d{name} = ',list2str(temp)])
-                    else:
-                        if isinstance(semi_expression, (int,float)):
-                            derivatives.append([f'd({list2str(semi_expression)})/d{name} = ', 0])
-                        else:
-                            derivatives.append([f'd({semi_expression})/d{name} = ',list2str(semi_expression.getDerivative(symbol))])
-                
-                except Exception as e:
-                    raise e
-                    #return semi_expression
-            
-            return derivatives
-            #return None
     
     def getDomain(self):
         res = []

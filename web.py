@@ -9,6 +9,10 @@ from datetime import datetime
 app = Flask(__name__)
 app.config["CACHE_TYPE"] = "null"
 
+def cleanLine(line):
+    result = line.replace(' ', '')
+    result = result.split(',')
+    return result
 @app.route('/input', methods = ['POST', 'GET'])
 def calcExpr():
    if request.method == 'POST':
@@ -21,10 +25,9 @@ def calcExpr():
       if derivative_points == '': derivative_points = 'x=1,y=1'
       if calculation =='': calculation = 'x=1,y=1'
       
-      derivative_points = derivative_points.replace(' ', '')
+      derivative_points = cleanLine(derivative_points)
+      calculation = cleanLine(calculation)
       expr_range = list(map(float,expr_range.split(',')))
-      derivative_points = derivative_points.split(',')
-      calculation = calculation.split(',')
       calculation_result = caculate(expr,calculation)
       pics, canonicalization, partial_derivatives, domain, derivative_point = test(expr,expr_range,derivative_points)
       return render_template('image.html',
