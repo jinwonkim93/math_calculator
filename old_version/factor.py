@@ -492,7 +492,7 @@ class Log(object):
         return repr(self.e) > repr(other.e)
     
     def __str__(self):
-        return f'log{str(self.symbol):.4}({str(self.e)})'
+        return f'log{str(self.symbol)}({str(self.e)})'
     
     def __repr__(self): 
         return f'Log({repr(self.symbol)},{self.e})'

@@ -92,6 +92,7 @@ def plot2D(parser, tree, start, end):
     y = []
     variables = list(parser.getVariables().keys())
     first_variable = variables[0] if len(variables) > 0 else 'No_Variable'
+    print(first_variable)
     value_dict = {}
 
     for value in values:
@@ -111,7 +112,7 @@ def plot2D(parser, tree, start, end):
     return [x,y]
 
 def plot3D(parser, tree, start, end):
-    values = np.linspace(start, end, 50)
+    values = np.linspace(start, end, 80)
     real_x = []
     real_y = []
     real_z = []
@@ -156,12 +157,18 @@ def draw2D(data, figure_num, title):
     ax = plt.axes()
     ax.set_xlabel('x')
     ax.set_ylabel('y',rotation=0)
-    vmin = np.nanmin(y)-0.1; vmax = np.nanmax(y)
+    vmin = np.nanmin(y)-0.1; vmax = np.nanmax(y)+0.1
     plt.ylim(vmin, vmax)
     plt.title(title)
     plt.plot(x,y)
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    plot_url = base64.b64encode(img.getvalue()).decode()
     plt.close()
-    return mpld3.fig_to_html(fig,template_type ='simple')
+    return '<img src="data:image/png;base64,{}">'.format(plot_url)
+    # plt.close()
+    # return mpld3.fig_to_html(fig,template_type ='simple')
 
 def draw3D(data, figure_num, title):
     mpl.rcParams['legend.fontsize'] = 10
@@ -248,7 +255,7 @@ def test(case, start_end, derivative_points):
         
         # derivative_points = list2str(derivative_points)
     except Exception as e:
-        # raise e
+        raise e
         return  pics, canonicalization, [],[], [e]
     
     try:
@@ -265,6 +272,7 @@ def test(case, start_end, derivative_points):
                 d_tree = d_parser.parse()
                 d_title = semi_expr
                 d_variable_num = len(d_parser.getVariables())
+                print(d_variable_num)
                 if d_variable_num > 1:
                     d_data = plot3D(d_parser, d_tree, start, end)
                     pics.append(draw3D(d_data, figure_num, d_title))
@@ -276,8 +284,8 @@ def test(case, start_end, derivative_points):
             clean_domain.append(list2str(d))
         if len(clean_domain) == 0: clean_domain.append('R')
     except Exception as e:
-        return pics, canonicalization, [e], [e], derivative_points_result 
-
+        return pics, canonicalization, [e], [e], derivative_points_result
+    print('pics',len(pics))
     return pics, canonicalization, partial_derivatives, clean_domain, derivative_points_result
     # return pics, canonicalization, partial_derivatives, clean_domain, derivative_points
 

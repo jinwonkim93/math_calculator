@@ -79,17 +79,6 @@ def checkTerm2(myExpr,other):
         return True
     else:
         return False
-    
-# def list2str(expr):
-#     try:
-#         d = ''
-#         for element in expr:
-#             if isinstance(element, list):
-#                 element = list2str(element)
-#             d += str(element)
-#         return d
-#     except:
-#         return str(expr)
 
 def calcByTerm(op, left,right):
     temp = []
@@ -269,15 +258,15 @@ def calcByTerm(op, left,right):
     except Exception as e:
         raise e
 
-def calc(op, left, right):
-    if op is '+':
-        return left + right
-    elif op is '-':
-        return left - right
-    elif op is '*':
-        return left * right
-    elif op is '/':
-        return left / right
+# def calc(op, left, right):
+#     if op is '+':
+#         return left + right
+#     elif op is '-':
+#         return left - right
+#     elif op is '*':
+#         return left * right
+#     elif op is '/':
+#         return left / right
 
 def clearExpr(left):
     res = 0
@@ -382,14 +371,14 @@ def getDerivative(parser, tree):
                                 temp.append(derivation)
                     temp = clearExpr(temp)
                     temp = list2str(sortVariable(temp))
-                    if temp[0] == '(' and temp[-1] == ')': temp = temp[1:-1]
+                    #if temp[0] == '(' and temp[-1] == ')': temp = temp[1:-1]
                     derivatives.append([f'd({list2str(semi_expression)})/d{name} = ',temp])
                 else:
                     if isinstance(semi_expression, (int,float)):
                         derivatives.append([f'd({list2str(semi_expression)})/d{name} = ', 0])
                     else:
                         result = list2str(semi_expression.getDerivative(symbol))
-                        if result[0] == '(' and result[-1] == ')': result = result[1:-1]
+                        # if result[0] == '(' and result[-1] == ')': result = result[1:-1]
                         derivatives.append([f'd({semi_expression})/d{name} = ',result])
             
             except Exception as e:
