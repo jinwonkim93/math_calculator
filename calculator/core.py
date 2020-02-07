@@ -38,15 +38,26 @@ class Expression(object):
     
     def getNextExpr(self):
         return self.expressionTail
+    def insertTerm(self, term):
+        if isinstance(self.term, Empty):
+            return Expression(term)
+        else:
+            if isinstance(self.expressionTail,Empty):
+                if isinstance(term, Term):
+                    term = ExpressionTail(term)
+                et = term
+            else:
+                et = self.expressionTail.insertTail(term)
+            return Expression(self.term,et)
+
     def __str__(self):
         return f'{str(self.term)}{str(self.expressionTail)}'
-    
     def __repr__(self):
         return f'Expr({repr(self.term)}, {repr(self.expressionTail)})'
 
 
 class ExpressionTail(object):
-    def __init__(self,op,t,et):
+    def __init__(self,t,op='+',et=Empty()):
         self.op = op
         self.term = t
         self.expressionTail = et
@@ -67,29 +78,60 @@ class ExpressionTail(object):
         left_term = expr.getTerm()
         nextExpr = expr.getNextExpr()
         et = Empty()
-        nextExpr = None
-        while nextExpr is not Empty():
-            nextExpr = expr.getNextExpr()
-            if op == '+':
+        if isinstance(nextExpr, Empty):
+            if left_term == term:
+                left_term = left_term.add(term)
+            else:
+                et = ExpressionTail(term)
+            return Expression(left_term,et)
+        else:
+            result = Expression(Empty())
+            flag = True
+            while True:
                 if left_term == term:
                     left_term = left_term.add(term)
-                    return Expression(left_term,nextExpr)
+                    result = result.insertTerm(left_term)
+                    result = result.insertTerm(nextExpr)
+                    flag = False
+                    break
                 else:
-                    pass
-                    # return Expression(terms,Empty())
-                # et = ExpressionTail('+',term,Empty())
-            else:
-                if left_term == term:
-                    left_term = left_term.sub(term)
-                pass
-            left_term = nextExpr.term
-                    # return left_term
-                    # return Expression(terms,Empty())
-                # et = ExpressionTail('-',term,Empty())
-            # return Expression(terms,et)
+                    result = result.insertTerm(left_term)
+                    left_term = nextExpr.term if isinstance(nextExpr, ExpressionTail) else Empty()
+                    nextExpr = nextExpr.expressionTail
+                    if isinstance(left_term, Empty): break
+            # result = result.insertTerm(left_term)
+            if flag: result = result.insertTerm(term)
+            return result
+        # ----------------------------------------------------
+        # # nextExpr = None
+        # while not isinstance(nextExpr, Empty):
+        #     # nextExpr = expr.getNextExpr()
+        #     if op == '+':
+        #         if left_term == term:
+        #             left_term = left_term.add(term)
+        #             return Expression(left_term,nextExpr)
+        #         else:
+        #             pass
+        #             # return Expression(terms,Empty())
+        #         # et = ExpressionTail('+',term,Empty())
+        #     else:
+        #         if left_term == term:
+        #             left_term = left_term.sub(term)
+        #         pass
+        #     left_term = nextExpr.term
+        #             # return left_term
+        #             # return Expression(terms,Empty())
+        #         # et = ExpressionTail('-',term,Empty())
+        #     # return Expression(terms,et)
         
 
-             
+    def insertTail(self,term):
+        if isinstance(self.expressionTail, Empty):
+            et = ExpressionTail(term)
+            return ExpressionTail(self.term, et)
+        else:
+            return self.expressionTail.insertTail(term)
+
     def __str__(self):
         return f'{str(self.op)}{str(self.term)}{str(self.expressionTail)}'
     def __repr__(self):

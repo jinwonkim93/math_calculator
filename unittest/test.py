@@ -4,7 +4,7 @@ print(os.getcwd())
 from calculator.parser import Parser
 from calculator.scanner import Scanner
 
-line = '5+5+-5+5+4+-3+1'
+line = 'x+5+5'
 token = Scanner(line)
 parser = Parser(token)
 tree = parser.parse()

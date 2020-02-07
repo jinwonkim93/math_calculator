@@ -26,7 +26,7 @@ class Parser(object):
             op = self.tokens.takeIt()
             t = self.parseTerm()
             et = self.parseExprTail()
-            return ExpressionTail(op,t,et)
+            return ExpressionTail(t,op,et)
         return Empty()
     
     def parseTerm(self):
