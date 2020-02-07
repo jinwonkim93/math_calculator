@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Index</title>
+</head>
+<form action ="http://localhost:5000/input" method = "post">
+    <fieldset style = "width: 150">
+        <p>Enter Expression: </p>
+        <p><input type ="text" name = "Expression"/></p>
+        <p>Enter Range: (default: -1,1)</p>
+        <p><input type ="text" name = "Range"/></p>
+        <p>Derivative at a point: (default: x = 1, y = 1)</p>
+        <p><input type ="text" name = "Point"/></p>
+        <p>Calculate value: (default:  x = 1, y = 1)</p>
+        <p><input type ="text" name = "Calculation"/></p>
+        <p><input type ="submit" name = "action" value = "Compute" /> </p>
+    </fieldset>
+</form>
+<body>
+    <font size="6">Input</font> 
+    <p>{{input}}</p>
+    <hr size="5" color="black">
+    <font size="6">Canonicalization Form </font> 
+    <p>{{canonicalization}}</p>
+    <hr size="5" color="black">
+    <font size="6">Result </font> 
+    <p>{{result}}</p>
+    <hr size="5" color="black">
+    <font size="6">Partial Derivatives </font> 
+    <p>
+    {% for d in partial_derivatives %}  
+    {{d}}<br>
+    {% endfor %}
+    </p>
+    <hr size="5" color="black">
+    <font size="6">Domain</font> 
+    <p>
+    {% for d in domain %}  
+    {{d}}<br>
+    {% endfor %}    
+    </p>
+    <hr size="5" color="black">
+    <font size="6">Derivative at Point</font> 
+    <p>
+    {% for d in derivative_point %}
+        {{d}}<br>
+    {% endfor %}    
+    </p>
+    <hr size="5" color="black">
+    <font size="6">Graph</font> 
+    <br>
+     {% for pic in pics %} 
+     <div>
+     {{ pic|safe }}
+    </div>
+    {% endfor %}
+    <hr size="5" color="black">
+</body>
+</html>

@@ -8,10 +8,10 @@ from copy import deepcopy
 
 class Factor(object):
     def __init__(self, e, sign = Empty(), expo = Empty()):
-        super(__class__,self)
         self.e = e
         self.sign = sign
         self.expo = expo
+
 
     def canonicalize(self):
         return -self.expo.canonicalize(self.e.canonicalize()) if self.sign is '-' else self.expo.canonicalize(self.e.canonicalize())

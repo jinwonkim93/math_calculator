@@ -135,6 +135,7 @@ class Parser(object):
             f = self.parseFactor()
             f_eval = f.eval()
             if abs(f_eval) > 0 and abs(f_eval) < 1:
+                
                 self.getInvalidDomain('x','> 0')
             expo = self.parseFactorTail()
             return FactorTail(f, expo)

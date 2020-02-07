@@ -4,7 +4,10 @@ class Term(object):
         self.tt = tt
     
     def canonicalize(self):
-        return self.tt.canonicalize(self.f.canonicalize())
+        return self.tt.canonicalize(self.f.canonicalize()))
+
+
+        
     def eval(self):
         return self.tt.eval(self.f.eval())
 
@@ -15,3 +18,10 @@ class Term(object):
     def __repr__(self):
         return f'Term({repr(self.f)},{repr(self.tt)})'
         
+
+# x * y * x^2
+
+
+# (x) * y * x^2
+# (x * y) * x^2
+# (x^3 * y)

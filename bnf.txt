@@ -1,0 +1,8 @@
+Expression := Term ExpressionTail
+ExpressionTail := [+,-] Term ExpressionTail | Empty
+Term := Factor TermTail
+TermTail := [*,/] Factor TermTail | Empty
+Factor := [-] Factor | Value FactorTail
+FactorTail := "^" Value FactorTail | Empty
+Value := "("Expression")" | Function | Special_Number | Variable | Digit
+Function := [sin,cos]"("Expression")"|[log]"(" (Expression,)?Expression)

@@ -17,7 +17,7 @@ def cleanLine(line):
         symbol, value = element.split('=')
         result_dict[symbol] = float(value)
     return result_dict
-@app.route('/input', methods = ['POST'])
+@app.route('/input', methods = ['POST', 'GET'])
 def calcExpr():
    if request.method == 'POST':
       expr = request.form['Expression']
