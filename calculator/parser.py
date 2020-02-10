@@ -1,4 +1,4 @@
-from calculator.core import Error, Empty, Expression, ExpressionTail, Term, TermTail, Factor, FactorTail, Value, Variable, Sin, Cos, Log, ConstantE, Pi
+from calculator.core import Error, Empty, Expression, ExpressionTail, Term, TermTail, Factor, FactorTail, Variable, Sin, Cos, Log, ConstantE, Pi
 from calculator.mathematical_constant import *
 
 class Parser(object):
@@ -46,11 +46,11 @@ class Parser(object):
         if self.tokens.isType(['+', '-']):
             sign = self.tokens.takeIt()
             f = self.parseFactor()
-            return Factor(f,sign=sign)
+            return Factor(v = f,sign=sign)
         else:
             v = self.parseValue()
             ft = self.parseFactorTail()
-            return Factor(v, ft)
+            return Factor(v=v, ft =ft)
 
     def parseValue(self):
         if self.tokens.isType(['(']):
@@ -88,7 +88,7 @@ class Parser(object):
         if alpha == 'EOL': raise Exception("Invalid Variable")
         elif alpha in self.variables.keys():
             alpha = self.variables.get(alpha)
-            return Variable(alpha)
+            return alpha
         else:
             variable = Variable(alpha)
             self.variables[alpha] = variable
