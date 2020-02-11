@@ -61,7 +61,7 @@ class Parser(object):
             return e
         elif self.tokens.isType(self.tokens.isFunction):
             function = self.parseFunction()
-            return Value(function)
+            return function
         elif self.tokens.isType(self.tokens.isSpecialNum):
             specialNum = self.parseSpecialNum()
             # return Value(specialNum)     
@@ -81,7 +81,7 @@ class Parser(object):
             f = self.parseFactor()
             factorTail = self.parseFactorTail()
             return FactorTail(f, factorTail)
-        return Empty()
+        return FactorTail(Factor(1.0))
     
     def parseVariable(self):
         alpha = self.tokens.takeIt(self.tokens.isAlpha)

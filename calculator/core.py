@@ -17,8 +17,12 @@ class Empty(object):
         return left
     def add(self,left):
         return left
-    def __eq__(self,other):
-        return self.__class__ == other.__class__
+    def compareEquality(self,other):
+        if self.__class__ == other.__class__: return 0
+        else: return -1
+    def compareFactorPrecedence(self,other):
+         return -1
+
     def __len__(self):
         return 0
     def __str__(self):
@@ -32,12 +36,22 @@ class Expression(object):
         self.expressionTail = et
     
     def canonicalize(self):
-        # t, et = self.expressionTail.canonicalize(self.term.canonicalize())
-        # return Expression(t,et)
         return self.expressionTail.canonicalize(Expression(self.term.canonicalize()))
-        # self.term = self.term.canonicalize()
-        # self.expressionTail = self.expressionTail.canonicalize(self.term)
-        # return self
+    
+    def mulTerm(self,term):
+        left_term = self.getTerm()
+        nextExpr = self.getNextExpr()
+        result = Expression(Empty)
+        while not isinstance(left_term, Empty):
+            print(left_term)
+            res = left_term.mul(term)
+            result.insertTerm(res)
+            left_term = nextExpr.getTerm() if isinstance(nextExpr, ExpressionTail) else Empty()
+            nextExpr = nextExpr.getNextExpr() if isinstance(nextExpr, ExpressionTail) else Empty()
+        return result
+    
+    
+    
     def getTerm(self):
         return self.term
     
@@ -45,20 +59,37 @@ class Expression(object):
         return self.expressionTail
     
     def insertTerm(self, term):
+        """
+        input:term output: expression
+        inserting term
+        """
         if isinstance(self.term, Empty):
             return Expression(term)
         else:
-            return self.insertExprTail(term)
+            return self.insertExprTail(ExpressionTail(t=term))
 
-    def insertExprTail(self, term):
+    def insertExprTail(self, expressionTail):
         if isinstance(self.expressionTail,Empty):
-            if isinstance(term, Term):
-                term = ExpressionTail(term)
-            et = term
+            return Expression(self.term,expressionTail)
         else:
-            et = self.expressionTail.insertTail(term)
+            et = self.expressionTail.insertTail(expressionTail)
         return Expression(self.term,et)
     
+    def dropZero(self, expr):
+        term = expr.getTerm()
+        nextExpr = expr.getNextExpr()
+        result = Expression(Empty())
+        allZero = True
+        while not isinstance(term, Empty):
+            if term.coefficient != 0:
+                result = result.insertTerm(term)
+                allZero = False
+            term = nextExpr.getTerm() if isinstance(nextExpr, ExpressionTail) else Empty()
+            nextExpr = nextExpr.getNextExpr() if isinstance(nextExpr, ExpressionTail) else Empty()
+        if allZero: result = Expression(Term(Constant(),coeff = 0))
+        return result
+
+
     def __str__(self):
         return f'{str(self.term)}{str(self.expressionTail)}'
     def __repr__(self):
@@ -72,9 +103,6 @@ class ExpressionTail(object):
         self.expressionTail = et
 
     def canonicalize(self, left):
-        # right = self.term.canonicalize()
-        # left = self.addTerm(left,right)
-        # return self.expressionTail.canonicalize(left)
         if self.op == '-':
             self.term = -self.term
             self.op = '+'
@@ -82,74 +110,47 @@ class ExpressionTail(object):
         right = self.term.canonicalize()
         left = self.calc(self.op,left,right)
         result = self.expressionTail.canonicalize(left)
-        # return Expression(left,self)
-        # return self
         return result
 
-    # #더하기, 빼기, insert하기
-    # def calc(self, op, expr, term):
-    #     left_term = expr.getTerm()
-    #     nextExpr = expr.getNextExpr()
-    #     result = Expression(Empty())
-    #     noSameTerm = True
-    #     while not isinstance(left_term, Empty):
-    #         #우선순위 파악하는걸로 수정해야함
-    #         # if left_term == term:
-    #         compare = left_term.compareEquality(term)
-    #         if compare == 0:
-    #             left_term = left_term.add(term)
-    #             result = result.insertTerm(left_term)
-    #             result = result.insertExprTail(nextExpr)
-    #             noSameTerm = False
-    #             break  
-    #         elif compare == 1:
-    #             result = result.insertTerm(term)
-    #             result = result.insertTerm(left_term)
-    #             result = result.insertExprTail(nextExpr)
-    #             noSameTerm = False
-    #             break
-    #         else:
-    #             result = result.insertTerm(left_term)
-    #             left_term = nextExpr.getTerm() if isinstance(nextExpr, ExpressionTail) else Empty()
-    #             nextExpr = nextExpr.getNextExpr() if isinstance(nextExpr, ExpressionTail) else Empty()
-    #     if noSameTerm: result = result.insertTerm(term)
-    #     return result
-    
-        #더하기, 빼기, insert하기
+    #더하기, 빼기, insert하기
     def calc(self, op, expr, term):
         left_term = expr.getTerm()
         nextExpr = expr.getNextExpr()
         result = Expression(Empty())
         noSameTerm = True
         while not isinstance(left_term, Empty):
-            #우선순위 파악하는걸로 수정해야함
-            # if left_term == term:
-            compare = left_term.compareEquality(term)
+            compare = left_term.compareTermPrecedence(term)
             if compare == 0:
                 left_term = left_term.add(term)
                 result = result.insertTerm(left_term)
                 result = result.insertExprTail(nextExpr)
                 noSameTerm = False
                 break  
+            elif compare == 1:
+                result = result.insertTerm(term)
+                result = result.insertTerm(left_term)
+                result = result.insertExprTail(nextExpr)
+                noSameTerm = False
+                break
             else:
                 result = result.insertTerm(left_term)
                 left_term = nextExpr.getTerm() if isinstance(nextExpr, ExpressionTail) else Empty()
                 nextExpr = nextExpr.getNextExpr() if isinstance(nextExpr, ExpressionTail) else Empty()
         if noSameTerm: result = result.insertTerm(term)
+        result = result.dropZero(result)
         return result
+    
         
     def getTerm(self):
         return self.term
     def getNextExpr(self):
         return self.expressionTail
-    def insertTail(self,term):
+    def insertTail(self,expressionTail):
         if isinstance(self.expressionTail, Empty):
-            if isinstance(term, Term):
-                term = ExpressionTail(term)
-            
-            return ExpressionTail(self.term, et=term)
+            return ExpressionTail(self.term, et=expressionTail)
         else:
-            return self.expressionTail.insertTail(term)
+            et = self.expressionTail.insertTail(expressionTail)
+            return ExpressionTail(self.term, et=et)
 
     def __str__(self):
         return f'{str(self.op)}{str(self.term)}{str(self.expressionTail)}'
@@ -164,34 +165,37 @@ class Term(object):
 
     def canonicalize(self):
         #empty이면 term이 리턴되어야 하기 때문에 term을 감싸야함
-        return self.termTail.canonicalize(Term(self.factor.canonicalize()))
-        # return self.termTail.canonicalize(Term(Factor(self.factor.canonicalize())))
-
-    # def 
-
-    def add(self, term):
-        if isinstance(self.factor.v, float) and isinstance(term.factor.v, float):
-        # if isinstance(self.factor, float) and isinstance(term.factor, float):
-            result = self.factor.add(term.factor)
-            return Term(result,self.termTail)
-        else:
-            my_sign = self.factor.getSign()
-            term_sign = term.factor.getSign()
-            if my_sign == '-':
-                self.coefficient = -self.coefficient
-                self.factor.sign = Empty()
-            if term_sign == '-':
-                term.coefficient = -term.coefficient
-                term.factor.sign = Empty()
-            coeff = self.coefficient+term.coefficient
-            if coeff == 0:
-                return Term(Factor(0.0))
-            return Term(self.factor, self.termTail, coeff = coeff)
-    #이제 안씀
-    def sub(self, term):
-        result = self.factor.sub(term.factor)
-        return Term(result,self.termTail)
+        factor = self.factor.canonicalize()
+        if factor.sign == '-':
+            self.coefficient = -self.coefficient
+            factor.sign = Empty()
+        if isinstance(factor.getValue(), float):
+            self.coefficient *= factor.getValue()
+            # factor = Factor(1.0)
+            # factor = Factor(Empty())
+            # factor = Empty()
+            factor = Constant()
+        return self.termTail.canonicalize(Term(f=factor,coeff=self.coefficient))
     
+    def add(self, term):
+        # my_sign = self.factor.getSign()
+        # term_sign = term.factor.getSign()
+        # if my_sign == '-':
+            # self.coefficient = -self.coefficient
+            # self.factor.sign = Empty()
+        # if term_sign == '-':
+            # term.coefficient = -term.coefficient
+            # term.factor.sign = Empty()
+        coeff = self.coefficient+term.coefficient
+        if coeff == 0:
+            return Term(Factor(1.0),coeff=coeff)
+        return Term(self.factor, self.termTail, coeff = coeff)
+    def mul(self, term):
+        coeff = self.coefficient * term.coefficient
+        termTail = TermTail(f=term.getFactor())
+        self.coefficient = coeff
+        result = termTail.canonicalize(self)
+        return result
     def getFactor(self):
         return self.factor
 
@@ -205,32 +209,41 @@ class Term(object):
             for idx in range(len(self)):
                 left_f = left.getFactor()
                 right_f = right.getFactor()
+                # if isinstance(left_f, Empty):return False
                 res = left_f.compareEquality(right_f)
-                if res != 0: return -1
+                if res != 0: return False
                 left = left.getNextTerm()
                 right = right.getNextTerm()
-            return 0
-        return -1
-
-        # result = self.factor.compareFactorPrecedence(term.factor)
-        # return result
+            return True
+        return False
 
     def insertFactor(self,factor):
+        """
+        input:factor output: Term
+        inserting factor
+        """
         if isinstance(self.factor, Empty):
-            return Term(factor,self.termTail)
+            return Term(factor,self.termTail,coeff=self.coefficient)
         else:
-            if isinstance(self.termTail, Empty):
-                tt = TermTail(f=factor)
-                if isinstance(factor,Empty):
-                    tt = factor
-                return Term(self.factor,tt)
-            else:
-                tt = self.termTail.insertTail(factor)
-                return Term(self.factor,tt)
-            
+            return self.insertTermTail(TermTail(f=factor))
+
+    def insertTermTail(self, termTail):
+        """
+        input:termtail output: Term
+        inserting termtail
+        """
+        if isinstance(self.termTail, Empty):
+            return Term(self.factor, termTail, coeff=self.coefficient)
+        else:
+            tt = self.termTail.insertTail(termTail)
+            return Term(self.factor,tt,coeff=self.coefficient)
+    
     def compareTermPrecedence(self, term):
-        result = self.factor.compareFactorPrecedence(term.factor)
-        return result
+        equal = self.compareEquality(term)
+        if equal: return 0
+        return self.factor.compareFactorPrecedence(term.factor)
+        # if self.factor < term.factor:return -1
+        # else: return 1
 
     def __eq__(self,term):
         if self.factor == term.factor:
@@ -247,6 +260,8 @@ class Term(object):
         return result
 
     def __str__(self):
+        if isinstance(self.factor,Constant):
+            return f'{self.coefficient}{str(self.termTail)}'
         return f'{self.coefficient}*{str(self.factor)}{str(self.termTail)}' if self.coefficient != 1 else f'{str(self.factor)}{str(self.termTail)}'
     def __repr__(self):
         return f'Term({self.coefficient},{repr(self.factor)},{repr(self.termTail)})'
@@ -259,52 +274,62 @@ class TermTail(object):
 
 
     def canonicalize(self, left):
-        right = self.factor.canonicalize()
-        left = self.calc(self.op, left, right)
-        return left
-    
-    def calc(self,op,factors,factor):
-        left_factor = factors.getFactor()
-        nextFactor = factors.getNextTerm()
-        result = Term(Empty())
-        noSameFactor = True
-        while not isinstance(left_factor, Empty):
-            compare = left_factor.compareFactorPrecedence(factor)
-            if compare == 0:
-                left_factor = left_factor.mul(factor)
-                result = result.insertFactor(left_factor)
-                result = result.insertFactor(nextFactor)
-                noSameFactor = False
-                break
-            elif compare == 1:
-                result = result.insertFactor(factor)
-                result = result.insertFactor(left_factor)
-                result = result.insertFactor(nextFactor)
-                noSameFactor = False
-                break
-            else:
-                result = result.insertFactor(left_factor)
-                left_factor = nextFactor.getFactor() if isinstance(nextFactor, TermTail) else Empty()
-                nextFactor = nextFactor.getNextTerm() if isinstance(nextFactor, TermTail) else Empty()
-        if noSameFactor: result = result.insertFactor(factor)
+        right = self.factor
+        if self.op == '/':
+            right = right.makeFactorTailNeg()
+            self.op = '*'
+        right = right.canonicalize()
+        left = self.calc(left, right)
+        result = self.termTail.canonicalize(left)
         return result
     
-    def mulFactor(self, factor):
-        pass
-            
-
+    def calc(self, factors,factor):
+        coeff = factors.coefficient
+        if isinstance(factor.getValue(),float):
+            #coeff에 연산
+            coeff = coeff*factor.getValue()
+            factors.coefficient = coeff
+            if coeff == 0: return Term(Factor(Empty),coeff=0)
+            return factors
+        
+        elif isinstance(factor.getValue(), Expression):
+            expr = factor.getValue()
+            res = expr.mulTerm(factors)
+            return res
+        else:
+            left_factor = factors.getFactor()
+            nextFactor = factors.getNextTerm()
+            result = Term(Empty(),coeff=coeff)
+            noSameFactor = True
+            while not isinstance(left_factor, Empty):
+                compare = left_factor.compareFactorPrecedence(factor)
+                if compare == 0:
+                    left_factor = left_factor.mul(factor)
+                    result = result.insertFactor(left_factor)
+                    result = result.insertTermTail(nextFactor)
+                    noSameFactor = False
+                    break
+                elif compare == 1:
+                    result = result.insertFactor(factor)
+                    result = result.insertFactor(left_factor)
+                    result = result.insertTermTail(nextFactor)
+                    noSameFactor = False
+                    break
+                else:
+                    result = result.insertFactor(left_factor)
+                    left_factor = nextFactor.getFactor() if isinstance(nextFactor, TermTail) else Empty()
+                    nextFactor = nextFactor.getNextTerm() if isinstance(nextFactor, TermTail) else Empty()
+            if noSameFactor: result = result.insertFactor(factor)
+            return result
     def getFactor(self):
         return self.factor
     def getNextTerm(self):
         return self.termTail
-    def insertTail(self,factor):
+    def insertTail(self,termTail):
         if isinstance(self.termTail,Empty):
-            tt = TermTail(f=factor)
-            if isinstance(factor,Empty):
-                tt = factor
-            return TermTail(f=self.factor,tt=tt)
+            return TermTail(f=self.factor,tt=termTail)
         else:
-            tt = self.termTail.insertTail(factor)
+            tt = self.termTail.insertTail(termTail)
             return TermTail(f=self.factor,tt=tt)
     
     def __eq__(self, termTail):
@@ -358,30 +383,21 @@ class Factor(object):
             v = self.v * factor.v
             return Factor(v=v)
         factorTail = self.factorTail.add(factor.factorTail)
+        if factorTail.factor.getValue() == 0: return Constant()
         return Factor(v=self.v,ft=factorTail)
-    
-    #안씀
-    def sub(self,factor):
-        left = self.v
-        right = factor.v
-        if self.sign == '-':
-            left = -left
-        if factor.sign == '-':
-            right = -right
-        result = left - right
-        result_sign = Empty()
-        if result < 0:
-            result_sign = '-'
-        result = abs(result)
+
         
         return Factor(result,result_sign, self.factorTail)
+    
+    
     def compareFactorPrecedence(self,factor):
+        compare = self.compareEquality(factor)
+        if compare == 0: return 0
+        left = str(self)
+        right = str(factor)
+        if left > right: return -1
+        else:return 1
 
-        left = self.getPriority()
-        right = factor.getPriority()
-        if left < right: return 1
-        elif left == right: return 0
-        else: return -1
     
     def getPriority(self):
         result = 0
@@ -394,14 +410,26 @@ class Factor(object):
     def compareEquality(self,factor):
         if self == factor: return 0
         else: return -1
+    def makeFactorTailNeg(self):
+        if isinstance(self.factorTail,Empty):
+            self.factorTail = FactorTail(f=Factor(1.0),ft=Empty())
+        self.factorTail = -self.factorTail
+        return self
     def getSign(self):
         return self.sign
+    def pow(self,factor):
+        if factor.sign == '-':
+            factor.v = -factor.v
+        return self.v**factor.v
 
+    def getValue(self):
+        return self.v
     def __eq__(self, other):
-        if isinstance(self.v, float) and isinstance(other.v,float):return True
+        if self.__class__ != other.__class__:return False
+        # if isinstance(self.v, float) and isinstance(other.v,float):return True
+        if isinstance(other,Empty):return False
         if self.v == other.v and self.factorTail == other.factorTail: return True
         return False
-    
     def __neg__(self):
         if isinstance(self.sign, Empty):
             return Factor(self.v,'-', ft= self.factorTail)
@@ -414,51 +442,39 @@ class Factor(object):
         return f'Factor({repr(self.sign)},{repr(self.v)},{repr(self.factorTail)})'
 
 class FactorTail(object):
-    def __init__(self, v, ft = Empty()):
-        self.v = v
+    def __init__(self, f, ft = Empty()):
+        self.factor = f
         self.factorTail = ft
 
     def canonicalize(self, left):
-        # return Factor(left, self)
-        v = self.factorTail.canonicalize(self.v)
+        factor = self.factorTail.canonicalize(self.factor)
         if isinstance(left.v, float):
-            v = left.v**v.v
-            return Factor(v)
-        else:
-            return Factor(left.v,self)
+            if isinstance(factor.v, float):
+                v = left.pow(factor)
+                return Factor(v=v)
+        return Factor(left.v,ft=self)
+    #안씀
     def getPriority(self):
         result = 0
         result += self.factorTail.getPriority()
-        result += self.v
+        result += self.factor.v
         return result
+    
     def add(self,factorTail):
-        result = self.v.add(factorTail.v)
+        result = self.factor.add(factorTail.factor)
         return FactorTail(result)
 
     def __eq__(self, factorTail):
-        if self.v == factorTail.v and self.factorTail == factorTail.factorTail: return True
+        if self.__class__ != factorTail.__class__:return False
+        if self.factor == factorTail.factor and self.factorTail == factorTail.factorTail: return True
         return False
+    def __neg__(self):
+        self.factor = -self.factor
+        return self
     def __str__(self):
-        return f'^{self.v}{self.factorTail}'
+        return '' if self.factor.v == 1 and isinstance(self.factor.sign, Empty) else f'^{self.factor}{self.factorTail}' 
     def __repr__(self):
-        return f'FactorTail({repr(self.v)},{self.factorTail})'
-
-# class Value(object):
-#     def __init__(self, e):
-#         self.e = e
-
-#     def __eq__(self, value):
-#         if self.e == value.e: return True
-#         return False
-
-#     def canonicalize(self):
-#         if isinstance(self.e, float): return self
-#         return Value(self.e.canonicalize())
-
-#     def __str__(self):
-#         return f'{self.e}'
-#     def __repr__(self):
-#         return f'Value({repr(self.e)})'
+        return f'FactorTail({repr(self.factor)},{repr(self.factorTail)})'
 
 
 class Variable(object):
@@ -477,16 +493,47 @@ class Variable(object):
         return f'Variable({repr(self.name)})'
 
 class Sin(object):
-    pass
-
+    def __init__(self, value):
+        self.value = value
+    
+    def canonicalize(self):
+        self.value = self.value.canonicalize()
+        return self
+    
+    def __eq__(self,other):
+        if self.__class__ != other.__class__:return False
+        if str(self) == str(other): return True
+    def __str__(self):
+        return f'sin({self.value})'
+    def __repr__(self):
+        return f'sin({repr(self.value)})'
 class Cos(object):
-    pass
-
+    def __init__(self, value):
+        self.value = value
+    
+    def canonicalize(self):
+        self.value = self.value.canonicalize()
+        return self
+    def __eq__(self,other):
+        if self.__class__ != other.__class__:return False
+        if str(self) == str(other): return True
+    def __str__(self):
+        return f'cos({self.value})'  
+    def __repr__(self):
+        return f'cos({repr(self.value)})'
 class Log(object):
     def __init__(self, base, value):
         self.base = base
         self.value = value
     
+    def canonicalize(self):
+        self.value = self.value.canonicalize()
+        return self
+    
+    def __eq__(self,other):
+        if self.__class__ != other.__class__:return False
+        if str(self) == str(other): return True
+        return False
     def __str__(self):
         return f'log({self.base},{self.value})'
     
@@ -510,3 +557,17 @@ class Pi(object):
         return 'pi'
     def __repr__(self):
         return 'pi'
+
+class Constant(object):
+    def compareEquality(self,other):
+        if self.__class__ == other.__class__: return 0
+        else: return -1
+    def compareFactorPrecedence(self,other):
+        return -1
+
+    def __len__(self):
+        return 0
+    def __str__(self):
+        return ''
+    def __repr__(self):
+        return 'Constant'
