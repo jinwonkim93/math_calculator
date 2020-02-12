@@ -53,7 +53,7 @@ def test(line):
 #     except Exception as e:
 #         print('Error = ', e)
 
-line = 'sin(x)-sin(x)'
+line = '((x^2)^0.5)/x+((y^2)^0.5)/y'
 # line = 'x*y + 2*x'
 # line = '2*x+x*y'
 test(line)

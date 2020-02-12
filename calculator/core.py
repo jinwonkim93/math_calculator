@@ -1,5 +1,12 @@
 import math
 
+def checkParenthesisValid(term):
+    coeff = term.coefficient
+    factor = term.getFactor()
+    factorTail = factor.factorTail
+    expr = factor.getValue()
+    return coeff == 1 and factorTail.factor.sign != '-' and factorTail.factor.v == 1 and len(term) == 1
+
 class Error(object):
     def __init__(self, error):
         self.error = error
@@ -41,7 +48,7 @@ class Expression(object):
     def canonicalize(self):
         term = self.term.canonicalize()
         #term이 expression일때 최종 expression에 확장
-        if isinstance(term.getFactor().getValue(),Expression) and term.getFactor().factorTail.factor.sign != '-' and len(term) == 1 and term.coefficient == 1:
+        if isinstance(term.getFactor().getValue(),Expression) and checkParenthesisValid(term):
             temp_expr = term.getFactor().getValue()
             if term.coefficient < 0:
                 temp_expr = -temp_expr
@@ -54,7 +61,7 @@ class Expression(object):
         #term 또는 expr n번 반복
         right_term = term
         right_nextExpr = Empty()
-        if isinstance(term.getFactor().getValue(), Expression)  and term.getFactor().factorTail.factor.sign != '-':
+        if isinstance(term.getFactor().getValue(), Expression)  and checkParenthesisValid(term):
             right_expr = term.getFactor().getValue()
             # if term.getFactor().sign == '-':
             right_term = right_expr.getTerm()
@@ -149,7 +156,7 @@ class ExpressionTail(object):
             self.op = '+'
            
         right = self.term.canonicalize()
-        if isinstance(right.getFactor().getValue(),Expression)  and right.getFactor().factorTail.factor.sign != '-':
+        if isinstance(right.getFactor().getValue(),Expression)  and checkParenthesisValid(right):
             temp_expr = right.getFactor().getValue()
             if right.coefficient < 0:
                 temp_expr = -temp_expr
@@ -578,15 +585,14 @@ class FactorTail(object):
     def canonicalize(self, left):
         # print(left,type(left),'FactorTail')
         self.factor = self.factor.canonicalize()
-        
-        
-        
         if isinstance(left.v, float):
             if isinstance(self.factor.v, float):
                 v = left.pow(self.factor)
                 return Factor(v=v,sign=left.sign)
         if isinstance(left.getValue(),Expression):
             result = left.getValue()
+            # if len(result) == 1:
+                # temp_factor = result.getTerm().getFactor()
             if self.factor.v == 2:
                 for _ in range(int(factor.v)-1):
                     result = result.mulTerm(left.getValue())
@@ -667,6 +673,7 @@ class Sin(object):
         return f'sin({self.value})'
     def __repr__(self):
         return f'sin({repr(self.value)})'
+
 class Cos(object):
     def __init__(self, value):
         self.value = value
@@ -684,6 +691,7 @@ class Cos(object):
         return f'cos({self.value})'  
     def __repr__(self):
         return f'cos({repr(self.value)})'
+
 class Log(object):
     def __init__(self, base, value):
         self.base = base
