@@ -6,6 +6,12 @@ class Parser(object):
         self.tokens = scanner
         self.variables = {}
         self.domain = {}
+
+    def insertValue(self, value):
+        for name, symbol in self.variables.items():
+            if self.tokens.isDigit(value[name]):
+                symbol.insert(value[name])
+        return True
     
     def parse(self):
         try:

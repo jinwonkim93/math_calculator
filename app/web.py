@@ -1,7 +1,8 @@
 
+import os, sys
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from flask import Flask, redirect, url_for, request, render_template,make_response
-from single_test import test, caculate
-import os
+from calculator.main import test, caculate
 import subprocess
 from functools import wraps, update_wrapper
 from datetime import datetime
@@ -32,8 +33,8 @@ def calcExpr():
       derivative_points = cleanLine(derivative_points)
       calculation = cleanLine(calculation)
       expr_range = list(map(float,expr_range.split(',')))
-      calculation_result = caculate(expr,calculation)
-      pics, canonicalization, partial_derivatives, domain, derivative_point = test(expr,expr_range,derivative_points)
+    #   calculation_result = caculate(expr,calculation)
+      pics, canonicalization, partial_derivatives, domain, derivative_point, calculation_result = test(expr,expr_range,derivative_points,calculation)
       return render_template('image.html',
                              pics = pics,
                              canonicalization = canonicalization,
