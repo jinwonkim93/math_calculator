@@ -79,8 +79,10 @@ class Parser(object):
         if self.tokens.isType(['^']):
             self.tokens.takeIt()
             f = self.parseFactor()
-            factorTail = self.parseFactorTail()
-            return FactorTail(f, factorTail)
+            # f = self.parseVariable()
+            # factorTail = self.parseFactorTail()
+            # return FactorTail(f, factorTail)
+            return FactorTail(f)
         return FactorTail(Factor(1.0))
     
     def parseVariable(self):
