@@ -2,27 +2,20 @@ import os, sys
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from calculator.parser import Parser
 from calculator.scanner import Scanner
-# import matplotlib.pyplot as plt, mpld3
-# import matplotlib as mpl
-# from mpl_toolkits.mplot3d import Axes3D
-# import numpy as np
-# import io
-# import base64
-# from error import NonDerivableError, Error
-# from calculator import clearExpr, getDerivative
-# from utils import list2str
-# mpl.use('Agg')
+import matplotlib.pyplot as plt, mpld3
+import matplotlib as mpl
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+import io
+import base64
+mpl.use('Agg')
 from copy import deepcopy
 
-domainRule = {
-    "!=":lambda x,y: x != y
-}
 #사용안함
 def checkDomain(parser,tree, value):
     domain = parser.getDomain()
     parser.insertValue(value)
     validity = True
-    print(domain)
     for symbol, rule in domain:
         rule_op, invalid_value = rule.split(',')
         try:
@@ -46,27 +39,28 @@ def derivativeAtPoint(parser,tree,value, derivatives):
             semi_expr = list2str(d[1])
             d_parser = getParser(semi_expr)
             d_tree = d_parser.parse()
+
             result = isContinuous(d_parser, d_tree, value_dict)
     return result
 
 
-def isContinuous(parser,tree, value):
+def isContinuous(tree, value):
     alpha = 10**-5
     tolerance = alpha * 10000
     first_variable = list(value.keys())[0]
     try:
-        parser.insertValue(value)
+        tree.insertValue(value)
         mid = tree.eval()
     except:
         return False
     #check x_axis
     temp = deepcopy(value)
     temp[first_variable] = temp[first_variable]-alpha
-    parser.insertValue(temp)
+    tree.insertValue(temp)
     left = tree.eval()
     temp = deepcopy(value)
     temp[first_variable] = temp[first_variable]+alpha
-    parser.insertValue(temp)
+    tree.insertValue(temp)
     right = tree.eval()
     return abs(left-mid)<tolerance and abs(mid-right)<tolerance
 
@@ -88,19 +82,19 @@ def isDerivative(parser, tree, value):
     return result
 
 
-def plot2D(parser, tree, start, end):
+def plot2D(tree, start, end):
     values = np.linspace(start, end , 1000)
     x = []
     y = []
-    variables = list(parser.getVariables().keys())
+    variables = list(tree.getVariables().keys())
+    print(variables, 'plot2d')
     first_variable = variables[0] if len(variables) > 0 else 'No_Variable'
-    print(first_variable)
     value_dict = {}
 
     for value in values:
         value_dict[first_variable] = value
-        if isContinuous(parser,tree, value_dict):
-            parser.insertValue(value_dict)
+        if isContinuous(tree, value_dict):
+            tree.insertValue(value_dict)
             mid = tree.eval()
             x.append(value)
             y.append(mid)
@@ -113,14 +107,14 @@ def plot2D(parser, tree, start, end):
     y = np.asarray(y)
     return [x,y]
 
-def plot3D(parser, tree, start, end):
+def plot3D(tree, start, end):
     values = np.linspace(start, end, 80)
     real_x = []
     real_y = []
     real_z = []
     flag = 0
-    variables = list(parser.getVariables().keys())
-
+    variables = list(tree.getVariables().keys())
+    print(variables, 'plot3d')
     first_variable = variables[0]
     second_variable = variables[1]
     value_dict = {}
@@ -134,8 +128,8 @@ def plot3D(parser, tree, start, end):
         value_dict[first_variable] = value_x
         for value_y in values[:]:
             value_dict[second_variable] = value_y
-            if isContinuous(parser,tree,value_dict):
-                parser.insertValue(value_dict)
+            if isContinuous(tree,value_dict):
+                tree.insertValue(value_dict)
                 mid = tree.eval()
                 x.append(value_x)
                 y.append(value_y)            
@@ -205,12 +199,36 @@ def caculate(case,value):
     return tree.eval()
 
 def test(case, start_end, derivative_points,value):
+    pics = []
+    partial_derivatives = []
     parser = getParser(case)
     tree = parser.parse()
     canonicalization = tree.canonicalize()
-    parser.insertValue(value)
+    canonicalization.insertValue(value)
     calculation = canonicalization.eval()
-    return [], canonicalization,[], [], [], calculation
+    
+    variables = canonicalization.getVariables()
+    variable_num = len(variables)
+    start, end = start_end
+    figure_num = 1
+    if variable_num > 1:
+        data = plot3D(canonicalization, start, end)
+        pics.append(draw3D(data, figure_num, canonicalization))  
+    elif variable_num == 1:
+        data = plot2D(canonicalization, start, end)
+        pics.append(draw2D(data, figure_num, canonicalization))   
+    for symbol in variables:
+        d_tree = canonicalization.getDerivative(symbol)
+        partial_derivatives.append(f'd({canonicalization}/d{symbol}) = {d_tree}')
+        d_tree.countVariable()
+        d_variable_num = len(d_tree.getVariables())
+        if d_variable_num > 1:
+            data = plot3D(d_tree, start, end)
+            pics.append(draw3D(data, figure_num, d_tree))  
+        elif d_variable_num == 1:
+            data = plot2D(d_tree, start, end)
+            pics.append(draw2D(data, figure_num, d_tree))   
+    return pics, canonicalization, partial_derivatives, [], [], calculation
 
 # def test(case, start_end, derivative_points):
 #     pics = []

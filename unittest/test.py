@@ -39,12 +39,16 @@ def test(line):
     a = tree.canonicalize()
     # a = a.canonicalize()
     # a = a.canonicalize()
+
     print(a)
     print(len(a))
     print('')
     print(repr(a))
     print('')
-
+    derivatives = a.getDerivative('x')
+    parser.insertValue({'x':1,'y':1})
+    print('calc', a.eval())
+    print(derivatives, type(derivatives), repr(derivatives))
 
 # for idx,case in enumerate(testCase):
 #     print(f'-------test case {idx}--------')
@@ -53,7 +57,7 @@ def test(line):
 #     except Exception as e:
 #         print('Error = ', e)
 
-line = '((x^2)^0.5)/x+((y^2)^0.5)/y'
+line = 'x^2+2*y*x+x/x'
 # line = 'x*y + 2*x'
 # line = '2*x+x*y'
 test(line)

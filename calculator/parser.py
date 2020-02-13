@@ -12,7 +12,8 @@ class Parser(object):
             if self.tokens.isDigit(value[name]):
                 symbol.insert(value[name])
         return True
-    
+    def getVariables(self):
+        return self.variables
     def parse(self):
         try:
             e = self.parseExpr()
