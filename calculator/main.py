@@ -93,6 +93,7 @@ def plot2D(tree, start, end):
 
     for value in values:
         value_dict[first_variable] = value
+        print(value_dict)
         if isContinuous(tree, value_dict):
             tree.insertValue(value_dict)
             mid = tree.eval()
@@ -220,8 +221,9 @@ def test(case, start_end, derivative_points,value):
     for symbol in variables:
         d_tree = canonicalization.getDerivative(symbol)
         partial_derivatives.append(f'd({canonicalization}/d{symbol}) = {d_tree}')
-        d_tree.countVariable()
-        d_variable_num = len(d_tree.getVariables())
+        d_variables = d_tree.countVariable()
+        d_variable_num = len(d_variables)
+        print(d_tree)
         if d_variable_num > 1:
             data = plot3D(d_tree, start, end)
             pics.append(draw3D(data, figure_num, d_tree))  
