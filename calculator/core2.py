@@ -142,6 +142,7 @@ class Expression(object):
     def countVariable(self,variables={}):
         result = self.term.countVariable(variables)
         result = self.expressionTail.countVariable(result)
+        self.variables = result
         return result
     def getVariables(self):
         return self.variables
@@ -272,13 +273,14 @@ class Term(object):
     def canonicalize(self):
         #empty이면 term이 리턴되어야 하기 때문에 term을 감싸야함
         factor = self.factor.canonicalize()
+        coeff = self.coefficient
         if factor.sign == '-':
-            self.coefficient = -self.coefficient
+            coeff = -coeff
             factor.sign = Empty()
         if isinstance(factor.getValue(), float):
-            self.coefficient *= factor.getValue()
+            coeff *= factor.getValue()
             factor = Constant( ft=factor.factorTail)
-        return self.termTail.canonicalize(Term(f=factor,coeff=self.coefficient))
+        return self.termTail.canonicalize(Term(f=factor,coeff=coeff))
     def getDerivative(self,symbol):
         if self.isDifferentiable(symbol):
             # 계수 * 지수, 지수-1, 나머지 상수처리
@@ -501,11 +503,9 @@ class Factor(object):
     def getDerivative(self, symbol):
         if self.v.isDifferentiable(symbol):
             expo, factorTail = self.factorTail.getDerivative()
-            fx, gx = self.v.getDerivative(symbol) if not isinstance(self.v, Expression) else self.v, Empty()
-            if isinstance(gx, Empty):
-                if factorTail.getValue() == 0:
-                    return expo, Constant()
-                return expo, Factor(fx, factorTail)
+            if factorTail.getValue() == 0:
+                return expo, Constant()
+            return expo, Factor(self.v, factorTail)
             
         return 1, self
     

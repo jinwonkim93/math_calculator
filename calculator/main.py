@@ -220,7 +220,7 @@ def test(case, start_end, derivative_points,value):
         pics.append(draw2D(data, figure_num, canonicalization))   
     for symbol in variables:
         d_tree = canonicalization.getDerivative(symbol)
-        partial_derivatives.append(f'd({canonicalization}/d{symbol}) = {d_tree}')
+        partial_derivatives.append(f'd({canonicalization})/d{symbol} = {d_tree}')
         d_variables = d_tree.countVariable()
         d_variable_num = len(d_variables)
         print(d_tree)

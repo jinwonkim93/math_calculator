@@ -1,4 +1,4 @@
-from calculator.core import Error, Empty, Expression, ExpressionTail, Term, TermTail, Factor, FactorTail, Variable, Sin, Cos, Log, ConstantE, Pi
+from calculator.core2 import Error, Empty, Expression, ExpressionTail, Term, TermTail, Factor, FactorTail, Variable, Sin, Cos, Log, ConstantE, Pi
 from calculator.mathematical_constant import *
 
 class Parser(object):
