@@ -1,12 +1,12 @@
 import re
 from collections.abc import Iterable
-from calculator.mathematical_constant import greeks
+from mathematical_constant import greeks
 
 class Scanner(object):
     def __init__(self, line):
         line = line.replace(' ', '').lower()
-        self.tokens = re.findall(r'[-+]|[a-zA-Z]+|[0-9]*\.?[0-9]+|[*+-/()^,]', line) + ['EOL']
-        print(self.tokens)
+        self.tokens = re.findall(r'[-+]|[a-z|A-Z]+|[0-9]*\.?[0-9]+|[*+-/()^]', line) + ['EOL']
+
     def peak(self):
         if len(self.tokens):
             return self.tokens[0]
@@ -34,12 +34,7 @@ class Scanner(object):
         
         else:
             return False
-    def isFunction(self,value):
-        functionDict = {'sin': True,
-                        'cos': True,
-                        'log': True}
-        return functionDict.get(value,False)
-
+    
     def isDigit(self, value):
         if value in greeks: return False
         try:

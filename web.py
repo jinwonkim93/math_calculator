@@ -1,8 +1,7 @@
 
-import os, sys
-sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from flask import Flask, redirect, url_for, request, render_template,make_response
-from calculator.main import test, caculate
+from single_test import test, caculate
+import os
 import subprocess
 from functools import wraps, update_wrapper
 from datetime import datetime
@@ -18,7 +17,7 @@ def cleanLine(line):
         symbol, value = element.split('=')
         result_dict[symbol] = float(value)
     return result_dict
-@app.route('/input', methods = ['POST', 'GET'])
+@app.route('/input', methods = ['POST'])
 def calcExpr():
    if request.method == 'POST':
       expr = request.form['Expression']
@@ -33,8 +32,8 @@ def calcExpr():
       derivative_points = cleanLine(derivative_points)
       calculation = cleanLine(calculation)
       expr_range = list(map(float,expr_range.split(',')))
-    #   calculation_result = caculate(expr,calculation)
-      pics, canonicalization, partial_derivatives, domain, derivative_point, calculation_result = test(expr,expr_range,derivative_points,calculation)
+      calculation_result = caculate(expr,calculation)
+      pics, canonicalization, partial_derivatives, domain, derivative_point = test(expr,expr_range,derivative_points)
       return render_template('image.html',
                              pics = pics,
                              canonicalization = canonicalization,
