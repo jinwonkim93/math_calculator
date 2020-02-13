@@ -69,6 +69,13 @@ class Expression(object):
         et = self.expressionTail.getDerivative(symbol)
         # print(left, et)
         return self.dropZero(Expression(left,et))
+    def isDifferentiable(self,symbol):
+        if self.term.isDifferentiable(symbol):
+            if isinstance(self.expressionTail,Empty): return True
+            elif self.expressionTail.isDifferentiable(symbol):
+                return True
+        return False
+
     def mulTerm(self,term):
         #term 또는 expr n번 반복
         right_term = term
@@ -136,8 +143,7 @@ class Expression(object):
         if allZero: result = Expression(Term(Constant(),coeff = 0))
         return result
     
-    def countVariable(self,variables = {}):
-        variables = self.getVariables()
+    def countVariable(self,variables={}):
         result = self.term.countVariable(variables)
         result = self.expressionTail.countVariable(result)
         return result
@@ -195,6 +201,13 @@ class ExpressionTail(object):
         right = self.term.getDerivative(symbol)
         et = self.expressionTail.getDerivative(symbol)
         return ExpressionTail(t=right,et=et)
+    
+    def isDifferentiable(self, symbol):
+        if self.term.isDifferentiable(symbol):
+            if isinstance(self.expressionTail,Empty): return True
+            elif self.expressionTail.isDifferentiable(symbol):
+                return True
+        return False
     #더하기, 빼기, insert하기
     def calc(self, expr, term):
         left_term = expr.getTerm()
@@ -280,15 +293,21 @@ class Term(object):
         if self.isDifferentiable(symbol):
             # 계수 * 지수, 지수-1, 나머지 상수처리
             expo, factor = self.factor.getDerivative(symbol)
-            # print(expo , repr(factor), 'factor get Derivative')
             if isinstance(factor, Empty): return Term(factor,coeff=0)
             coeff = self.coefficient * expo
             term = Term(f=factor,coeff=coeff)
             tt = self.termTail.getTermDerivative(symbol, term)
-            # print(tt, repr(tt), 'term getderivative')
             return tt
         else:
             return Term(Constant(), coeff = 0)
+    
+    def isDifferentiable(self,symbol):
+        left = self
+        for idx in range(len(self)):
+            left_f = left.getFactor()
+            if left_f.isDifferentiable(symbol): return True
+            left = left.getNextTerm()
+        return False
     def add(self, term):
         coeff = self.coefficient+term.coefficient
         if coeff == 0:
@@ -352,14 +371,7 @@ class Term(object):
         left = str(self)
         right = str(term)
         return 1 if left > right else -1
-    def isDifferentiable(self,symbol):
-        left = self
-        for idx in range(len(self)):
-            left_f = left.getFactor()
-            # print(left_f, symbol, left_f.isDifferentiable(symbol))
-            if left_f.isDifferentiable(symbol): return True
-            left = left.getNextTerm()
-        return False
+
     def pow(self,power_factor):
         coeff = self.coefficient**power_factor
         factor = self.getFactor()
@@ -541,12 +553,17 @@ class Factor(object):
         # print(self, symbol, self.v.isDifferentiable(symbol), 'factor getDerivative')
         if self.v.isDifferentiable(symbol):
             expo, factorTail = self.factorTail.getDerivative()
-            if factorTail.getValue() == 0:
-                # variable 없어지는거
-                return expo, Constant()
-            return expo, Factor(self.v, factorTail)
+            fx, gx = self.v.getDerivative(symbol) if not isinstance(self.v, Expression) else self.v, Empty()
+            if isinstance(gx, Empty):
+                if factorTail.getValue() == 0:
+                    # variable 없어지는거
+                    return expo, Constant()
+                return expo, Factor(fx, factorTail)
+            
         return 1, self
-
+    
+    def isDifferentiable(self, symbol):
+        return self.v.isDifferentiable(symbol)
     def add(self,factor):
         left = self.v
         right = factor.v
@@ -623,8 +640,7 @@ class Factor(object):
         # if self.v == factor.v: return True
         if self == factor: return True
         return False
-    def isDifferentiable(self, symbol):
-        return self.v.isDifferentiable(symbol)
+
     def makeFactorTailNeg(self):
         if isinstance(self.factorTail,Empty):
             self.factorTail = FactorTail(f=Factor(1.0),ft=Empty())
@@ -732,6 +748,8 @@ class Variable(object):
         return self.value
     def canonicalize(self):
         return self
+    def getDerivative(self, symbol):
+        return self, Empty()
     def isDifferentiable(self,symbol):
         if self.name == symbol: return True
         return False
@@ -759,11 +777,13 @@ class Sin(object):
     def eval(self):
         value = self.value if isinstance(self.value,float) else self.value.eval()
         return math.sin(value)
-    def isDifferentiable(self,symbol):
-        return False
     def canonicalize(self):
         self.value = self.value.canonicalize()
         return self
+    def isDifferentiable(self,symbol):
+        return False
+    def getDerivative(self, symbol):
+        return self, Empty()
     def countVariable(self, variables):
         return self.value.countVariable(variables)
     def __eq__(self,other):
@@ -786,6 +806,8 @@ class Cos(object):
         return self
     def isDifferentiable(self,symbol):
         return False    
+    def getDerivative(self, symbol):
+        return self, Empty()
     def countVariable(self, variables):
         return self.value.countVariable(variables)
     def __eq__(self,other):
@@ -807,8 +829,11 @@ class Log(object):
     def canonicalize(self):
         self.value = self.value.canonicalize()
         return self
+    def getDerivative(self,symbol):
+        #f(g(x)) = f'(g(x)) * g(x)'
+        return self, Empty()
     def isDifferentiable(self,symbol):
-        return False
+        return self.value.isDifferentiable(symbol)
     def countVariable(self, variables):
         return self.value.countVariable(variables)
     def __eq__(self,other):
