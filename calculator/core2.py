@@ -76,7 +76,7 @@ class Expression(object):
         left = self.term.getDerivative(symbol)
         et = self.expressionTail.getDerivative(symbol)
         # print(left, et)
-        return self.dropZero(Expression(left,et))
+        return Expression(left,et).dropZero()
     def isDifferentiable(self,symbol):
         if self.term.isDifferentiable(symbol):
             if isinstance(self.expressionTail,Empty): return True
@@ -133,9 +133,9 @@ class Expression(object):
         else:
             self.expressionTail.insertTail(et)
     
-    def dropZero(self, expr):
-        term = expr.getTerm()
-        nextExpr = expr.getNextExpr()
+    def dropZero(self):
+        term = self.getTerm()
+        nextExpr = self.getNextExpr()
         result = Expression(Empty())
         allZero = True
         while not isinstance(term, Empty):
@@ -198,18 +198,13 @@ class ExpressionTail(object):
            
         right = self.term.canonicalize()
         s = self
-        if isinstance(right.getFactor().getValue(),Expression)  and checkParenthesisValid(right):
+        if isinstance(right.getFactor().getValue(),Expression) and checkParenthesisValid(right):
             temp_expr = right.getFactor().getValue()
-            if right.coefficient < 0:
-                temp_expr = -temp_expr
+            if right.coefficient < 0: temp_expr = -temp_expr
             right = temp_expr.getTerm()
-            #가독성 저하
             s.insertTail(temp_expr.getNextExpr())
-            # s = s.insertTail(temp_expr.getNextExpr())
-        
-        left = s.calc(left,right)
-        result = s.expressionTail.canonicalize(left)
-        return result
+        return s.expressionTail.canonicalize(s.calc(left,right))
+    
     def getDerivative(self, symbol):
         right = self.term.getDerivative(symbol)
         et = self.expressionTail.getDerivative(symbol)
@@ -246,7 +241,7 @@ class ExpressionTail(object):
                 left_term = nextExpr.getTerm() if isinstance(nextExpr, ExpressionTail) else Empty()
                 nextExpr = nextExpr.getNextExpr() if isinstance(nextExpr, ExpressionTail) else Empty()
         if noSameTerm: result.insertTerm(term)
-        result = result.dropZero(result)
+        result = result.dropZero()
         return result
     
         
@@ -269,7 +264,7 @@ class ExpressionTail(object):
     def getNew(self):
         term = self.term.getNew()
         et = self.expressionTail.getNew()
-        return ExpressionTail(t=term,et=et)
+        return ExpressionTail(t=term,et=et,op=self.op)
     
     def __neg__(self):
         self.term = -self.term
@@ -303,6 +298,7 @@ class Term(object):
             coeff *= factor.getValue()
             factor = Constant( ft=factor.factorTail)
         return self.termTail.canonicalize(Term(f=factor,coeff=coeff))
+    
     def getDerivative(self,symbol):
         if self.isDifferentiable(symbol):
             # 계수 * 지수, 지수-1, 나머지 상수처리
@@ -420,11 +416,10 @@ class TermTail(object):
         left = left*right
         return self.termTail.eval(left)
     def canonicalize(self, left):
-        right = self.factor
         if self.op == '/':
-            right = right.makeFactorTailNeg()
+            self.factor.makeFactorTailNeg()
             self.op = '*'
-        right = right.canonicalize()
+        right = self.factor.canonicalize()
         left = self.calc(left, right)
         result = self.termTail.canonicalize(left)
         return result
@@ -455,13 +450,13 @@ class TermTail(object):
             if compare == 0:
                 left_factor = left_factor.mul(factor)
                 result.insertFactor(left_factor)
-                result.insertTermTail(nextFactor)
+                result.insertTail(nextFactor)
                 noSameFactor = False
                 break
             elif compare == 1:
                 result.insertFactor(factor)
                 result.insertFactor(left_factor)
-                result.insertTermTail(nextFactor)
+                result.insertTail(nextFactor)
                 noSameFactor = False
                 break
             else:
@@ -489,7 +484,7 @@ class TermTail(object):
     def getNew(self):
         factor = self.factor.getNew()
         tt = self.termTail.getNew()
-        return TermTail(f=factor,tt=tt)
+        return TermTail(f=factor,tt=tt,op=self.op)
     def __eq__(self, termTail):
         if isinstance(termTail, Empty): return False
         if self.factor == termTail.factor:
@@ -597,7 +592,6 @@ class Factor(object):
         if isinstance(self.factorTail,Empty):
             self.factorTail = FactorTail(f=Factor(1.0),ft=Empty())
         self.factorTail = -self.factorTail
-        return self
     
     def getSign(self):
         return self.sign

@@ -61,7 +61,7 @@ def test(line):
 #     except Exception as e:
 #         print('Error = ', e)
 
-line = 'x+x+5+x^2'
+line = 'x-x+5+x+x^2+x/x'
 # line = 'x*y + 2*x'
 # line = '2*x+x*y'
 test(line)
