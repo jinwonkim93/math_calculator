@@ -225,7 +225,7 @@ class ExpressionTail(object):
         while not isinstance(left_term, Empty):
             compare = left_term.compareTermPrecedence(term)
             if compare == 0:
-                left_term = left_term.add(term)
+                left_term.add(term)
                 result.insertTerm(left_term)
                 result.insertExprTail(nextExpr)
                 noSameTerm = False
@@ -318,11 +318,10 @@ class Term(object):
             if left_f.isDifferentiable(symbol): return True
             left = left.getNextTerm()
         return False
+    
     def add(self, term):
-        coeff = self.coefficient+term.coefficient
-        if coeff == 0:
-            return Term(Factor(1.0),coeff=coeff)
-        return Term(self.factor, self.termTail, coeff = coeff)
+        self.coefficient = self.coefficient+term.coefficient
+        if self.coefficient == 0: self.factor = Constant()
     
     def mul(self, term):
         coeff = self.coefficient * term.coefficient
@@ -420,9 +419,7 @@ class TermTail(object):
             self.factor.makeFactorTailNeg()
             self.op = '*'
         right = self.factor.canonicalize()
-        left = self.calc(left, right)
-        result = self.termTail.canonicalize(left)
-        return result
+        return self.termTail.canonicalize(self.calc(left, right))
     def getTermDerivative(self, symbol, term):
         expo, factor = self.factor.getDerivative(symbol)
         term.coefficient = term.coefficient * expo
@@ -532,21 +529,17 @@ class Factor(object):
     
     def isDifferentiable(self, symbol):
         return self.v.isDifferentiable(symbol)
+    
     def add(self,factor):
-        left = self.v
         right = factor.v
         if self.sign == '-':
-            left = -left
+            self.v = -self.v
         if factor.sign == '-':
             right = -right
-        result = left + right
-        result_sign = Empty()
-        if result < 0:
-            result_sign = '-'
-        result = abs(result)
+        self.v = self.v+right
+        if abs(self.v) < 0: self.sign = '-'
+        else: self.sign = Empty()
         
-        return Factor(result,result_sign, self.factorTail)
-    
     def mul(self,factor):
         if isinstance(self,Constant): return factor
         factorTail = self.factorTail.add(factor.factorTail)
@@ -665,8 +658,9 @@ class FactorTail(object):
         return False
 
     def add(self,factorTail):
-        result = self.factor.add(factorTail.factor)
-        return FactorTail(result)
+        self.factor.add(factorTail.factor)
+        return self
+
     def getValue(self):
         return self.factor.getValue()
     def getNew(self):
