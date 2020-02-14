@@ -99,7 +99,6 @@ class Expression(object):
             while not isinstance(left_term, Empty):
                 res = left_term.mul(right_term)
                 result.insertTerm(res)
-                # result = result.insertTerm(res)
                 left_term = left_nextExpr.getTerm() if isinstance(left_nextExpr, ExpressionTail) else Empty()
                 left_nextExpr = left_nextExpr.getNextExpr() if isinstance(left_nextExpr, ExpressionTail) else Empty()
             right_term = right_nextExpr.getTerm() if isinstance(right_nextExpr, ExpressionTail) else Empty()
@@ -123,9 +122,7 @@ class Expression(object):
         term = term.getNew()
         if isinstance(self.term, Empty):
             self.term = term
-            # return Expression(term)
         elif isinstance(self.expressionTail, Empty):
-            # return self.insertExprTail(ExpressionTail(t=term))
             self.expressionTail = ExpressionTail(t=term)
         else:
             self.expressionTail.insertTail(ExpressionTail(t=term))
@@ -135,34 +132,6 @@ class Expression(object):
             self.expressionTail = et
         else:
             self.expressionTail.insertTail(et)
-    # def insertExprTail(self, expressionTail):
-    #     term = self.term.getNew()
-    #     if isinstance(self.expressionTail,Empty):
-    #         return Expression(term,expressionTail)
-    #     else:
-    #         et = self.expressionTail.getNew()
-    #         et = et.insertTail(expressionTail)
-    #     return Expression(term,et)
-    # def insertTerm(self, term):
-    #     """
-    #     input:term output: expression
-    #     inserting term
-    #     """
-    #     # term = Term(term.factor, term.termTail, term.coefficient)
-    #     term = term.getNew()
-    #     if isinstance(self.term, Empty):
-    #         return Expression(term)
-    #     else:
-    #         return self.insertExprTail(ExpressionTail(t=term))
-
-    # def insertExprTail(self, expressionTail):
-    #     term = self.term.getNew()
-    #     if isinstance(self.expressionTail,Empty):
-    #         return Expression(term,expressionTail)
-    #     else:
-    #         et = self.expressionTail.getNew()
-    #         et = et.insertTail(expressionTail)
-    #     return Expression(term,et)
     
     def dropZero(self, expr):
         term = expr.getTerm()
@@ -260,32 +229,23 @@ class ExpressionTail(object):
         noSameTerm = True
         while not isinstance(left_term, Empty):
             compare = left_term.compareTermPrecedence(term)
-            # print(compare, left_term, term)
             if compare == 0:
-                # 
                 left_term = left_term.add(term)
                 result.insertTerm(left_term)
                 result.insertExprTail(nextExpr)
-                # result = result.insertTerm(left_term)
-                # result = result.insertExprTail(nextExpr)
                 noSameTerm = False
                 break  
             elif compare == 1:
                 result.insertTerm(term)
                 result.insertTerm(left_term)
                 result.insertExprTail(nextExpr)
-                # result = result.insertTerm(term)
-                # result = result.insertTerm(left_term)
-                # result = result.insertExprTail(nextE
                 noSameTerm = False
                 break
             else:
                 result.insertTerm(left_term)
-                # result = result.insertTerm(left_term)
                 left_term = nextExpr.getTerm() if isinstance(nextExpr, ExpressionTail) else Empty()
                 nextExpr = nextExpr.getNextExpr() if isinstance(nextExpr, ExpressionTail) else Empty()
         if noSameTerm: result.insertTerm(term)
-        # if noSameTerm: result = result.insertTerm(term)
         result = result.dropZero(result)
         return result
     
@@ -299,13 +259,7 @@ class ExpressionTail(object):
             self.expressionTail = expressionTail
         else:
             self.expressionTail.insertTail(expressionTail)
-    # def insertTail(self,expressionTail):
-    #     term = self.term.getNew()
-    #     if isinstance(self.expressionTail, Empty):
-    #         return ExpressionTail(term, et=expressionTail)
-    #     else:
-    #         et = self.expressionTail.insertTail(expressionTail)
-    #         return ExpressionTail(term, et=et)
+
     
     def countVariable(self, variables):
         result = self.term.countVariable(variables)
@@ -413,28 +367,6 @@ class Term(object):
             self.termTail = tt
         else:
             self.termTail.insertTail(tt)
-    # def insertFactor(self,factor):
-    #     """
-    #     input:factor output: Term
-    #     inserting factor
-    #     """
-    #     if isinstance(self.factor, Empty):
-    #         return Term(factor,self.termTail,coeff=self.coefficient)
-    #     elif isinstance(self.factor, Constant):
-    #         return Term(factor,self.termTail, coeff = self.coefficient)
-    #     else:
-    #         return self.insertTermTail(TermTail(f=factor))
-
-    # def insertTermTail(self, termTail):
-    #     """
-    #     input:termtail output: Term
-    #     inserting termtail
-    #     """
-    #     if isinstance(self.termTail, Empty):
-    #         return Term(self.factor, termTail, coeff=self.coefficient)
-    #     else:
-    #         tt = self.termTail.insertTail(termTail)
-    #         return Term(self.factor,tt,coeff=self.coefficient)
     
     def compareTermPrecedence(self, term):
         if self.compareEquality(term): return 0
@@ -523,27 +455,20 @@ class TermTail(object):
             if compare == 0:
                 left_factor = left_factor.mul(factor)
                 result.insertFactor(left_factor)
-                # result = result.insertFactor(left_factor)
                 result.insertTermTail(nextFactor)
-                # result = result.insertTermTail(nextFactor)
                 noSameFactor = False
                 break
             elif compare == 1:
                 result.insertFactor(factor)
-                # result = result.insertFactor(factor)
                 result.insertFactor(left_factor)
-                # result = result.insertFactor(left_factor)
                 result.insertTermTail(nextFactor)
-                # result = result.insertTermTail(nextFactor)
                 noSameFactor = False
                 break
             else:
                 result.insertFactor(left_factor)
-                # result = result.insertFactor(left_factor)
                 left_factor = nextFactor.getFactor() if isinstance(nextFactor, TermTail) else Empty()
                 nextFactor = nextFactor.getNextTerm() if isinstance(nextFactor, TermTail) else Empty()
         if noSameFactor: result.insertFactor(factor)
-        # if noSameFactor: result = result.insertFactor(factor)
         return result
     
     def getFactor(self):
@@ -555,12 +480,7 @@ class TermTail(object):
             self.termTail = termTail
         else:
             self.termTail.insert(termTail)
-    # def insertTail(self,termTail):
-    #     if isinstance(self.termTail,Empty):
-    #         return TermTail(f=self.factor,tt=termTail)
-    #     else:
-    #         tt = self.termTail.insertTail(termTail)
-    #         return TermTail(f=self.factor,tt=tt)
+
     def countVariable(self, variables):
         result = self.factor.countVariable(variables)
         result = self.termTail.countVariable(result)
