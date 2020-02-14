@@ -1,4 +1,5 @@
 import math
+from dataclasses import dataclass
 
 def checkParenthesisValid(term):
     coeff = term.coefficient
@@ -45,6 +46,7 @@ class Empty(object):
     def __repr__(self):
         return f'Empty'
 
+@dataclass(frozen=True)
 class Expression(object):
     def __init__(self,t, et=Empty()):
         self.term = t
@@ -55,6 +57,7 @@ class Expression(object):
         return self.expressionTail.eval(self.term.eval())
     def canonicalize(self):
         term = self.term.canonicalize()
+        expressionTail = self.expressionTail
         #term이 expression일때 최종 expression에 확장
         if isinstance(term.getFactor().getValue(),Expression) and checkParenthesisValid(term):
             temp_expr = term.getFactor().getValue()
@@ -62,8 +65,8 @@ class Expression(object):
                 temp_expr = -temp_expr
             term = temp_expr.getTerm()
             temp_et = temp_expr.getNextExpr()
-            self.expressionTail = temp_et.insertTail(self.expressionTail) if not isinstance(temp_et, Empty) else self.expressionTail
-        return self.expressionTail.canonicalize(Expression(term))
+            expressionTail = temp_et.insertTail(expressionTail) if not isinstance(temp_et, Empty) else expressionTail
+        return expressionTail.canonicalize(Expression(term))
     def getDerivative(self,symbol):
         left = self.term.getDerivative(symbol)
         et = self.expressionTail.getDerivative(symbol)
@@ -172,7 +175,7 @@ class Expression(object):
     def __repr__(self):
         return f'Expr({repr(self.term)}, {repr(self.expressionTail)})'
 
-
+@dataclass(frozen=True)
 class ExpressionTail(object):
     def __init__(self,t,op='+',et=Empty()):
         self.op = op
@@ -272,6 +275,7 @@ class ExpressionTail(object):
     def __repr__(self):
         return f'ExprTail({repr(self.op)}, {repr(self.term)}, {repr(self.expressionTail)})'
 
+@dataclass(frozen=True)
 class Term(object):
     def __init__(self, f,tt = Empty(),coeff = 1.0):
         self.coefficient = coeff
