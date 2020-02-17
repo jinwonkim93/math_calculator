@@ -275,7 +275,6 @@ class ExpressionTail(object):
     def __repr__(self):
         return f'ExprTail({repr(self.op)}, {repr(self.term)}, {repr(self.expressionTail)})'
 
-@dataclass(frozen=True)
 class Term(object):
     def __init__(self, f,tt = Empty(),coeff = 1.0):
         self.coefficient = coeff

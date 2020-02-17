@@ -39,9 +39,9 @@ def test(line):
     # derivatives = a.getDerivative('x')
     # print(derivatives, type(derivatives), repr(derivatives))
 
-for idx,case in enumerate(testCase):
-    print(f'-------test case {idx}--------')
-    test(case)
+# for idx,case in enumerate(testCase):
+#     print(f'-------test case {idx}--------')
+#     test(case)
     # try:
     #     test(case)
     # except Exception as e:
@@ -49,7 +49,7 @@ for idx,case in enumerate(testCase):
 
 # line = 'x+(x+2)'
 # line = 'x*y + 2*x'
-# line = 'x*x*x*x/x*y*y*x'
-# test(line)
+line = '(x+2)+(x+2)'
+test(line)
 # line = '1*x'
 # test(line)

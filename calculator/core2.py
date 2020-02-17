@@ -102,7 +102,7 @@ class Expression(object):
                 return True
         return False
 
-    def mulTerm(self,term):
+    def getMulTerm(self,term):
         #term 또는 expr n번 반복
         right_term = term
         right_nextExpr = Empty()
@@ -336,11 +336,15 @@ class Term(object):
 
     def mul(self, term):
         coeff = self.coefficient * term.coefficient
-        left_term = Term(self.factor, self.termTail, coeff)
-        termTail = TermTail(f=term.getFactor())
-        result = termTail.calc(left_term,termTail.factor)
-        return result
-
+        factor = self.factor.getNew()
+        if not isinstance(self.termTail.getNew(), Empty):
+            tt = self.termTail.getNew()
+            tt2 = TermTail(f=term.getFactor(), tt=term.getNextTerm())
+            tt.insertTail(tt2)
+        else:
+            tt =  TermTail(f=term.getFactor(), tt=term.getNextTerm())
+        return Term(factor, tt, coeff).canonicalize()
+                
     def getFactor(self):
         return self.factor
 
@@ -447,12 +451,30 @@ class TermTail(object):
     def calc(self, factors, factor):
         coeff = factors.coefficient
         result = Term(Empty(), coeff = coeff)
-        if isinstance(factor.getValue(),float):
+        if isinstance(factors.getFactor().getValue(), Expression) and factors.getFactor().factorTail.factor.sign != '-':
+            left_factor = factors.getFactor()
+            temp_expr = left_factor.getValue()
+            temp_expr = temp_expr.getMulTerm(Term(factor))
+            temp_expr = temp_expr.canonicalize()
+            result.insertFactor(Factor(v=temp_expr,sign=left_factor.sign, ft=left_factor.factorTail))
+            return result
+        
+        elif isinstance(factor.getValue(),float):
             #coeff에 연산
             coeff = coeff*factor.getValue()
             if coeff == 0: return Term(Constant(), coeff=0)
-            return Term(factors.getNew(),factors.termTail.getNew(),coeff)
+            return Term(factors.getFactor().getNew(),factors.termTail.getNew(),coeff)
+        
 
+        elif isinstance(factor.getValue(), Expression) and factor.factorTail.factor.sign != '-':
+            result = Term(Empty())
+            left_factor = factor
+            temp_expr = left_factor.getValue()
+            temp_expr = temp_expr.getMulTerm(factors)
+            temp_expr = temp_expr.canonicalize()
+            result.insertFactor(Factor(v=temp_expr,sign=left_factor.sign, ft=left_factor.factorTail))
+            return result
+        
         left_factor = factors.getFactor()
         nextFactor = factors.getNextTerm()
         noSameFactor = True
@@ -534,9 +556,8 @@ class Factor(object):
 
     def getDerivative(self, symbol):
         if self.v.isDifferentiable(symbol):
-            print(type(self.factorTail))
-            expo, factorTail = self.factorTail.getDerivative(symbol) if isinstance(self.factorTail, FactorTail) else 1, Empty()
-            if factorTail.getValue() == 0:
+            expo, factorTail = self.factorTail.getDerivative(symbol) if isinstance(self.factorTail, FactorTail) else (1, Empty())
+            if not isinstance(factorTail, Empty) and factorTail.getValue() == 0:
                 return expo, Constant()
             return expo, Factor(self.v, factorTail)
         return 1, self
@@ -653,7 +674,7 @@ class FactorTail(object):
             result = left.getValue()
             if factor.v == 2:
                 for _ in range(int(factor.v)-1):
-                    result = result.mulTerm(left.getValue())
+                    result = result.getMulTerm(left.getValue())
                     result = result.canonicalize()
                 return Factor(result)
         return Factor(left.v, sign=left.sign, ft=factorTail)
@@ -661,7 +682,7 @@ class FactorTail(object):
     def getDerivative(self, symbol):
         factorTail = FactorTail(Factor(self.factor.getValue() -1) )
         return self.factor.getValue(), factorTail
-    
+
     def comparePriority(self, factorTail):
         if isinstance(self.factor.getValue(), Factor) and isinstance(factorTail.factor.getValue(), Factor):
             left = self.factor.getValue()
