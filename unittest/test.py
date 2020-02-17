@@ -14,7 +14,8 @@ testCase = [
     'x+x',
     'x*y',
     '2*x*y',
-    'x*x + 2*x'
+    'x*x + 2*x',
+    'x*x*x*x/x*y*y*x'
             ]
 
 
@@ -38,17 +39,17 @@ def test(line):
     # derivatives = a.getDerivative('x')
     # print(derivatives, type(derivatives), repr(derivatives))
 
-for idx,case in enumerate(testCase):
-    print(f'-------test case {idx}--------')
-    test(case)
-    # try:
-    #     test(case)
-    # except Exception as e:
-    #     print('Error = ', e)
+# for idx,case in enumerate(testCase):
+#     print(f'-------test case {idx}--------')
+#     test(case)
+#     # try:
+#     #     test(case)
+#     # except Exception as e:
+#     #     print('Error = ', e)
 
 # line = 'x+(x+2)'
-# # line = 'x*y + 2*x'
-# # line = '2*x+x*y'
-# test(line)
+# line = 'x*y + 2*x'
+line = 'x*x*x*x/x*y*y*x'
+test(line)
 # line = '1*x'
 # test(line)
