@@ -8,6 +8,7 @@ def checkParenthesisValid(term):
     expr = factor.getValue()
     return coeff == 1 and factorTail.factor.sign != '-' and factorTail.factor.v == 1 and len(term) == 1
 
+
 class Error(object):
     def __init__(self, error):
         self.error = error
@@ -18,11 +19,12 @@ class Error(object):
     def __repr__(self):
         return "Error(Expr)"
         
+
 class Empty(object):
     def __init__(self):
         self.value = 'Empty'
 
-    def eval(self,left):
+    def eval(self,left,values):
         return left
 
     def canonicalize(self,left):
@@ -42,7 +44,7 @@ class Empty(object):
         if self.__class__ == other.__class__: return 0
         return -1
 
-    def countVariable(self, variables):
+    def getVariables(self, variables):
         return variables
 
     def insertTail(self, tail):
@@ -63,14 +65,14 @@ class Empty(object):
     def __repr__(self):
         return f'Empty'
         
+
 class Expression(object):
     def __init__(self,t, et=Empty()):
         self.term = t
         self.expressionTail = et
-        self.variables = {}
 
-    def eval(self):
-        return self.expressionTail.eval(self.term.eval())
+    def eval(self, values):
+        return self.expressionTail.eval(self.term.eval(values), values)
 
     def canonicalize(self):
         term = self.term.canonicalize()
@@ -85,7 +87,6 @@ class Expression(object):
             if not isinstance(temp_et, Empty):
                 et = temp_et
                 et.insertTail(expressionTail)
-                # if not isinstance(expressionTail, Empty): et.insertTail(expressionTail)
             else: et = expressionTail
             return et.canonicalize(Expression(term))
         return expressionTail.canonicalize(Expression(term))
@@ -168,20 +169,9 @@ class Expression(object):
         if allZero: result = Expression(Term(Constant(),coeff = 0))
         return result
 
-    def countVariable(self,variables={}):
-        result = self.term.countVariable(variables)
-        result = self.expressionTail.countVariable(result)
-        self.variables = result
-        return result
-        
-    def getVariables(self):
-        return self.variables
-
-    def insertValue(self,value):
-        self.variables = self.countVariable()
-        for name, symbol in self.variables.items():
-            symbol.insert(value[name])
-        return True
+    def getVariables(self, variables=None):
+        if variables == None: variables = set([])
+        return self.expressionTail.getVariables(self.term.getVariables(variables))
 
     def getNew(self):
         term = self.term.getNew()
@@ -210,30 +200,27 @@ class Expression(object):
 
 
 class ExpressionTail(object):
-    def __init__(self,t,op='+',et=Empty()):
+    def __init__(self, t, op='+', et=Empty()):
         self.op = op
         self.term = t
         self.expressionTail = et
 
-    def eval(self, left):
-        right = self.term.eval()
+    def eval(self, left, values):
+        right = self.term.eval(values)
         left = left+right
-        return self.expressionTail.eval(left)
+        return self.expressionTail.eval(left, values)
 
     def canonicalize(self, left):
-        if self.op == '-':
-            self.term = -self.term
-            self.op = '+'
-           
-        right = self.term.canonicalize()
-        s = self
-        if isinstance(right.getFactor().getValue(),Expression) and checkParenthesisValid(right):
-            temp_expr = right.getFactor().getValue()
-            if right.coefficient < 0: temp_expr = -temp_expr
-            right = temp_expr.getTerm()
+        s = self.getNew()
+        if s.op == '-': s.term, s.op = -s.term, '+'
+        s.term = s.term.canonicalize()
+        if isinstance(s.term.getFactor().getValue(), Expression) and checkParenthesisValid(s.term):
+            temp_expr = s.term.getFactor().getValue()
+            if s.term.coefficient < 0: temp_expr = -temp_expr
+            s.term = temp_expr.getTerm()
             s.insertTail(temp_expr.getNextExpr())
-        return s.expressionTail.canonicalize(s.calc(left,right))
-    
+        return s.expressionTail.canonicalize(s.calc(left,s.term))
+
     def getDerivative(self, symbol):
         right = self.term.getDerivative(symbol)
         et = self.expressionTail.getDerivative(symbol)
@@ -286,10 +273,8 @@ class ExpressionTail(object):
         else:
             self.expressionTail.insertTail(expressionTail)
 
-    def countVariable(self, variables):
-        result = self.term.countVariable(variables)
-        result = self.expressionTail.countVariable(result)
-        return result
+    def getVariables(self, variables):
+        return self.expressionTail.getVariables(self.term.getVariables(variables))
 
     def getNew(self):
         term = self.term.getNew()
@@ -312,26 +297,25 @@ class ExpressionTail(object):
     def __repr__(self):
         return f'ExprTail({repr(self.op)}, {repr(self.term)}, {repr(self.expressionTail)})'
 
+
 class Term(object):
     def __init__(self, f,tt = Empty(),coeff = 1.0):
         self.coefficient = coeff
         self.factor = f
         self.termTail = tt
 
-    def eval(self):
-        result = self.coefficient * self.factor.eval()
-        return self.termTail.eval(result)
+    def eval(self, values):
+        result = self.coefficient * self.factor.eval(values)
+        return self.termTail.eval(result, values)
 
     def canonicalize(self):
         #empty이면 term이 리턴되어야 하기 때문에 term을 감싸야함
         factor = self.factor.canonicalize()
         coeff = self.coefficient
-        if factor.sign == '-':
-            coeff = -coeff
-            factor.sign = Empty()
+        if factor.sign == '-': coeff, factor.sign = -coeff, Empty()
         if isinstance(factor.getValue(), float):
             coeff *= factor.getValue()
-            factor = Constant( ft=factor.factorTail)
+            factor = Constant(ft=factor.factorTail)
         return self.termTail.canonicalize(Term(f=factor,coeff=coeff))
 
     def getDerivative(self,symbol):
@@ -386,12 +370,10 @@ class Term(object):
 
     def insertFactor(self,factor):
         factor = factor.getNew()
-        if isinstance(self.factor, Empty):
-            self.factor = factor
-        elif isinstance(self.factor, Constant):
-            self.factor = factor
-        elif isinstance(self.termTail, Empty):
-            self.termTail.insertTail(TermTail(f=factor))
+        if isinstance(self.factor, Empty): self.factor = factor
+        elif isinstance(self.factor, Constant): self.factor = factor
+        elif isinstance(self.termTail, Empty): self.termTail = TermTail(f=factor)
+        else: self.termTail.insertTail(TermTail(f=factor))
 
     def insertTail(self,tt):
         tt = tt.getNew()
@@ -413,10 +395,8 @@ class Term(object):
         factor = self.getFactor()
         factor = factor.pow(power_factor)
 
-    def countVariable(self, variables):
-        result = self.factor.countVariable(variables)
-        result = self.termTail.countVariable(result)
-        return result
+    def getVariables(self, variables):
+        return self.termTail.getVariables(self.factor.getVariables(variables))
 
     def getNew(self):
         factor = self.factor.getNew()
@@ -447,23 +427,25 @@ class Term(object):
     def __repr__(self):
         return f'Term({self.coefficient},{repr(self.factor)},{repr(self.termTail)})'
 
+
 class TermTail(object):
     def __init__(self, op ='*', f = Empty(), tt = Empty()):
         self.op = op
         self.factor = f
         self.termTail = tt
 
-    def eval(self, left):
-        right = self.factor.eval()
+    def eval(self, left, values):
+        right = self.factor.eval(values)
         left = left*right
-        return self.termTail.eval(left)
+        return self.termTail.eval(left, values)
         
     def canonicalize(self, left):
-        if self.op == '/':
-            self.factor.makeFactorTailNeg()
-            self.op = '*'
-        right = self.factor.canonicalize()
-        return self.termTail.canonicalize(self.calc(left, right))
+        s = self.getNew()
+        if s.op == '/':
+            s.factor.makeFactorTailNeg()
+            s.op = '*'
+        right = s.factor.canonicalize()
+        return s.termTail.canonicalize(s.calc(left, right))
 
     def getTermDerivative(self, symbol, term):
         expo, factor = self.factor.getDerivative(symbol)
@@ -521,10 +503,8 @@ class TermTail(object):
         else:
             self.termTail.insert(termTail)
 
-    def countVariable(self, variables):
-        result = self.factor.countVariable(variables)
-        result = self.termTail.countVariable(result)
-        return result
+    def getVariables(self, variables):
+        return self.termTail.getVariables(self.factor.getVariables(variables))
 
     def getNew(self):
         factor = self.factor.getNew()
@@ -556,20 +536,16 @@ class Factor(object):
         self.v = v
         self.factorTail = ft
 
-    def eval(self):
-        v = self.v if isinstance(self.v, float) else self.v.eval()
-        return self.factorTail.eval(v)
+    def eval(self, values):
+        v = self.v if isinstance(self.v, float) else self.v.eval(values)
+        return self.factorTail.eval(v, values)
 
     def canonicalize(self):
         #factor은 factor을 리턴해야함
         v = self.v.canonicalize() if not isinstance(self.v,float) else self.v
-        if isinstance(v, Expression):
-            pass
-        if not isinstance(v, Factor):
-            v = Factor(v)
+        if not isinstance(v, Factor): v = Factor(v)
         v = self.factorTail.canonicalize(v)
-        if self.sign == '-':
-            v = -v
+        if self.sign == '-': v = -v
         return v
 
     def getDerivative(self, symbol):
@@ -648,15 +624,14 @@ class Factor(object):
     def getValue(self):
         return self.v
 
-    def countVariable(self,variables):
-        result = self.v.countVariable(variables)
-        return result
+    def getVariables(self,variables):
+        return self.v.getVariables(variables) if not isinstance(self.v, float) else variables
 
     def getNew(self):
         v = self.v.getNew() if isinstance(self.v, Expression) else self.v
         ft = self.factorTail.getNew()
         sign = self.sign
-        return Factor(sign=sign, v=v,ft=ft)
+        return Factor(sign=sign, v=v, ft=ft)
 
     def __eq__(self, other):
         if self.__class__ != other.__class__:return False
@@ -675,13 +650,14 @@ class Factor(object):
     def __repr__(self):
         return f'Factor({repr(self.sign)},{repr(self.v)},{repr(self.factorTail)})'
 
+
 class FactorTail(object):
     def __init__(self, f):
         self.factor = f
 
-    def eval(self, left):
-        fator = self.factor.eval()
-        return left**self.factor.eval()
+    def eval(self, left, values):
+        fator = self.factor.eval(values)
+        return left**fator
 
     def canonicalize(self, left):
         factor = self.factor.canonicalize()
@@ -689,7 +665,7 @@ class FactorTail(object):
         if isinstance(left.v, float):
             if isinstance(factor.v, float):
                 v = left.pow(factor)
-                return Factor(v=v,sign=left.sign)
+                return Factor(v=v, sign=left.sign)
         if isinstance(left.getValue(),Expression):
             result = left.getValue()
             if factor.v == 2:
@@ -697,7 +673,7 @@ class FactorTail(object):
                     result = result.mulTerm(left.getValue())
                     result = result.canonicalize()
                 return Factor(result)
-        return Factor(left.v,sign=left.sign,ft=factorTail)
+        return Factor(left.v, sign=left.sign, ft=factorTail)
 
     def getDerivative(self, symbol):
         factorTail = FactorTail(Factor(self.factor.getValue() -1) )
@@ -746,8 +722,8 @@ class Variable(object):
         self.name = symbol
         self.value = None
 
-    def eval(self):
-        return self.value
+    def eval(self, values):
+        return values[self.name]
 
     def canonicalize(self):
         return self
@@ -759,9 +735,8 @@ class Variable(object):
         if self.name == symbol: return True
         return False
     
-    def countVariable(self,variables):
-        if not self.name in variables.keys():
-            variables[self.name] = self
+    def getVariables(self,variables):
+        variables.add(self.name)
         return variables
 
     def __eq__(self,variable):
@@ -778,12 +753,13 @@ class Variable(object):
     def __repr__(self):
         return f'Variable({repr(self.name)})'
 
+
 class Sin(object):
     def __init__(self, value):
         self.value = value
     
-    def eval(self):
-        value = self.value if isinstance(self.value,float) else self.value.eval()
+    def eval(self, values):
+        value = self.value if isinstance(self.value,float) else self.value.eval(values)
         return math.sin(value)
 
     def canonicalize(self):
@@ -796,8 +772,8 @@ class Sin(object):
     def getDerivative(self, symbol):
         return self, Empty()
 
-    def countVariable(self, variables):
-        return self.value.countVariable(variables)
+    def getVariables(self, variables):
+        return self.value.getVariables(variables)
 
     def __eq__(self,other):
         if self.__class__ != other.__class__:return False
@@ -809,12 +785,13 @@ class Sin(object):
     def __repr__(self):
         return f'sin({repr(self.value)})'
 
+
 class Cos(object):
     def __init__(self, value):
         self.value = value
     
-    def eval(self):
-        value = self.value if isinstance(self.value,float) else self.value.eval()
+    def eval(self, values):
+        value = self.value if isinstance(self.value,float) else self.value.eval(values)
         return math.cos(value)
 
     def canonicalize(self):
@@ -827,8 +804,8 @@ class Cos(object):
     def getDerivative(self, symbol):
         return self, Empty()
 
-    def countVariable(self, variables):
-        return self.value.countVariable(variables)
+    def getVariables(self, variables):
+        return self.value.getVariables(variables)
 
     def __eq__(self,other):
         if self.__class__ != other.__class__:return False
@@ -840,14 +817,15 @@ class Cos(object):
     def __repr__(self):
         return f'cos({repr(self.value)})'
 
+
 class Log(object):
     def __init__(self, base, value):
         self.base = base
         self.value = value
 
-    def eval(self):
-        base = self.base if isinstance(self.base,float) else self.base.eval()
-        value =  self.value.eval()
+    def eval(self, values):
+        base = self.base if isinstance(self.base,float) else self.base.eval(values)
+        value =  self.value.eval(values)
         return math.log(value)/math.log(base)
 
     def canonicalize(self):
@@ -862,8 +840,8 @@ class Log(object):
     def isDifferentiable(self,symbol):
         return self.value.isDifferentiable(symbol)
 
-    def countVariable(self, variables):
-        return self.value.countVariable(variables)
+    def getVariables(self, variables):
+        return self.value.getVariables(variables)
 
     def __eq__(self,other):
         if self.__class__ != other.__class__:return False
@@ -876,6 +854,7 @@ class Log(object):
     def __repr__(self):
         return f'log({self.base},{self.value})'
 
+
 class ConstantE(object):
     def __init__(self):
         self.value = math.e
@@ -885,6 +864,7 @@ class ConstantE(object):
 
     def __repr__(self):
         return 'e'
+
 
 class Pi(object):
     def __init__(self):
@@ -896,26 +876,24 @@ class Pi(object):
     def __repr__(self):
         return 'pi'
 
+
 class Constant(Factor):
     def __init__(self,v=Empty(),ft = Empty()):
         super().__init__(self)
         self.v = v
         self.factorTail = ft
 
-    def getValue(self):
-        return self.v
-
-    def eval(self):
+    def eval(self, values):
         return 1
+
+    def canonicalize(self):
+        return self
 
     def getDerivative(self, symbol):
         return 1, Empty()
 
     def isDifferentiable(self,symbol):
         return False
-
-    def canonicalize(self):
-        return self
 
     def compareEquality(self,other):
         if self.__class__ != other.__class__: return False
@@ -932,8 +910,11 @@ class Constant(Factor):
         if left > right: return 1
         return -1
 
-    def countVariable(self, variables):
+    def getVariables(self, variables):
         return variables
+
+    def getValue(self):
+        return self.v
 
     def getNew(self):
         return self
@@ -947,6 +928,6 @@ class Constant(Factor):
 
     def __str__(self):
         return f'{self.factorTail}'
-        
+
     def __repr__(self):
         return f'Constant({repr(self.factorTail)})'
